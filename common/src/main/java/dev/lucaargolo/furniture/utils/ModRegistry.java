@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.utils;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public abstract class ModRegistry<T> {
@@ -15,7 +16,9 @@ public abstract class ModRegistry<T> {
 
     public abstract void init();
 
-    public abstract <E extends T> ModEntry<E> register(String name, Supplier<E> supplier);
+    public abstract <E extends T> ModEntry<E> register(String path, Supplier<E> supplier);
+
+    public abstract void forEach(BiConsumer<String, Supplier<? extends T>> consumer);
 
     public static class ModEntry<E> implements Supplier<E> {
 

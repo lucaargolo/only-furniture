@@ -6,6 +6,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class NeoForgeModRegistry<T> extends ModRegistry<T> {
@@ -23,8 +24,15 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     }
 
     @Override
-    public <E extends T> ModEntry<E> register(String name, Supplier<E> supplier) {
-        return new ModEntry<E>(this.registry.register(name, supplier));
+    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier) {
+        return new ModEntry<>(this.registry.register(path, supplier));
+    }
+
+    @Override
+    public void forEach(BiConsumer<String, Supplier<? extends T>> consumer) {
+        this.registry.getEntries().forEach(holder -> {
+            consumer.accept(holder.getId().getPath(), holder);
+        });
     }
 
 }

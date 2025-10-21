@@ -7,12 +7,13 @@ import net.minecraft.resources.ResourceKey;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public class FabricModRegistry<T> extends ModRegistry<T>{
 
-    private final Map<String, ModEntry<T>> toRegister = new HashMap<>();
+    private final Map<String, ModEntry<T>> entries = new HashMap<>();
     private final Registry<T> registry;
 
     public FabricModRegistry(ResourceKey<Registry<T>> registryKey) {
@@ -22,18 +23,23 @@ public class FabricModRegistry<T> extends ModRegistry<T>{
 
     @Override
     public void init() {
-        toRegister.forEach(this::registerEntry);
+        entries.forEach(this::registerEntry);
     }
 
-    private <E extends T> void registerEntry(String name, ModEntry<E> entry) {
-        entry.set(Registry.register(registry, FurnitureMod.id(name), entry.get()));
+    private <E extends T> void registerEntry(String path, ModEntry<E> entry) {
+        entry.set(Registry.register(registry, FurnitureMod.id(path), entry.get()));
     }
 
     @Override
-    public <E extends T> ModEntry<E> register(String name, Supplier<E> supplier) {
+    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier) {
         ModEntry<E> entry = new ModEntry<>(supplier);
-        toRegister.put(name, (ModEntry<T>) entry);
+        entries.put(path, (ModEntry<T>) entry);
         return entry;
+    }
+
+    @Override
+    public void forEach(BiConsumer<String, Supplier<? extends T>> consumer) {
+        entries.forEach(consumer);
     }
 
 }
