@@ -13,6 +13,6 @@ public class ModBlocks {
 
     public static final ModRegistry<Block> BLOCKS = FurnitureMod.INSTANCE.registry(Registries.BLOCK);
 
-    public static Supplier<FurnitureBlock> FURNITURE = BLOCKS.register("furniture", () -> new FurnitureBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+    public static Supplier<FurnitureBlock> SMALL_TABLE = BLOCKS.register("small_table", () -> new FurnitureBlock(Blocks.OAK_PLANKS));
 
 }

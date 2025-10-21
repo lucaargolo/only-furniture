@@ -4,7 +4,9 @@
   "package": "dev.lucaargolo.furniture.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
-  "client": [],
+  "client": [
+    "ModelBakeryMixin"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1

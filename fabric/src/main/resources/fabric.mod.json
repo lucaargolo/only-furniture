@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "dev.lucaargolo.furniture.FabricFurnitureMod"
+    ],
+    "client": [
+      "dev.lucaargolo.furniture.client.FabricFurnitureModClient"
     ]
   },
   "mixins": [

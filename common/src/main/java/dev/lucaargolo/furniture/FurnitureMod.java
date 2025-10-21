@@ -34,7 +34,7 @@ public abstract class FurnitureMod {
         return loadPlatformClass(ModRegistry.class, registryKey);
     }
 
-    private <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
+    public <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
         String name = clazz.getName();
         String platformName = name.substring(0, name.lastIndexOf('.')) + "." + getPlatform() + name.substring(name.lastIndexOf('.') + 1);
         Class<?>[] parameterTypes = new Class<?>[parameters.length];
