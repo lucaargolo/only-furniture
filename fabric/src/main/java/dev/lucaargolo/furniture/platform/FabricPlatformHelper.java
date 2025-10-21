@@ -1,9 +1,8 @@
 package dev.lucaargolo.furniture.platform;
 
-import dev.lucaargolo.furniture.platform.services.IPlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
-public class FabricPlatformHelper implements IPlatformHelper {
+public class FabricPlatformHelper implements PlatformHelper {
 
     @Override
     public String getPlatformName() {

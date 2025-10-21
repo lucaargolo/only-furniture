@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.lucaargolo.furniture.Furniture"
+      "dev.lucaargolo.furniture.FabricFurnitureMod"
     ]
   },
   "mixins": [

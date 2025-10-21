@@ -1,10 +1,9 @@
 package dev.lucaargolo.furniture.platform;
 
-import dev.lucaargolo.furniture.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 
-public class NeoForgePlatformHelper implements IPlatformHelper {
+public class NeoForgePlatformHelper implements PlatformHelper {
 
     @Override
     public String getPlatformName() {
