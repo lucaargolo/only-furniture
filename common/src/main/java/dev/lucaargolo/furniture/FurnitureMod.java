@@ -1,26 +1,40 @@
 package dev.lucaargolo.furniture;
 
+import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.utils.ModRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("unchecked")
 public abstract class FurnitureMod {
 
     public static final String MOD_ID = "furniture";
     public static final String MOD_NAME = "Furniture Mod";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
+
     public static FurnitureMod INSTANCE;
 
-    public final PlatformHelper platformHelper = loadPlatformClass(PlatformHelper.class);
+    private final PlatformHelper platformHelper = loadPlatformClass(PlatformHelper.class);
 
     public void init() {
         INSTANCE = this;
-        LOG.info("Hello from Common! I'm running on {} ({})", platformHelper.getPlatformName(), platformHelper.getEnvironmentName());
+        ModBlocks.BLOCKS.init();
     }
 
     public abstract String getPlatform();
 
-    @SuppressWarnings("unchecked")
-    public <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
+    public PlatformHelper getPlatformHelper() {
+        return platformHelper;
+    }
+
+    public <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
+        return loadPlatformClass(ModRegistry.class, registryKey);
+    }
+
+    private <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
         String name = clazz.getName();
         String platformName = name.substring(0, name.lastIndexOf('.')) + "." + getPlatform() + name.substring(name.lastIndexOf('.') + 1);
         Class<?>[] parameterTypes = new Class<?>[parameters.length];
@@ -32,6 +46,10 @@ public abstract class FurnitureMod {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
 }

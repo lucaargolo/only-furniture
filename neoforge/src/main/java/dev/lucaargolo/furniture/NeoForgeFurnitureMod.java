@@ -8,10 +8,11 @@ import net.neoforged.fml.common.Mod;
 public class NeoForgeFurnitureMod extends FurnitureMod {
 
     public static NeoForgeFurnitureMod INSTANCE;
+    private final IEventBus modBus;
 
-    public NeoForgeFurnitureMod(IEventBus eventBus) {
+    public NeoForgeFurnitureMod(IEventBus modBus) {
         INSTANCE = this;
-        LOG.info("Hello from NeoForge!");
+        this.modBus = modBus;
         this.init();
     }
 
@@ -20,4 +21,7 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
         return "NeoForge";
     }
 
+    public IEventBus getModBus() {
+        return modBus;
+    }
 }

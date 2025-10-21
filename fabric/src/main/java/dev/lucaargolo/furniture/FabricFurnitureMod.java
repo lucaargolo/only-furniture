@@ -9,7 +9,6 @@ public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
     @Override
     public void onInitialize() {
         INSTANCE = this;
-        LOG.info("Hello from Fabric!");
         this.init();
     }
 
