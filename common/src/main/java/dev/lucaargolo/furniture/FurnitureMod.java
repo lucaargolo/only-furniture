@@ -1,6 +1,5 @@
 package dev.lucaargolo.furniture;
 
-import dev.lucaargolo.furniture.platform.PlatformHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

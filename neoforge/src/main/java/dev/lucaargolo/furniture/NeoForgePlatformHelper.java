@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.platform;
+package dev.lucaargolo.furniture;
 
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;

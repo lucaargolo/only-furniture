@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.platform;
+package dev.lucaargolo.furniture;
 
 import net.fabricmc.loader.api.FabricLoader;
 

@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.platform;
+package dev.lucaargolo.furniture;
 
 public interface PlatformHelper {
 
