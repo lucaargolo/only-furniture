@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.item.ModItems;
+import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.utils.ModRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -20,10 +21,13 @@ public abstract class FurnitureMod {
 
     private final PlatformHelper platformHelper = loadPlatformClass(PlatformHelper.class);
 
+    private final ModPacketManager packetManager = loadPlatformClass(ModPacketManager.class);
+
     public void init() {
         INSTANCE = this;
         ModBlocks.BLOCKS.init();
         ModItems.ITEMS.init();
+        packetManager.init();
     }
 
     public abstract String getPlatform();

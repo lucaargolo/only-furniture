@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FabricFurnitureModelManager extends FurnitureModelManager implements ModelLoadingPlugin {
+public class FabricModModelManager extends ModModelManager implements ModelLoadingPlugin {
 
     private final List<ResourceLocation> modelsToRegister = new ArrayList<>();
     private final Map<ResourceLocation, UnbakedModel> modelsToReplace = new HashMap<>();

@@ -36,6 +36,9 @@ public class RegionFurnitureData extends SavedData {
             }else{
                 chunkMap.remove(blockPos);
             }
+            if(chunkMap.isEmpty()) {
+                regionMap.remove(chunkPos);
+            }
         }else if(!isDefault) {
             Long2IntMap newChunkMap = new Long2IntOpenHashMap();
             newChunkMap.put(blockPos, data.getPacked());

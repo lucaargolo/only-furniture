@@ -1,13 +1,24 @@
 package dev.lucaargolo.furniture.data;
 
 import com.mojang.datafixers.util.Pair;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
+
+import java.util.Objects;
 
 public class FurnitureData {
 
     public static FurnitureData DEFAULT = new FurnitureData(0);
+
+    public static final StreamCodec<ByteBuf, FurnitureData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.VAR_INT,
+            FurnitureData::getPacked,
+            FurnitureData::new
+    );
 
     private final int packed;
 
@@ -35,6 +46,18 @@ public class FurnitureData {
 
     protected int getPacked() {
         return packed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        FurnitureData that = (FurnitureData) o;
+        return packed == that.packed;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(packed);
     }
 
     public static FurnitureData get(ServerLevel level, BlockPos pos) {

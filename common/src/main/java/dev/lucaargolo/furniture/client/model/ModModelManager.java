@@ -6,7 +6,7 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class FurnitureModelManager {
+public abstract class ModModelManager {
 
     public void init() {
         registerModel(FurnitureMod.id("block/small_table"));

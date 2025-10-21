@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class NeoForgeFurnitureModelManager extends FurnitureModelManager {
+public class NeoForgeModModelManager extends ModModelManager {
 
     private final Map<ResourceLocation, ModelResourceLocation> modelsToRegister = new HashMap<>();
     private final Map<ResourceLocation, UnbakedModel> modelsToReplace = new HashMap<>();
