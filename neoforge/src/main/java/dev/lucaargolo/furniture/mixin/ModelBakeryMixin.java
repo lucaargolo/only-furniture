@@ -1,6 +1,6 @@
 package dev.lucaargolo.furniture.mixin;
 
-import dev.lucaargolo.furniture.client.NeoForgeFurnitureModClient;
+import dev.lucaargolo.furniture.client.FurnitureModClient;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -14,10 +14,10 @@ public class ModelBakeryMixin {
 
     @Inject(at = @At("HEAD"), method = "getModel", cancellable = true)
     public void loadBlockModel(ResourceLocation location, CallbackInfoReturnable<UnbakedModel> cir) {
-        UnbakedModel model = NeoForgeFurnitureModClient.INSTANCE.getModelReplacement(location);
+        UnbakedModel model = FurnitureModClient.INSTANCE.getModelManager().getModelReplacement(location);
         if(model != null) {
             cir.setReturnValue(model);
         }
     }
-    
+
 }

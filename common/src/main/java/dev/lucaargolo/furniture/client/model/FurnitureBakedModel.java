@@ -78,7 +78,7 @@ public abstract class FurnitureBakedModel implements BakedModel {
         if(state != null) {
             Block block = state.getBlock();
             ResourceLocation location = block.builtInRegistryHolder().key().location().withPrefix("block/");
-            return FurnitureModClient.INSTANCE.getModel(location);
+            return FurnitureModClient.INSTANCE.getModelManager().getModel(location);
         }else{
             return null;
         }
