@@ -12,22 +12,26 @@ import org.jetbrains.annotations.NotNull;
 public class RegionFurnitureData extends SavedData {
 
     @SuppressWarnings("DataFlowIssue")
-    public static final Factory<RegionFurnitureData> FACTORY = new Factory<>(RegionFurnitureData::new, RegionFurnitureData::create, null);
+    protected static final Factory<RegionFurnitureData> FACTORY = new Factory<>(RegionFurnitureData::new, RegionFurnitureData::create, null);
 
     private final Int2ObjectMap<Long2IntMap> regionMap = new Int2ObjectOpenHashMap<>();
 
-    public FurnitureData get(int chunkPos, long blockPos) {
+    protected Long2IntMap get(int chunkPos) {
+        return regionMap.get(chunkPos);
+    }
+
+    protected FurnitureData get(int chunkPos, long blockPos) {
         Long2IntMap chunkMap = regionMap.get(chunkPos);
         if(chunkMap != null) {
             int packed = chunkMap.get(blockPos);
-            if(packed != 0) {
+            if(packed != FurnitureData.DEFAULT.getPacked()) {
                 return new FurnitureData(packed);
             }
         }
         return FurnitureData.DEFAULT;
     }
 
-    public void set(int chunkPos, long blockPos, FurnitureData data) {
+    protected void set(int chunkPos, long blockPos, FurnitureData data) {
         boolean isDefault = data.equals(FurnitureData.DEFAULT);
         Long2IntMap chunkMap = regionMap.get(chunkPos);
         if(chunkMap != null) {
@@ -44,6 +48,7 @@ public class RegionFurnitureData extends SavedData {
             newChunkMap.put(blockPos, data.getPacked());
             regionMap.put(chunkPos, newChunkMap);
         }
+        this.setDirty();
     }
 
     @Override
@@ -70,7 +75,7 @@ public class RegionFurnitureData extends SavedData {
         return tag;
     }
 
-    public static RegionFurnitureData create(CompoundTag tag, HolderLookup.Provider registries) {
+    protected static RegionFurnitureData create(CompoundTag tag, HolderLookup.Provider registries) {
         RegionFurnitureData data = new RegionFurnitureData();
 
         for (String key : tag.getAllKeys()) {

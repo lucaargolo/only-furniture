@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.client.ClientFurnitureData;
+import dev.lucaargolo.furniture.data.LocalFurnitureData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -30,7 +30,7 @@ public record FurnitureDataPayload(ResourceKey<Level> dimension, long chunkPos, 
     );
 
     public static void handleClient(FurnitureDataPayload payload, Executor executor) {
-        executor.execute(() -> ClientFurnitureData.set(payload.dimension(), payload.chunkPos(), payload.blockPos(), payload.data()));
+        executor.execute(() -> LocalFurnitureData.set(payload.dimension(), payload.chunkPos(), payload.blockPos(), payload.data()));
     }
 
     @Override

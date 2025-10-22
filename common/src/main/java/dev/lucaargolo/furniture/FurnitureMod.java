@@ -36,6 +36,10 @@ public abstract class FurnitureMod {
         return platformHelper;
     }
 
+    public ModPacketManager getPacketManager() {
+        return packetManager;
+    }
+
     public <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
         return loadPlatformClass(ModRegistry.class, registryKey);
     }

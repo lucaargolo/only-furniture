@@ -1,42 +1,41 @@
 package dev.lucaargolo.furniture.data;
 
 import com.mojang.datafixers.util.Pair;
-import io.netty.buffer.ByteBuf;
+import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.network.ChunkFurnitureDataPayload;
+import dev.lucaargolo.furniture.network.FurnitureDataPayload;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
 public class FurnitureData {
 
-    public static FurnitureData DEFAULT = new FurnitureData(0);
-
-    public static final StreamCodec<ByteBuf, FurnitureData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT,
-            FurnitureData::getPacked,
-            FurnitureData::new
-    );
+    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f);
 
     private final int packed;
 
-    public FurnitureData(int packed) {
+    protected FurnitureData(int packed) {
         this.packed = packed;
     }
 
-    public FurnitureData(int x, int z, float rotation) {
+    public FurnitureData(float x, float z, float rotation) {
+        int ofx = Mth.floor(x*16f) & 0b1111;
+        int ofz = Mth.floor(z*16f) & 0b1111;
         int rot = Math.round(rotation / 22.5f) & 0b1111;
-        this.packed = (rot << 8) | ((z & 0b1111) << 4) | (x & 0b1111);
+        this.packed = (rot << 8) | (ofz << 4) | ofx;
     }
 
-    public int getX() {
-        return packed & 0b1111;
+    public float getX() {
+        return (packed & 0b1111)/16f - 0.5f;
     }
 
-    public int getZ() {
-        return (packed >> 4) & 0b1111;
+    public float getZ() {
+        return ((packed >> 4) & 0b1111)/16f - 0.5f;
     }
 
     public float getRotation() {
@@ -60,25 +59,41 @@ public class FurnitureData {
         return Objects.hashCode(packed);
     }
 
-    public static FurnitureData get(ServerLevel level, BlockPos pos) {
-        Pair<String, Integer> pair = blockToRegion(pos);
-        return regionData(level, pair.getFirst()).get(pair.getSecond(), pos.asLong());
+    public static FurnitureData get(Level level, BlockPos pos) {
+        ChunkPos chunkPos = new ChunkPos(pos);
+        Pair<String, Integer> pair = blockToRegion(chunkPos);
+        FurnitureData data;
+        if(level instanceof ServerLevel serverLevel) {
+            data = getRegion(serverLevel, pair.getFirst()).get(pair.getSecond(), pos.asLong());
+        }else{
+            data = LocalFurnitureData.get(level.dimension(), chunkPos.toLong(), pos.asLong());
+        }
+        return data;
     }
 
-
-    public static void set(ServerLevel level, BlockPos pos, FurnitureData data) {
-        Pair<String, Integer> pair = blockToRegion(pos);
-        regionData(level, pair.getFirst()).set(pair.getSecond(), pos.asLong(), data);
+    public static void set(Level level, BlockPos pos, FurnitureData data) {
+        ChunkPos chunkPos = new ChunkPos(pos);
+        Pair<String, Integer> pair = blockToRegion(chunkPos);
+        if(level instanceof ServerLevel serverLevel) {
+            getRegion(serverLevel, pair.getFirst()).set(pair.getSecond(), pos.asLong(), data);
+            FurnitureMod.INSTANCE.getPacketManager().sendToPlayersTrackingChunk(serverLevel, chunkPos, new FurnitureDataPayload(level.dimension(), chunkPos.toLong(), pos.asLong(), data.getPacked()));
+        }else {
+            LocalFurnitureData.set(level.dimension(), chunkPos.toLong(), pos.asLong(), data.getPacked());
+        }
     }
 
-    private static RegionFurnitureData regionData(ServerLevel level, String key) {
-        return level.getDataStorage().get(RegionFurnitureData.FACTORY, key);
+    public static void sendChunk(ServerPlayer player, ServerLevel level, ChunkPos chunkPos) {
+        Pair<String, Integer> pair = blockToRegion(chunkPos);
+        RegionFurnitureData data = getRegion(level, pair.getFirst());
+        FurnitureMod.INSTANCE.getPacketManager().sendToPlayer(player, new ChunkFurnitureDataPayload(level.dimension(), chunkPos.toLong(), data.get(pair.getSecond())));
     }
 
-    private static Pair<String, Integer> blockToRegion(BlockPos pos) {
-        int x = SectionPos.blockToSectionCoord(pos.getX());
-        int z = SectionPos.blockToSectionCoord(pos.getZ());
-        return Pair.of(String.format("furniture_r_%s_%s", x >> 5, z >> 5), ((z & 31) << 5) | (x & 31));
+    private static RegionFurnitureData getRegion(ServerLevel level, String key) {
+        return level.getDataStorage().computeIfAbsent(RegionFurnitureData.FACTORY, key);
+    }
+
+    private static Pair<String, Integer> blockToRegion(ChunkPos pos) {
+        return Pair.of(String.format("furniture_r_%s_%s", pos.x >> 5, pos.z >> 5), ((pos.z & 31) << 5) | (pos.x & 31));
     }
 
 

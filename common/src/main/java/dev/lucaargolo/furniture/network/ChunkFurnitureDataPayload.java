@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.client.ClientFurnitureData;
+import dev.lucaargolo.furniture.data.LocalFurnitureData;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -31,7 +31,7 @@ public record ChunkFurnitureDataPayload(ResourceKey<Level> dimension, long pos, 
 
     public static void handleClient(ChunkFurnitureDataPayload payload, Executor executor) {
         executor.execute(() -> {
-            ClientFurnitureData.put(payload.dimension(), payload.pos(), payload.data());
+            LocalFurnitureData.put(payload.dimension(), payload.pos(), payload.data());
         });
     }
 

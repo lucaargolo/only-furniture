@@ -1,6 +1,46 @@
 package dev.lucaargolo.furniture.client.model;
 
-public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel{
+import com.mojang.math.Transformation;
+import dev.lucaargolo.furniture.data.FurnitureData;
+import dev.lucaargolo.furniture.data.LocalFurnitureData;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.IQuadTransformer;
+import net.neoforged.neoforge.client.model.QuadTransformers;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
+import java.util.List;
+
+public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel {
+
+    private static final ModelProperty<FurnitureData> FURNITURE_DATA_PROPERTY = new ModelProperty<>();
+
+    @Override
+    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData modelData, @Nullable RenderType renderType) {
+        FurnitureData data = modelData.get(FURNITURE_DATA_PROPERTY);
+        if(data != null) {
+            Vector3f offset = new Vector3f(data.getX(), 0f, data.getZ());
+            Transformation transformation = new Transformation(offset, null, null, null);
+            IQuadTransformer transformer = QuadTransformers.applying(transformation);
+            return transformer.process(super.getQuads(state, side, rand, modelData, renderType));
+        }else{
+            return super.getQuads(state, side, rand, modelData, renderType);
+        }
+    }
+
+    @Override
+    public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
+        return modelData.derive().with(FURNITURE_DATA_PROPERTY, LocalFurnitureData.get(Level.OVERWORLD, pos)).build();
+    }
 
 }

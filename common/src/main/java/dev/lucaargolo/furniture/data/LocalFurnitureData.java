@@ -1,20 +1,43 @@
-package dev.lucaargolo.furniture.client;
+package dev.lucaargolo.furniture.data;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
 
-public class ClientFurnitureData {
+public class LocalFurnitureData {
 
     private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Long2IntMap>> map = new HashMap<>();
 
+    public static FurnitureData get(ResourceKey<Level> dimension, BlockPos pos) {
+        int chunkX = SectionPos.blockToSectionCoord(pos.getX());
+        int chunkZ = SectionPos.blockToSectionCoord(pos.getZ());
+        return get(dimension, ChunkPos.asLong(chunkX, chunkZ), pos.asLong());
+    }
+
+    public static FurnitureData get(ResourceKey<Level> dimension, long chunkPos, long blockPos) {
+        Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
+        if(regionMap != null) {
+            Long2IntMap chunkMap = regionMap.get(chunkPos);
+            if(chunkMap != null) {
+                int packed = chunkMap.get(blockPos);
+                if(packed != FurnitureData.DEFAULT.getPacked()) {
+                    return new FurnitureData(packed);
+                }
+            }
+        }
+        return FurnitureData.DEFAULT;
+    }
+
     public static void set(ResourceKey<Level> dimension, long chunkPos, long blockPos, int data) {
-        boolean isDefault = data == 0;
+        boolean isDefault = data == FurnitureData.DEFAULT.getPacked();
         Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
         if(regionMap != null) {
             Long2IntMap chunkMap = regionMap.get(chunkPos);
