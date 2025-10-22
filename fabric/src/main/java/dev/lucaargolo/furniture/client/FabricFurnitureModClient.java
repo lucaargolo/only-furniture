@@ -15,7 +15,7 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     }
 
     private void onFinishTranslucent(WorldRenderContext context) {
-        renderFurniturePreview(Objects.requireNonNull(context.matrixStack()), context.tickCounter().getGameTimeDeltaPartialTick(false));
+        renderFurniturePreview(Objects.requireNonNull(context.matrixStack()));
     }
 
 }

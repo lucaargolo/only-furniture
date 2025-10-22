@@ -50,7 +50,7 @@ public class NeoForgeModPacketManager extends ModPacketManager {
                 });
                 Lazy<Method> serverHandler = Lazy.of(() -> {
                     try {
-                        return payloadClass.getMethod("handleServer", payloadClass, Executor.class);
+                        return payloadClass.getMethod("handleServer", payloadClass, ServerPlayer.class, Executor.class);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -65,7 +65,7 @@ public class NeoForgeModPacketManager extends ModPacketManager {
                     });
                     case PLAY_TO_SERVER -> registrar.playToServer(payloadType, payloadCodec, (payload, context) -> {
                         try {
-                            serverHandler.get().invoke(null, payload, (Executor) context::enqueueWork);
+                            serverHandler.get().invoke(null, payload, context.player(), (Executor) context::enqueueWork);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -75,7 +75,7 @@ public class NeoForgeModPacketManager extends ModPacketManager {
                             if(context.flow().isClientbound()) {
                                 clientHandler.get().invoke(null, payload, (Executor) context::enqueueWork);
                             }else{
-                                serverHandler.get().invoke(null, payload, (Executor) context::enqueueWork);
+                                serverHandler.get().invoke(null, payload, context.player(), (Executor) context::enqueueWork);
                             }
                         } catch (Exception e) {
                             throw new RuntimeException(e);

@@ -48,10 +48,10 @@ public class FabricModPacketManager extends ModPacketManager {
             }
             if(info == PacketInfo.PLAY_TO_SERVER || info == PacketInfo.PLAY_TO_BOTH) {
                 PayloadTypeRegistry.playC2S().register(payloadType, payloadCodec);
-                Method method = klass.getMethod("handleServer", klass, Executor.class);
+                Method method = klass.getMethod("handleServer", klass, ServerPlayer.class, Executor.class);
                 ServerPlayNetworking.registerGlobalReceiver(payloadType, (data, context) -> {
                     try {
-                        method.invoke(null, data, context.server());
+                        method.invoke(null, data, context.player(), context.server());
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }

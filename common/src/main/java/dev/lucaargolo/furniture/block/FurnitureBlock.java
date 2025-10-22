@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 public class FurnitureBlock extends Block {
 
     public FurnitureBlock(Block base) {
-        super(BlockBehaviour.Properties.ofFullCopy(base));
+        super(BlockBehaviour.Properties.ofFullCopy(base).noOcclusion());
     }
 
     @Override

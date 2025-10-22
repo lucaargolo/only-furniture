@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture.client.model;
 
+import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.data.FurnitureData;
 import dev.lucaargolo.furniture.data.LocalFurnitureData;
@@ -17,7 +18,8 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 
 import java.util.List;
 
@@ -29,8 +31,13 @@ public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel {
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData modelData, @Nullable RenderType renderType) {
         FurnitureData data = modelData.get(FURNITURE_DATA_PROPERTY);
         if(data != null) {
-            Vector3f offset = new Vector3f(data.getX(), 0f, data.getZ());
-            Transformation transformation = new Transformation(offset, null, null, null);
+            Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
+            Matrix4f transform = new Matrix4f()
+                    .translate(data.getX(), 0f, data.getZ())
+                    .translate(0.5f, 0.5f, 0.5f)
+                    .rotate(rotation)
+                    .translate(-0.5f, -0.5f, -0.5f);
+            Transformation transformation = new Transformation(transform);
             IQuadTransformer transformer = QuadTransformers.applying(transformation);
             return transformer.process(super.getQuads(state, side, rand, modelData, renderType));
         }else{

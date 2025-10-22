@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 public abstract class ModPacketManager {
 
     public void init() {
+        register(PacketInfo.PLAY_TO_SERVER, FurnitureRotationPayload.class);
+
         register(PacketInfo.PLAY_TO_CLIENT, FurnitureDataPayload.class);
         register(PacketInfo.PLAY_TO_CLIENT, ChunkFurnitureDataPayload.class);
     }

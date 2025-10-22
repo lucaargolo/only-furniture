@@ -3,12 +3,15 @@ package dev.lucaargolo.furniture.client;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.model.ModModelManager;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
+import dev.lucaargolo.furniture.network.FurnitureRotationPayload;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -21,6 +24,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -32,6 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -46,6 +51,8 @@ public abstract class FurnitureModClient {
     private final ModModelManager modelManager = FurnitureMod.INSTANCE.loadPlatformClass(ModModelManager.class);
     private final ModShaderManager shaderManager = FurnitureMod.INSTANCE.loadPlatformClass(ModShaderManager.class);
     private final ModRenderTypeManager renderTypeManager = FurnitureMod.INSTANCE.loadPlatformClass(ModRenderTypeManager.class);
+
+    private float furnitureRotation = 0f;
 
     public final void init() {
         INSTANCE = this;
@@ -65,31 +72,49 @@ public abstract class FurnitureModClient {
         return renderTypeManager;
     }
 
-    public final void renderFurniturePreview(PoseStack poseStack, float partialTick) {
+    public float getFurnitureRotation() {
+        return furnitureRotation;
+    }
+
+    public final boolean onMouseScroll(double deltaX, double deltaY) {
+        Minecraft minecraft = Minecraft.getInstance();
+        LocalPlayer player = minecraft.player;
+        if(player != null) {
+            Pair<FurnitureBlockItem, InteractionHand> holding = getHoldingFurniture(player);
+            if(holding != null) {
+                furnitureRotation += Mth.sign(deltaY)*22.5f;
+                if(furnitureRotation > 360.0f) {
+                    furnitureRotation -= 360.0f;
+                }
+                if(furnitureRotation < 0f) {
+                    furnitureRotation += 360.0f;
+                }
+                FurnitureMod.INSTANCE.getPacketManager().sendToServer(new FurnitureRotationPayload(furnitureRotation));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final void renderFurniturePreview(PoseStack poseStack) {
         Minecraft minecraft = Minecraft.getInstance();
         Camera camera = minecraft.gameRenderer.getMainCamera();
 
         HitResult hitResult = minecraft.hitResult;
         LocalPlayer player = minecraft.player;
         if(hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && player != null) {
-            ItemStack mainStack = player.getMainHandItem();
-            ItemStack offStack = player.getOffhandItem();
-            FurnitureBlockItem item = null;
-            InteractionHand hand = null;
-            if(mainStack.getItem() instanceof FurnitureBlockItem mainItem) {
-                item = mainItem;
-                hand = InteractionHand.MAIN_HAND;
-            }else if(offStack.getItem() instanceof FurnitureBlockItem offItem) {
-                item = offItem;
-                hand = InteractionHand.OFF_HAND;
-            }
-            if(item != null) {
-                Vec3 pos = getHologramPosition(blockHitResult, player, hand);
+            Pair<FurnitureBlockItem, InteractionHand> holding = getHoldingFurniture(player);
+            if(holding != null) {
+                Vec3 pos = getHologramPosition(blockHitResult, player, holding.getSecond());
 
                 poseStack.pushPose();
                 poseStack.translate(pos.x-camera.getPosition().x-0.5, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z-0.5);
+                poseStack.translate(0.5, 0.0, 0.5);
+                poseStack.mulPose(Axis.YP.rotationDegrees(furnitureRotation));
+                poseStack.translate(-0.5, 0.0, -0.5);
 
-                FurnitureBlock block = item.getFurnitureBlock();
+
+                FurnitureBlock block = holding.getFirst().getFurnitureBlock();
                 BlockState state = block.defaultBlockState();
                 BakedModel model = minecraft.getBlockRenderer().getBlockModel(state);
 
@@ -114,6 +139,19 @@ public abstract class FurnitureModClient {
 
         bufferSource.endBatch();
     }
+
+    private static @Nullable Pair<FurnitureBlockItem, InteractionHand> getHoldingFurniture(LocalPlayer player) {
+        ItemStack mainStack = player.getMainHandItem();
+        ItemStack offStack = player.getOffhandItem();
+        if(mainStack.getItem() instanceof FurnitureBlockItem mainItem) {
+            return Pair.of(mainItem, InteractionHand.MAIN_HAND);
+        }else if(offStack.getItem() instanceof FurnitureBlockItem offItem) {
+            return Pair.of(offItem, InteractionHand.OFF_HAND);
+        }else{
+            return null;
+        }
+    }
+
 
     private static @NotNull Vec3 getHologramPosition(BlockHitResult blockHitResult, LocalPlayer player, InteractionHand hand) {
         BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, hand, blockHitResult));
