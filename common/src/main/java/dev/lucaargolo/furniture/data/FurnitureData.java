@@ -24,9 +24,9 @@ public class FurnitureData {
     }
 
     public FurnitureData(float x, float z, float rotation) {
-        int ofx = Mth.floor(x*16f) & 0b1111;
-        int ofz = Mth.floor(z*16f) & 0b1111;
-        int rot = Math.round(rotation / 22.5f) & 0b1111;
+        int ofx = Mth.floor(Math.min(x*16f, 15f)) & 0b1111;
+        int ofz = Mth.floor(Math.min(z*16f, 15f)) & 0b1111;
+        int rot = Mth.floor(Math.min(x*16f, 359f) / 22.5f) & 0b1111;
         this.packed = (rot << 8) | (ofz << 4) | ofx;
     }
 

@@ -18,14 +18,20 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -65,27 +71,20 @@ public abstract class FurnitureModClient {
 
         HitResult hitResult = minecraft.hitResult;
         LocalPlayer player = minecraft.player;
-        if(hitResult != null && player != null) {
+        if(hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK && player != null) {
             ItemStack mainStack = player.getMainHandItem();
             ItemStack offStack = player.getOffhandItem();
             FurnitureBlockItem item = null;
+            InteractionHand hand = null;
             if(mainStack.getItem() instanceof FurnitureBlockItem mainItem) {
                 item = mainItem;
+                hand = InteractionHand.MAIN_HAND;
             }else if(offStack.getItem() instanceof FurnitureBlockItem offItem) {
                 item = offItem;
+                hand = InteractionHand.OFF_HAND;
             }
             if(item != null) {
-                Vec3 lookAtPos = hitResult.getLocation();
-
-                double fx = Math.floor(lookAtPos.x);
-                double fy = Math.floor(lookAtPos.y);
-                double fz = Math.floor(lookAtPos.z);
-
-                double ox = Math.floor((lookAtPos.x - fx)*16.0)/16.0;
-                double oy = Math.floor((lookAtPos.y - fy)*16.0)/16.0;
-                double oz = Math.floor((lookAtPos.z - fz)*16.0)/16.0;
-
-                Vec3 pos = new Vec3(fx+ox, fy+oy, fz+oz);
+                Vec3 pos = getHologramPosition(blockHitResult, player, hand);
 
                 poseStack.pushPose();
                 poseStack.translate(pos.x-camera.getPosition().x-0.5, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z-0.5);
@@ -114,6 +113,17 @@ public abstract class FurnitureModClient {
         }
 
         bufferSource.endBatch();
+    }
+
+    private static @NotNull Vec3 getHologramPosition(BlockHitResult blockHitResult, LocalPlayer player, InteractionHand hand) {
+        BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, hand, blockHitResult));
+        BlockPos pos = context.getClickedPos();
+        Vec3 location = context.getClickLocation();
+
+        double ox = Math.floor((location.x - pos.getX())*16.0)/16.0;
+        double oz = Math.floor((location.z - pos.getZ())*16.0)/16.0;
+
+        return new Vec3(pos.getX()+ox, pos.getY(), pos.getZ()+oz);
     }
 
     private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, int packedLight, int packedColor) {

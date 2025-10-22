@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ModelBakeryMixin {
 
     @Inject(at = @At("HEAD"), method = "getModel", cancellable = true)
-    public void loadBlockModel(ResourceLocation location, CallbackInfoReturnable<UnbakedModel> cir) {
+    public void furniture$loadBlockModel(ResourceLocation location, CallbackInfoReturnable<UnbakedModel> cir) {
         UnbakedModel model = FurnitureModClient.INSTANCE.getModelManager().getModelReplacement(location);
         if(model != null) {
             cir.setReturnValue(model);
