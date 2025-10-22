@@ -20,7 +20,7 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
     @Override
     public void init() {
-        this.registry.register(NeoForgeFurnitureMod.INSTANCE.getModBus());
+        this.registry.register(NeoForgeFurnitureMod.getModBus());
     }
 
     @Override

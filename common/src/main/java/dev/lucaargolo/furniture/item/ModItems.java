@@ -20,8 +20,8 @@ public class ModItems {
     }
 
     private static BlockItem getBlockItem(Block block, Item.Properties properties) {
-        if(block instanceof FurnitureBlock) {
-            return new FurnitureBlockItem(block, properties);
+        if(block instanceof FurnitureBlock furnitureBlock) {
+            return new FurnitureBlockItem(furnitureBlock, properties);
         }else{
             return new BlockItem(block, properties);
         }

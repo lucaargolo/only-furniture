@@ -10,11 +10,9 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 @Mod(FurnitureMod.MOD_ID)
 public class NeoForgeFurnitureMod extends FurnitureMod {
 
-    public static NeoForgeFurnitureMod INSTANCE;
     private final IEventBus modBus;
 
     public NeoForgeFurnitureMod(IEventBus modBus) {
-        INSTANCE = this;
         this.modBus = modBus;
         this.modBus.register(this);
         this.init();
@@ -30,7 +28,8 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
         return "NeoForge";
     }
 
-    public IEventBus getModBus() {
-        return modBus;
+    public static IEventBus getModBus() {
+        return ((NeoForgeFurnitureMod) FurnitureMod.INSTANCE).modBus;
     }
+
 }

@@ -21,7 +21,7 @@ public class NeoForgeModModelManager extends ModModelManager {
     @Override
     public void init() {
         super.init();
-        NeoForgeFurnitureMod.INSTANCE.getModBus().register(this);
+        NeoForgeFurnitureMod.getModBus().register(this);
     }
 
     @SubscribeEvent

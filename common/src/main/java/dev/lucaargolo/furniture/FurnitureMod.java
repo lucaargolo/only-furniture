@@ -23,7 +23,7 @@ public abstract class FurnitureMod {
 
     private final ModPacketManager packetManager = loadPlatformClass(ModPacketManager.class);
 
-    public void init() {
+    public final void init() {
         INSTANCE = this;
         ModBlocks.BLOCKS.init();
         ModItems.ITEMS.init();
@@ -32,19 +32,19 @@ public abstract class FurnitureMod {
 
     public abstract String getPlatform();
 
-    public PlatformHelper getPlatformHelper() {
+    public final PlatformHelper getPlatformHelper() {
         return platformHelper;
     }
 
-    public ModPacketManager getPacketManager() {
+    public final ModPacketManager getPacketManager() {
         return packetManager;
     }
 
-    public <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
+    public final <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
         return loadPlatformClass(ModRegistry.class, registryKey);
     }
 
-    public <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
+    public final <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
         String name = clazz.getName();
         String platformName = name.substring(0, name.lastIndexOf('.')) + "." + getPlatform() + name.substring(name.lastIndexOf('.') + 1);
         Class<?>[] parameterTypes = new Class<?>[parameters.length];
