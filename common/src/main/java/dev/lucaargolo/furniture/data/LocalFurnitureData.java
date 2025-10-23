@@ -69,11 +69,14 @@ public class LocalFurnitureData {
         Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
         if (regionMap != null) {
             regionMap.remove(chunkPos);
+            if(regionMap.isEmpty()) {
+                map.remove(dimension);
+            }
         }
     }
 
-    public static synchronized void clear(ResourceKey<Level> dimension) {
-        map.remove(dimension);
+    public static synchronized void clear() {
+        map.clear();
     }
 
 }

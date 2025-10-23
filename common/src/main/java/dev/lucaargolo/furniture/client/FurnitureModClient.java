@@ -7,6 +7,7 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.model.ModModelManager;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
+import dev.lucaargolo.furniture.data.LocalFurnitureData;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import net.minecraft.client.Camera;
@@ -14,7 +15,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 public abstract class FurnitureModClient {
 
@@ -42,6 +45,14 @@ public abstract class FurnitureModClient {
 
     public ModRenderTypeManager getRenderTypeManager() {
         return renderTypeManager;
+    }
+
+    public final void onChunkUnload(Level level, ChunkAccess chunk) {
+        LocalFurnitureData.remove(level.dimension(), chunk.getPos().toLong());
+    }
+
+    public final void onDisconnect() {
+        LocalFurnitureData.clear();
     }
 
     public final boolean onMouseScroll(double deltaX, double deltaY) {

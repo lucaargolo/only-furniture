@@ -6,6 +6,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.ChunkWatchEvent;
 
 @Mod(FurnitureMod.MOD_ID)
@@ -15,7 +16,8 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
 
     public NeoForgeFurnitureMod(IEventBus modBus) {
         this.modBus = modBus;
-        this.modBus.register(this);
+        this.modBus.addListener(this::onClientInit);
+        NeoForge.EVENT_BUS.addListener(this::onChunkSent);
         this.init();
     }
 
