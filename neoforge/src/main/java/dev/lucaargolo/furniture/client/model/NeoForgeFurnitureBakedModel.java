@@ -3,14 +3,12 @@ package dev.lucaargolo.furniture.client.model;
 import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.data.FurnitureData;
-import dev.lucaargolo.furniture.data.LocalFurnitureData;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.QuadTransformers;
@@ -47,7 +45,7 @@ public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel {
 
     @Override
     public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
-        return modelData.derive().with(FURNITURE_DATA_PROPERTY, LocalFurnitureData.get(Level.OVERWORLD, pos)).build();
+        return modelData.derive().with(FURNITURE_DATA_PROPERTY, FurnitureData.get(level, pos)).build();
     }
 
 }

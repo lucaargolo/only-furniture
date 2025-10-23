@@ -8,7 +8,10 @@
     "ClipContextMixin",
     "EntityCollisionContextAccessor"
   ],
-  "client": [],
+  "client": [
+    "LevelRendererAccessor",
+    "RenderChunkRegionAccessor"
+  ],
   "server": [],
   "injectors": {
     "defaultRequire": 1

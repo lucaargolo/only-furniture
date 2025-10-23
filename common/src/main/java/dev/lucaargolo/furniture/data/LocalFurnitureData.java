@@ -4,10 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 import java.util.HashMap;
@@ -15,12 +12,6 @@ import java.util.HashMap;
 public class LocalFurnitureData {
 
     private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Long2IntMap>> map = new HashMap<>();
-
-    public static FurnitureData get(ResourceKey<Level> dimension, BlockPos pos) {
-        int chunkX = SectionPos.blockToSectionCoord(pos.getX());
-        int chunkZ = SectionPos.blockToSectionCoord(pos.getZ());
-        return get(dimension, ChunkPos.asLong(chunkX, chunkZ), pos.asLong());
-    }
 
     public static FurnitureData get(ResourceKey<Level> dimension, long chunkPos, long blockPos) {
         Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
@@ -52,6 +43,7 @@ public class LocalFurnitureData {
                 }
             }else if(!isDefault) {
                 Long2IntMap newChunkMap = new Long2IntOpenHashMap();
+                newChunkMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
                 newChunkMap.put(blockPos, data);
                 regionMap.put(chunkPos, newChunkMap);
             }
@@ -61,6 +53,7 @@ public class LocalFurnitureData {
         }else if(!isDefault) {
             Long2ObjectMap<Long2IntMap> newRegionMap = new Long2ObjectOpenHashMap<>();
             Long2IntMap newChunkMap = new Long2IntOpenHashMap();
+            newChunkMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
             newChunkMap.put(blockPos, data);
             newRegionMap.put(chunkPos, newChunkMap);
             map.put(dimension, newRegionMap);

@@ -45,6 +45,7 @@ public class RegionFurnitureData extends SavedData {
             }
         }else if(!isDefault) {
             Long2IntMap newChunkMap = new Long2IntOpenHashMap();
+            newChunkMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
             newChunkMap.put(blockPos, data.getPacked());
             regionMap.put(chunkPos, newChunkMap);
         }

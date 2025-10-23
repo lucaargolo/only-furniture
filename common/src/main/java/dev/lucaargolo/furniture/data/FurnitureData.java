@@ -2,14 +2,18 @@ package dev.lucaargolo.furniture.data;
 
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
 import dev.lucaargolo.furniture.network.ChunkFurnitureDataPayload;
 import dev.lucaargolo.furniture.network.FurnitureDataPayload;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -59,14 +63,19 @@ public class FurnitureData {
         return Objects.hashCode(packed);
     }
 
-    public static FurnitureData get(Level level, BlockPos pos) {
+    public static FurnitureData get(BlockGetter level, BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
         Pair<String, Integer> pair = blockToRegion(chunkPos);
         FurnitureData data;
         if(level instanceof ServerLevel serverLevel) {
             data = getRegion(serverLevel, pair.getFirst()).get(pair.getSecond(), pos.asLong());
         }else{
-            data = LocalFurnitureData.get(level.dimension(), chunkPos.toLong(), pos.asLong());
+            ResourceKey<Level> dimension = getBlockGetterDimension(level);
+            if(dimension == null) {
+                data = FurnitureData.DEFAULT;
+            }else{
+                data = LocalFurnitureData.get(dimension, chunkPos.toLong(), pos.asLong());
+            }
         }
         return data;
     }
@@ -96,6 +105,16 @@ public class FurnitureData {
         return Pair.of(String.format("furniture_r_%s_%s", pos.x >> 5, pos.z >> 5), ((pos.z & 31) << 5) | (pos.x & 31));
     }
 
+    @Nullable
+    private static ResourceKey<Level> getBlockGetterDimension(BlockGetter blockGetter) {
+        if(blockGetter instanceof Level level) {
+            return level.dimension();
+        }else if(blockGetter instanceof RenderChunkRegionAccessor region) {
+            return region.getLevel().dimension();
+        }else{
+            return null;
+        }
+    }
 
 }
 

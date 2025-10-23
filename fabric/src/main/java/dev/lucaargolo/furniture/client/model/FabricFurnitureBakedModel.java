@@ -2,14 +2,12 @@ package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.data.FurnitureData;
-import dev.lucaargolo.furniture.data.LocalFurnitureData;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -26,7 +24,7 @@ public class FabricFurnitureBakedModel extends FurnitureBakedModel implements Fa
 
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        FurnitureData data = LocalFurnitureData.get(Level.OVERWORLD, pos);
+        FurnitureData data = FurnitureData.get(blockView, pos);
 
         Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
         Matrix4f transform = new Matrix4f()

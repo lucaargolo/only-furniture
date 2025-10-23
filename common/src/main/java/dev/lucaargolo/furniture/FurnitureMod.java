@@ -19,8 +19,6 @@ public abstract class FurnitureMod {
 
     public static FurnitureMod INSTANCE;
 
-    private final PlatformHelper platformHelper = loadPlatformClass(PlatformHelper.class);
-
     private final ModPacketManager packetManager = loadPlatformClass(ModPacketManager.class);
 
     public final void init() {
@@ -31,10 +29,6 @@ public abstract class FurnitureMod {
     }
 
     public abstract String getPlatform();
-
-    public final PlatformHelper getPlatformHelper() {
-        return platformHelper;
-    }
 
     public final ModPacketManager getPacketManager() {
         return packetManager;
