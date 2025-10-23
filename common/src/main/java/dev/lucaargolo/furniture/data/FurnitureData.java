@@ -5,6 +5,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
 import dev.lucaargolo.furniture.network.ChunkFurnitureDataPayload;
 import dev.lucaargolo.furniture.network.FurnitureDataPayload;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -91,10 +92,13 @@ public class FurnitureData {
         }
     }
 
-    public static void sendChunk(ServerPlayer player, ServerLevel level, ChunkPos chunkPos) {
+    public static void sync(ServerLevel level, ServerPlayer player, ChunkPos chunkPos) {
         Pair<String, Integer> pair = blockToRegion(chunkPos);
         RegionFurnitureData data = getRegion(level, pair.getFirst());
-        FurnitureMod.INSTANCE.getPacketManager().sendToPlayer(player, new ChunkFurnitureDataPayload(level.dimension(), chunkPos.toLong(), data.get(pair.getSecond())));
+        Long2IntMap chunkMap = data.get(pair.getSecond());
+        if(chunkMap != null) {
+            FurnitureMod.INSTANCE.getPacketManager().sendToPlayer(player, new ChunkFurnitureDataPayload(level.dimension(), chunkPos.toLong(), chunkMap));
+        }
     }
 
     private static RegionFurnitureData getRegion(ServerLevel level, String key) {

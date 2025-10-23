@@ -13,7 +13,7 @@ public class LocalFurnitureData {
 
     private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Long2IntMap>> map = new HashMap<>();
 
-    public static FurnitureData get(ResourceKey<Level> dimension, long chunkPos, long blockPos) {
+    public static synchronized FurnitureData get(ResourceKey<Level> dimension, long chunkPos, long blockPos) {
         Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
         if(regionMap != null) {
             Long2IntMap chunkMap = regionMap.get(chunkPos);
@@ -27,7 +27,7 @@ public class LocalFurnitureData {
         return FurnitureData.DEFAULT;
     }
 
-    public static void set(ResourceKey<Level> dimension, long chunkPos, long blockPos, int data) {
+    public static synchronized void set(ResourceKey<Level> dimension, long chunkPos, long blockPos, int data) {
         boolean isDefault = data == FurnitureData.DEFAULT.getPacked();
         Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
         if(regionMap != null) {
@@ -60,19 +60,19 @@ public class LocalFurnitureData {
         }
     }
 
-    public static void put(ResourceKey<Level> dimension, long chunkPos, Long2IntMap chunkData) {
+    public static synchronized void put(ResourceKey<Level> dimension, long chunkPos, Long2IntMap chunkData) {
         Long2ObjectMap<Long2IntMap> regionMap = map.computeIfAbsent(dimension, k -> new Long2ObjectOpenHashMap<>());
         regionMap.put(chunkPos, chunkData);
     }
 
-    public static void remove(ResourceKey<Level> dimension, long chunkPos) {
+    public static synchronized void remove(ResourceKey<Level> dimension, long chunkPos) {
         Long2ObjectMap<Long2IntMap> regionMap = map.get(dimension);
         if (regionMap != null) {
             regionMap.remove(chunkPos);
         }
     }
 
-    public static void clear(ResourceKey<Level> dimension) {
+    public static synchronized void clear(ResourceKey<Level> dimension) {
         map.remove(dimension);
     }
 

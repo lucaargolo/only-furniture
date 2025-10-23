@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class RegionFurnitureData extends SavedData {
 
@@ -16,6 +17,7 @@ public class RegionFurnitureData extends SavedData {
 
     private final Int2ObjectMap<Long2IntMap> regionMap = new Int2ObjectOpenHashMap<>();
 
+    @Nullable
     protected Long2IntMap get(int chunkPos) {
         return regionMap.get(chunkPos);
     }
