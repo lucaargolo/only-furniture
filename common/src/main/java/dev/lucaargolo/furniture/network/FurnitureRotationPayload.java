@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.item.FurnitureBlockItem;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -22,7 +22,7 @@ public record FurnitureRotationPayload(float rotation) implements CustomPacketPa
     );
 
     public static void handleServer(FurnitureRotationPayload payload, ServerPlayer player, Executor executor) {
-        executor.execute(() -> FurnitureBlockItem.setRotation(player, payload.rotation));
+        executor.execute(() -> FurnitureBlock.setRotation(player, payload.rotation));
     }
 
     @Override

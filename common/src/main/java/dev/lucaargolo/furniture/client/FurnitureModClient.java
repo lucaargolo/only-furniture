@@ -70,6 +70,7 @@ public abstract class FurnitureModClient {
 
     public final void onFinishTranslucentLayer(LevelRendererAccessor levelRenderer, Camera camera, PoseStack poseStack) {
         FurnitureBlockItem.renderFurniturePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
+        LocalFurnitureData.renderFurnitureDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         bufferSource.endBatch();
     }
 

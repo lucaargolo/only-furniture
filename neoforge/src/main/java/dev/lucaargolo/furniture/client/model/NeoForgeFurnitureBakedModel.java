@@ -29,15 +29,19 @@ public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel {
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData modelData, @Nullable RenderType renderType) {
         FurnitureData data = modelData.get(FURNITURE_DATA_PROPERTY);
         if(data != null) {
-            Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
-            Matrix4f transform = new Matrix4f()
-                    .translate(data.getX(), 0f, data.getZ())
-                    .translate(0.5f, 0.5f, 0.5f)
-                    .rotate(rotation)
-                    .translate(-0.5f, -0.5f, -0.5f);
-            Transformation transformation = new Transformation(transform);
-            IQuadTransformer transformer = QuadTransformers.applying(transformation);
-            return transformer.process(super.getQuads(state, side, rand, modelData, renderType));
+            if(data.getDirectionToOriginal() == null) {
+                Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
+                Matrix4f transform = new Matrix4f()
+                        .translate(data.getX(), 0f, data.getZ())
+                        .translate(0.5f, 0.5f, 0.5f)
+                        .rotate(rotation)
+                        .translate(-0.5f, -0.5f, -0.5f);
+                Transformation transformation = new Transformation(transform);
+                IQuadTransformer transformer = QuadTransformers.applying(transformation);
+                return transformer.process(super.getQuads(state, side, rand, modelData, renderType));
+            }else{
+                return List.of();
+            }
         }else{
             return super.getQuads(state, side, rand, modelData, renderType);
         }

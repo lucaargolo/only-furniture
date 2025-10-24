@@ -89,6 +89,7 @@ public class RegionFurnitureData extends SavedData {
             int[] values = regionTag.getIntArray("values");
 
             Long2IntMap longMap = new Long2IntOpenHashMap(keys.length);
+            longMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
             for (int i = 0; i < keys.length; i++) {
                 longMap.put(keys[i], values[i]);
             }

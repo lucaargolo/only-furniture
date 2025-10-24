@@ -20,7 +20,6 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -39,15 +38,11 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class FurnitureBlockItem extends BlockItem {
 
     private static final RandomSource random = RandomSource.create();
-    private static final Map<UUID, Float> rotations = new HashMap<>();
     private static float localRotation = 0f;
 
     private final FurnitureBlock furnitureBlock;
@@ -63,12 +58,16 @@ public class FurnitureBlockItem extends BlockItem {
         Player player = pContext.getPlayer();
         BlockPos pos = pContext.getClickedPos();
         Vec3 location = pContext.getClickLocation();
-        FurnitureData.set(pContext.getLevel(), pos, new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), getRotation(player)));
+        FurnitureData.set(pContext.getLevel(), pos, new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), FurnitureBlock.getRotation(player), null));
         return placed;
     }
 
     public FurnitureBlock getFurnitureBlock() {
         return furnitureBlock;
+    }
+
+    public static float getLocalRotation() {
+        return localRotation;
     }
 
     public static boolean rotateFurniture(LocalPlayer player, double delta) {
@@ -95,7 +94,14 @@ public class FurnitureBlockItem extends BlockItem {
         if(player != null && level == player.level() && hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
             Pair<FurnitureBlockItem, InteractionHand> holding = getHoldingFurniture(player);
             if(holding != null) {
-                Vec3 pos = getHologramPosition(blockHitResult, player, holding.getSecond());
+                BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, holding.getSecond(), blockHitResult));
+                BlockPos blockPos = context.getClickedPos();
+                Vec3 location = context.getClickLocation();
+
+                double ox = Math.floor((location.x - blockPos.getX())*16.0)/16.0;
+                double oz = Math.floor((location.z - blockPos.getZ())*16.0)/16.0;
+
+                Vec3 pos = new Vec3(blockPos.getX()+ox, blockPos.getY(), blockPos.getZ()+oz);
 
                 poseStack.pushPose();
                 poseStack.translate(pos.x-camera.getPosition().x-0.5, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z-0.5);
@@ -111,7 +117,7 @@ public class FurnitureBlockItem extends BlockItem {
                 VertexConsumer consumer = bufferSource.getBuffer(renderType);
 
                 int packedLight = LightTexture.FULL_BRIGHT;
-                int packedColor = FastColor.ARGB32.color(120, 0x5865f2);
+                int packedColor = FastColor.ARGB32.color(120, block.getStateForPlacement(context) == null ? 0xda3e44 : 0x5865f2);
 
                 for (Direction direction : Direction.values()) {
                     random.setSeed(42L);
@@ -139,18 +145,6 @@ public class FurnitureBlockItem extends BlockItem {
         }
     }
 
-
-    private static @NotNull Vec3 getHologramPosition(BlockHitResult blockHitResult, LocalPlayer player, InteractionHand hand) {
-        BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, hand, blockHitResult));
-        BlockPos pos = context.getClickedPos();
-        Vec3 location = context.getClickLocation();
-
-        double ox = Math.floor((location.x - pos.getX())*16.0)/16.0;
-        double oz = Math.floor((location.z - pos.getZ())*16.0)/16.0;
-
-        return new Vec3(pos.getX()+ox, pos.getY(), pos.getZ()+oz);
-    }
-
     private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, int packedLight, int packedColor) {
         for (BakedQuad bakedquad : quads) {
             poseStack.pushPose();
@@ -159,14 +153,6 @@ public class FurnitureBlockItem extends BlockItem {
             consumer.putBulkData(poseStack.last(), bakedquad, FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
-    }
-
-    public static float getRotation(@Nullable Player player) {
-        return player != null ? player.level().isClientSide ? localRotation : rotations.getOrDefault(player.getUUID(), 0f) : 0f;
-    }
-
-    public static void setRotation(ServerPlayer player, float rotation) {
-        rotations.put(player.getUUID(), rotation);
     }
 
 }

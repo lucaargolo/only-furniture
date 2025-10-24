@@ -7,6 +7,7 @@ import dev.lucaargolo.furniture.network.ChunkFurnitureDataPayload;
 import dev.lucaargolo.furniture.network.FurnitureDataPayload;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,7 +21,7 @@ import java.util.Objects;
 
 public class FurnitureData {
 
-    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f);
+    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f, null);
 
     private final int packed;
 
@@ -28,11 +29,12 @@ public class FurnitureData {
         this.packed = packed;
     }
 
-    public FurnitureData(float x, float z, float rotation) {
-        int ofx = Mth.floor(Math.min(x*16f, 15f)) & 0b1111;
-        int ofz = Mth.floor(Math.min(z*16f, 15f)) & 0b1111;
-        int rot = Mth.floor(Math.min(rotation, 359f) / 22.5f) & 0b1111;
-        this.packed = (rot << 8) | (ofz << 4) | ofx;
+    public FurnitureData(float x, float z, float rotation, @Nullable Direction toOriginal) {
+        int ofx = Mth.clamp(Mth.floor(x * 16f), 0, 15);
+        int ofz = Mth.clamp(Mth.floor(z * 16f), 0, 15);
+        int rot = Mth.floor(Math.min(rotation, 359f) / 22.5f);
+        int dir = (toOriginal == null ? 0 : toOriginal.ordinal() + 1);
+        this.packed = (dir << 12) | (rot << 8) | (ofz << 4) | ofx;
     }
 
     public float getX() {
@@ -46,6 +48,12 @@ public class FurnitureData {
     public float getRotation() {
         int rotationIndex = (packed >> 8) & 0b1111;
         return rotationIndex * 22.5f;
+    }
+
+    @Nullable
+    public Direction getDirectionToOriginal() {
+        int dir = (packed >> 12) & 0b1111;
+        return dir == 0 ? null : Direction.values()[dir - 1];
     }
 
     protected int getPacked() {

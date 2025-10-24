@@ -25,29 +25,30 @@ public class FabricFurnitureBakedModel extends FurnitureBakedModel implements Fa
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
         FurnitureData data = FurnitureData.get(blockView, pos);
+        if(data.getDirectionToOriginal() == null) {
+            Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
+            Matrix4f transform = new Matrix4f()
+                    .translate(data.getX(), 0f, data.getZ())
+                    .translate(0.5f, 0.5f, 0.5f)
+                    .rotate(rotation)
+                    .translate(-0.5f, -0.5f, -0.5f);
 
-        Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
-        Matrix4f transform = new Matrix4f()
-                .translate(data.getX(), 0f, data.getZ())
-                .translate(0.5f, 0.5f, 0.5f)
-                .rotate(rotation)
-                .translate(-0.5f, -0.5f, -0.5f);
+            context.pushTransform((quad) -> {
+                for (int i = 0; i < 4; i++) {
+                    Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
+                    vector.mul(transform);
+                    quad.pos(i, vector.x, vector.y, vector.z);
+                }
+                return true;
+            });
 
-        context.pushTransform((quad) -> {
-            for(int i = 0; i < 4; i++) {
-                Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-                vector.mul(transform);
-                quad.pos(i, vector.x, vector.y, vector.z);
+            BakedModel bakedModel = getBakedModel(state);
+            if (bakedModel != null) {
+                bakedModel.emitBlockQuads(blockView, state, pos, randomSupplier, context);
             }
-            return true;
-        });
 
-        BakedModel bakedModel = getBakedModel(state);
-        if(bakedModel != null) {
-            bakedModel.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            context.popTransform();
         }
-
-        context.popTransform();
     }
 
 }
