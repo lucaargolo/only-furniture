@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.client;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -28,6 +29,11 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
         if(event.getLevel() instanceof Level level && level.isClientSide) {
             this.onClientChunkUnwatch(level, event.getChunk().getPos());
         }
+    }
+
+    @SubscribeEvent
+    public void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+        this.onDisconnect();
     }
 
     @SubscribeEvent

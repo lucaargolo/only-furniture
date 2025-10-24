@@ -55,6 +55,10 @@ public abstract class FurnitureModClient {
         LocalFurnitureData.unwatchChunk(level.dimension(), pos);
     }
 
+    public final void onDisconnect() {
+        LocalFurnitureData.unwatchWorld();
+    }
+
     public final boolean onMouseScroll(double deltaX, double deltaY) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;

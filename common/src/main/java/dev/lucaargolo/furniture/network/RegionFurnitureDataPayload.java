@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.data.FurnitureData;
 import dev.lucaargolo.furniture.data.LocalFurnitureData;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
@@ -31,6 +32,7 @@ public record RegionFurnitureDataPayload(ResourceKey<Level> dimension, long regi
 
     public static void handleClient(RegionFurnitureDataPayload payload, Executor executor) {
         executor.execute(() -> {
+            payload.regionMap().defaultReturnValue(FurnitureData.DEFAULT.getPacked());
             LocalFurnitureData.put(payload.dimension(), payload.regionPos(), payload.regionMap());
         });
     }

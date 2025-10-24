@@ -9,6 +9,7 @@
     "EntityCollisionContextAccessor"
   ],
   "client": [
+    "BlockElementMixin",
     "LevelRendererAccessor",
     "RenderChunkRegionAccessor"
   ],

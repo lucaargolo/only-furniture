@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture.block;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
@@ -8,6 +9,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.data.FurnitureData;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -40,8 +42,7 @@ import java.util.*;
 public class FurnitureBlock extends Block {
 
     private static final Map<UUID, Float> rotations = new HashMap<>();
-
-    private final VoxelShape shape;
+    private final Map<Direction, VoxelShape> shapes;
 
     public FurnitureBlock(Block base, VoxelShape... shapes) {
         super(BlockBehaviour.Properties.ofFullCopy(base).noOcclusion());
@@ -49,13 +50,19 @@ public class FurnitureBlock extends Block {
         for (VoxelShape s : shapes) {
             shape = Shapes.join(shape, s, BooleanOp.OR);
         }
-        this.shape = shape;
+        ImmutableMap.Builder<Direction, VoxelShape> builder = ImmutableMap.builder();
+        builder.put(Direction.NORTH, shape);
+        builder.put(Direction.EAST, VoxelShapeUtils.rotate(shape, Direction.EAST));
+        builder.put(Direction.SOUTH, VoxelShapeUtils.rotate(shape, Direction.SOUTH));
+        builder.put(Direction.WEST, VoxelShapeUtils.rotate(shape, Direction.WEST));
+        this.shapes = builder.build();
     }
 
     @Override
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
         FurnitureData data = FurnitureData.get(pLevel, pPos);
-        AABB bounds = this.shape.bounds().deflate(0.001).move(pPos).move(data.getX(), 0, data.getZ());
+        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+        AABB bounds = this.shapes.getOrDefault(facing, Shapes.empty()).bounds().deflate(0.001).move(pPos).move(data.getX(), 0, data.getZ());
         List<BlockPos> intersectingPositions = BlockPos.betweenClosedStream(bounds).filter(p -> !p.equals(pPos)).map(BlockPos::new).toList();
         Map<BlockPos, Direction> intersectingDirections = calculateIntersectingDirections(pPos, intersectingPositions);
 
@@ -81,7 +88,8 @@ public class FurnitureBlock extends Block {
         Player player = pContext.getPlayer();
 
         FurnitureData data = new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), getRotation(player), null);
-        AABB bounds = this.shape.bounds().deflate(0.001).move(pos).move(data.getX(), 0, data.getZ());
+        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+        AABB bounds = this.shapes.getOrDefault(facing, Shapes.empty()).bounds().deflate(0.001).move(pos).move(data.getX(), 0, data.getZ());
         List<BlockPos> intersectingPositions = BlockPos.betweenClosedStream(bounds).filter(p -> !p.equals(pos)).map(BlockPos::new).toList();
 
         for(BlockPos intersectingPos: intersectingPositions) {
@@ -123,7 +131,8 @@ public class FurnitureBlock extends Block {
         FurnitureData data = pair.getFirst();
         Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
         toOriginal = toOriginal.add(data.getX(), 0.0, data.getZ());
-        return shape.move(toOriginal.x, toOriginal.y, toOriginal.z);
+        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+        return this.shapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z);
     }
 
     public static float getRotation(@Nullable Player player) {
@@ -196,7 +205,7 @@ public class FurnitureBlock extends Block {
         if(state.getBlock() instanceof FurnitureBlock) {
             Pair<FurnitureData, Vec3i> pair = getOriginal(levelRenderer.getLevel(), pos);
             FurnitureData data = pair.getFirst();
-            if(data.getRotation() != 0f) {
+            if(data.getRotation() != 0) {
                 VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
 
                 Vec3 offsetVec = Vec3.atLowerCornerOf(pair.getSecond());
@@ -205,6 +214,8 @@ public class FurnitureBlock extends Block {
 
                 poseStack.pushPose();
                 poseStack.translate(offsetPos.x-camera.getPosition().x, offsetPos.y-camera.getPosition().y, offsetPos.z-camera.getPosition().z);
+                Direction facing = Direction.fromYRot(data.getRotation() + 180);
+                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
                 poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
 
                 renderHitOutline(levelRenderer, poseStack, consumer, camera.getEntity(), offsetPos.x, offsetPos.y, offsetPos.z, pos, state);

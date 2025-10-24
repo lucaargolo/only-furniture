@@ -111,6 +111,11 @@ public class LocalFurnitureData {
         }
     }
 
+    public static void unwatchWorld() {
+        dimensionToLevelMap.clear();
+        trackingMap.clear();
+    }
+
     public static void renderFurnitureDataDebug(Level level, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
         if(!Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
             return;

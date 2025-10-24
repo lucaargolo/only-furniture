@@ -22,7 +22,7 @@ public class ChunkMapMixin {
     @Inject(at = @At("HEAD"), method = "dropChunk")
     private static void furniture$unwatchChunk(ServerPlayer player, ChunkPos chunkPos, CallbackInfo ci) {
         //Technically this breaks Immersive Portals compatibility, since we're assuming the server level is the one where the player is.
-        FurnitureMod.INSTANCE.onServerChunkWatch(player.serverLevel(), player, chunkPos);
+        FurnitureMod.INSTANCE.onServerChunkUnwatch(player.serverLevel(), player, chunkPos);
     }
 
 }

@@ -1,6 +1,8 @@
 package dev.lucaargolo.furniture.client.model;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.ModBlocks;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.resources.ResourceLocation;
@@ -9,7 +11,11 @@ import org.jetbrains.annotations.Nullable;
 public abstract class ModModelManager {
 
     public void init() {
-        registerModel(FurnitureMod.id("block/small_table"));
+        ModBlocks.BLOCKS.forEach((path, block) -> {
+            if(block.get() instanceof FurnitureBlock) {
+                registerModel(FurnitureMod.id("block/"+path));
+            }
+        });
         replaceModel(FurnitureMod.id("block/furniture"), new FurnitureUnbakedModel());
     }
 

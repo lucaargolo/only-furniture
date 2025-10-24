@@ -51,7 +51,7 @@ public class FurnitureData {
         return dir == 0 ? null : Direction.values()[dir - 1];
     }
 
-    protected int getPacked() {
+    public int getPacked() {
         return packed;
     }
 
