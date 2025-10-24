@@ -15,9 +15,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 
 public abstract class FurnitureModClient {
 
@@ -47,12 +47,12 @@ public abstract class FurnitureModClient {
         return renderTypeManager;
     }
 
-    public final void onChunkUnload(Level level, ChunkAccess chunk) {
-        LocalFurnitureData.remove(level.dimension(), chunk.getPos().toLong());
+    public final void onClientChunkWatch(Level level, ChunkPos pos) {
+        LocalFurnitureData.watchChunk(level.dimension(), pos);
     }
 
-    public final void onDisconnect() {
-        LocalFurnitureData.clear();
+    public final void onClientChunkUnwatch(Level level, ChunkPos pos) {
+        LocalFurnitureData.unwatchChunk(level.dimension(), pos);
     }
 
     public final boolean onMouseScroll(double deltaX, double deltaY) {
@@ -70,7 +70,7 @@ public abstract class FurnitureModClient {
 
     public final void onFinishTranslucentLayer(LevelRendererAccessor levelRenderer, Camera camera, PoseStack poseStack) {
         FurnitureBlockItem.renderFurniturePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
-        LocalFurnitureData.renderFurnitureDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
+        LocalFurnitureData.renderFurnitureDataDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         bufferSource.endBatch();
     }
 

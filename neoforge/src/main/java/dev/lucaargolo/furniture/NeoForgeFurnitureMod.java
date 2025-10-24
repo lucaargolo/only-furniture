@@ -17,7 +17,8 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
     public NeoForgeFurnitureMod(IEventBus modBus) {
         this.modBus = modBus;
         this.modBus.addListener(this::onClientInit);
-        NeoForge.EVENT_BUS.addListener(this::onChunkSent);
+        NeoForge.EVENT_BUS.addListener(this::onChunkWatch);
+        NeoForge.EVENT_BUS.addListener(this::onChunkUnwatch);
         this.init();
     }
 
@@ -27,8 +28,13 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
     }
 
     @SubscribeEvent
-    public void onChunkSent(ChunkWatchEvent.Sent event) {
-        this.onChunkPacket(event.getLevel(), event.getPlayer(), event.getPos());
+    public void onChunkWatch(ChunkWatchEvent.Watch event) {
+        this.onServerChunkWatch(event.getLevel(), event.getPlayer(), event.getPos());
+    }
+
+    @SubscribeEvent
+    public void onChunkUnwatch(ChunkWatchEvent.UnWatch event) {
+        this.onServerChunkUnwatch(event.getLevel(), event.getPlayer(), event.getPos());
     }
 
     @Override

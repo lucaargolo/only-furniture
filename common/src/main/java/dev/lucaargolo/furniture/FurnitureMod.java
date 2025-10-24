@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.data.FurnitureData;
+import dev.lucaargolo.furniture.data.RegionFurnitureData;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.utils.ModRegistry;
@@ -38,8 +38,12 @@ public abstract class FurnitureMod {
         return packetManager;
     }
 
-    public final void onChunkPacket(ServerLevel level, ServerPlayer player, ChunkPos pos) {
-        FurnitureData.sync(level, player, pos);
+    public final void onServerChunkWatch(ServerLevel level, ServerPlayer player, ChunkPos pos) {
+        RegionFurnitureData.watchChunk(level, player, pos);
+    }
+
+    public final void onServerChunkUnwatch(ServerLevel level, ServerPlayer player, ChunkPos pos) {
+        RegionFurnitureData.unwatchChunk(level, player, pos);
     }
 
     public final <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {

@@ -74,7 +74,7 @@ public class FurnitureBlockItem extends BlockItem {
         Pair<FurnitureBlockItem, InteractionHand> holding = getHoldingFurniture(player);
         if(holding != null) {
             localRotation += Mth.sign(delta)*22.5f;
-            if(localRotation > 360.0f) {
+            if(localRotation >= 360.0f) {
                 localRotation -= 360.0f;
             }
             if(localRotation < 0f) {
@@ -116,8 +116,9 @@ public class FurnitureBlockItem extends BlockItem {
                 RenderType renderType = FurnitureModClient.INSTANCE.getRenderTypeManager().hologramTranslucent(InventoryMenu.BLOCK_ATLAS);
                 VertexConsumer consumer = bufferSource.getBuffer(renderType);
 
+                int color = !level.getBlockState(blockPos).canBeReplaced(context) || block.getStateForPlacement(context) == null ? 0xda3e44 : 0x5865f2;
                 int packedLight = LightTexture.FULL_BRIGHT;
-                int packedColor = FastColor.ARGB32.color(120, block.getStateForPlacement(context) == null ? 0xda3e44 : 0x5865f2);
+                int packedColor = FastColor.ARGB32.color(120, color);
 
                 for (Direction direction : Direction.values()) {
                     random.setSeed(42L);

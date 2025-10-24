@@ -1,16 +1,11 @@
 package dev.lucaargolo.furniture.data;
 
-import com.mojang.datafixers.util.Pair;
-import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
-import dev.lucaargolo.furniture.network.ChunkFurnitureDataPayload;
 import dev.lucaargolo.furniture.network.FurnitureDataPayload;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import dev.lucaargolo.furniture.utils.FurnitureUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
@@ -74,59 +69,32 @@ public class FurnitureData {
 
     public static FurnitureData get(BlockGetter level, BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
-        Pair<String, Integer> pair = blockToRegion(chunkPos);
-        FurnitureData data;
+        long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
+        int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
         if(level instanceof ServerLevel serverLevel) {
-            data = getRegion(serverLevel, pair.getFirst()).get(pair.getSecond(), pos.asLong());
+            return RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).get(regionLocalBlockPos);
         }else{
-            ResourceKey<Level> dimension = getBlockGetterDimension(level);
-            if(dimension == null) {
-                data = FurnitureData.DEFAULT;
-            }else{
-                data = LocalFurnitureData.get(dimension, chunkPos.toLong(), pos.asLong());
+            ResourceKey<Level> dimension = FurnitureUtils.getBlockGetterDimension(level);
+            if(dimension != null) {
+                return LocalFurnitureData.get(dimension, regionPos, regionLocalBlockPos);
             }
         }
-        return data;
+        return FurnitureData.DEFAULT;
     }
 
     public static void set(Level level, BlockPos pos, FurnitureData data) {
         ChunkPos chunkPos = new ChunkPos(pos);
-        Pair<String, Integer> pair = blockToRegion(chunkPos);
+        long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
+        int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
         if(level instanceof ServerLevel serverLevel) {
-            getRegion(serverLevel, pair.getFirst()).set(pair.getSecond(), pos.asLong(), data);
-            FurnitureMod.INSTANCE.getPacketManager().sendToPlayersTrackingChunk(serverLevel, chunkPos, new FurnitureDataPayload(level.dimension(), chunkPos.toLong(), pos.asLong(), data.getPacked()));
+            RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).set(regionLocalBlockPos, data);
+            RegionFurnitureData.sendToPlayersTrackingRegion(serverLevel, regionPos, new FurnitureDataPayload(level.dimension(), regionPos, regionLocalBlockPos, data.getPacked()));
         }else {
-            LocalFurnitureData.set(level.dimension(), chunkPos.toLong(), pos.asLong(), data.getPacked());
+            LocalFurnitureData.set(level.dimension(), regionPos, regionLocalBlockPos, data.getPacked());
         }
     }
 
-    public static void sync(ServerLevel level, ServerPlayer player, ChunkPos chunkPos) {
-        Pair<String, Integer> pair = blockToRegion(chunkPos);
-        RegionFurnitureData data = getRegion(level, pair.getFirst());
-        Long2IntMap chunkMap = data.get(pair.getSecond());
-        if(chunkMap != null) {
-            FurnitureMod.INSTANCE.getPacketManager().sendToPlayer(player, new ChunkFurnitureDataPayload(level.dimension(), chunkPos.toLong(), chunkMap));
-        }
-    }
 
-    private static RegionFurnitureData getRegion(ServerLevel level, String key) {
-        return level.getDataStorage().computeIfAbsent(RegionFurnitureData.FACTORY, key);
-    }
-
-    private static Pair<String, Integer> blockToRegion(ChunkPos pos) {
-        return Pair.of(String.format("furniture_r_%s_%s", pos.x >> 5, pos.z >> 5), ((pos.z & 31) << 5) | (pos.x & 31));
-    }
-
-    @Nullable
-    private static ResourceKey<Level> getBlockGetterDimension(BlockGetter blockGetter) {
-        if(blockGetter instanceof Level level) {
-            return level.dimension();
-        }else if(blockGetter instanceof RenderChunkRegionAccessor region) {
-            return region.getLevel().dimension();
-        }else{
-            return null;
-        }
-    }
 
 }
 
