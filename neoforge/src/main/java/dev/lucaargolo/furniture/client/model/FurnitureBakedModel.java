@@ -5,11 +5,13 @@ import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.data.FurnitureData;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.BakedModelWrapper;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -21,9 +23,13 @@ import org.joml.Quaternionf;
 
 import java.util.List;
 
-public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel {
+public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
     private static final ModelProperty<FurnitureData> FURNITURE_DATA_PROPERTY = new ModelProperty<>();
+
+    public FurnitureBakedModel(BakedModel originalModel) {
+        super(originalModel);
+    }
 
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData modelData, @Nullable RenderType renderType) {

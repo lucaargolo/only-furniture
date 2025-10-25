@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
-import dev.lucaargolo.furniture.client.model.ModModelManager;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
 import dev.lucaargolo.furniture.data.LocalFurnitureData;
@@ -25,18 +24,12 @@ public abstract class FurnitureModClient {
 
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(128));
 
-    private final ModModelManager modelManager = FurnitureMod.INSTANCE.loadPlatformClass(ModModelManager.class);
     private final ModShaderManager shaderManager = FurnitureMod.INSTANCE.loadPlatformClass(ModShaderManager.class);
     private final ModRenderTypeManager renderTypeManager = FurnitureMod.INSTANCE.loadPlatformClass(ModRenderTypeManager.class);
 
     public final void init() {
         INSTANCE = this;
-        modelManager.init();
         shaderManager.init();
-    }
-
-    public final ModModelManager getModelManager() {
-        return modelManager;
     }
 
     public ModShaderManager getShaderManager() {

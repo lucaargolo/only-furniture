@@ -5,12 +5,16 @@ import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
+    private final Map<String, ModEntry<? extends T>> entries = new HashMap<>();
     private final DeferredRegister<T> registry;
 
     public NeoForgeModRegistry(ResourceKey<Registry<T>> registryKey) {
@@ -25,7 +29,9 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
     @Override
     public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier) {
-        return new ModEntry<>(this.registry.register(path, supplier));
+        ModEntry<E> entry = new ModEntry<>(this.registry.register(path, supplier));
+        entries.put(path, entry);
+        return entry;
     }
 
     @Override
@@ -33,6 +39,12 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
         this.registry.getEntries().forEach(holder -> {
             consumer.accept(holder.getId().getPath(), holder);
         });
+    }
+
+    @Override
+    @Nullable
+    public ModEntry<? extends T> get(String path) {
+        return entries.get(path);
     }
 
 }

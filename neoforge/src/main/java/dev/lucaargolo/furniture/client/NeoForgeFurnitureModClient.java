@@ -1,12 +1,15 @@
 package dev.lucaargolo.furniture.client;
 
+import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 
@@ -14,7 +17,23 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
     public NeoForgeFurnitureModClient() {
         this.init();
-        NeoForge.EVENT_BUS.register(this);
+        NeoForgeFurnitureMod.getModBus().addListener(this::onModelRegister);
+        NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
+        NeoForge.EVENT_BUS.addListener(this::onChunkUnload);
+        NeoForge.EVENT_BUS.addListener(this::onLoggingOut);
+        NeoForge.EVENT_BUS.addListener(this::onMouseScrolling);
+        NeoForge.EVENT_BUS.addListener(this::onDrawBlockHighlight);
+        NeoForge.EVENT_BUS.addListener(this::onRenderLevelStage);
+    }
+
+    @SubscribeEvent
+    public void onModelRegister(ModelEvent.ModifyBakingResult event) {
+        ModBlocks.BLOCKS.forEach((path, block) -> {
+            if(block.get() instanceof FurnitureBlock) {
+                ModelResourceLocation location = new ModelResourceLocation(FurnitureMod.id(path), "");
+                event.getModels().compute(location, (k, model) -> new FurnitureBakedModel(model));
+            }
+        });
     }
 
     @SubscribeEvent
@@ -37,7 +56,7 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @SubscribeEvent
-    public void onMouseScroll(InputEvent.MouseScrollingEvent event) {
+    public void onMouseScrolling(InputEvent.MouseScrollingEvent event) {
         boolean result = this.onMouseScroll(event.getScrollDeltaX(), event.getScrollDeltaY());
         event.setCanceled(result);
     }
