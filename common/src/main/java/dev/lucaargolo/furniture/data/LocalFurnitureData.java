@@ -4,8 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import dev.lucaargolo.furniture.utils.FurnitureUtils;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2LongMap;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
@@ -30,63 +30,67 @@ import java.util.stream.Collectors;
 
 public class LocalFurnitureData {
 
-    private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2IntMap>> dimensionToLevelMap = new HashMap<>();
+    private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2LongMap>> dimensionToLevelMap = new HashMap<>();
     private static final Map<ResourceKey<Level>, Set<ChunkPos>> trackingMap = new HashMap<>();
 
-    public static synchronized FurnitureData get(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos) {
-        Long2ObjectMap<Int2IntMap> levelMap = dimensionToLevelMap.get(dimension);
+    public static synchronized FurnitureData get(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int layer) {
+        Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(dimension);
         if(levelMap != null) {
-            Int2IntMap regionMap = levelMap.get(regionPos);
+            Int2LongMap regionMap = levelMap.get(regionPos);
             if(regionMap != null) {
-                int packed = regionMap.get(regionLocalBlockPos);
-                if(packed != FurnitureData.DEFAULT.getPacked()) {
-                    return new FurnitureData(packed);
+                long packed = regionMap.get(regionLocalBlockPos);
+                if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
+                    return FurnitureUtils.unpackFurnitureDataLayers(packed)[layer];
                 }
             }
         }
         return FurnitureData.DEFAULT;
     }
 
-    public static synchronized void set(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int packedFurnitureData) {
+    public static synchronized void set(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int layer, short packedFurnitureData) {
         boolean isDefault = packedFurnitureData == FurnitureData.DEFAULT.getPacked();
-        Long2ObjectMap<Int2IntMap> levelMap = dimensionToLevelMap.get(dimension);
+        Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(dimension);
         if(levelMap != null) {
-            Int2IntMap regionMap = levelMap.get(regionPos);
+            Int2LongMap regionMap = levelMap.get(regionPos);
             if(regionMap != null) {
-                if(!isDefault) {
-                    regionMap.put(regionLocalBlockPos, packedFurnitureData);
-                }else{
-                    regionMap.remove(regionLocalBlockPos);
-                }
-                if(regionMap.isEmpty()) {
-                    levelMap.remove(regionPos);
+                long packed = regionMap.get(regionLocalBlockPos);
+                if(packed != FurnitureData.DEFAULT_PACKED_LAYERS || !isDefault) {
+                    packed = FurnitureUtils.updatePackedFurnitureDataLayers(packed, layer, packedFurnitureData);
+                    if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
+                        regionMap.put(regionLocalBlockPos, packed);
+                    }else{
+                        regionMap.remove(regionLocalBlockPos);
+                    }
+                    if(regionMap.isEmpty()) {
+                        levelMap.remove(regionPos);
+                    }
                 }
             }else if(!isDefault) {
-                Int2IntMap newRegionMap = new Int2IntOpenHashMap();
-                newRegionMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
-                newRegionMap.put(regionLocalBlockPos, packedFurnitureData);
+                Int2LongMap newRegionMap = new Int2LongOpenHashMap();
+                newRegionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
+                newRegionMap.put(regionLocalBlockPos, FurnitureUtils.updatePackedFurnitureDataLayers(FurnitureData.DEFAULT_PACKED_LAYERS, layer, packedFurnitureData));
                 levelMap.put(regionPos, newRegionMap);
             }
             if(levelMap.isEmpty()) {
                 dimensionToLevelMap.remove(dimension);
             }
         }else if(!isDefault) {
-            Long2ObjectMap<Int2IntMap> newLevelMap = new Long2ObjectOpenHashMap<>();
-            Int2IntMap newRegionMap = new Int2IntOpenHashMap();
-            newRegionMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
-            newRegionMap.put(regionLocalBlockPos, packedFurnitureData);
+            Long2ObjectMap<Int2LongMap> newLevelMap = new Long2ObjectOpenHashMap<>();
+            Int2LongMap newRegionMap = new Int2LongOpenHashMap();
+            newRegionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
+            newRegionMap.put(regionLocalBlockPos, FurnitureUtils.updatePackedFurnitureDataLayers(FurnitureData.DEFAULT_PACKED_LAYERS, layer, packedFurnitureData));
             newLevelMap.put(regionPos, newRegionMap);
             dimensionToLevelMap.put(dimension, newLevelMap);
         }
     }
 
-    public static synchronized void put(ResourceKey<Level> dimension, long regionPos, Int2IntMap regionMap) {
-        Long2ObjectMap<Int2IntMap> levelMap = dimensionToLevelMap.computeIfAbsent(dimension, k -> new Long2ObjectOpenHashMap<>());
+    public static synchronized void put(ResourceKey<Level> dimension, long regionPos, Int2LongMap regionMap) {
+        Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.computeIfAbsent(dimension, k -> new Long2ObjectOpenHashMap<>());
         levelMap.put(regionPos, regionMap);
     }
 
     private static synchronized void remove(ResourceKey<Level> dimension, long regionPos) {
-        Long2ObjectMap<Int2IntMap> levelMap = dimensionToLevelMap.get(dimension);
+        Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(dimension);
         if (levelMap != null) {
             levelMap.remove(regionPos);
             if(levelMap.isEmpty()) {
@@ -121,7 +125,7 @@ public class LocalFurnitureData {
             return;
         }
 
-        Long2ObjectMap<Int2IntMap> levelMap = dimensionToLevelMap.get(level.dimension());
+        Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(level.dimension());
 
         if(levelMap == null) {
             return;
@@ -130,8 +134,8 @@ public class LocalFurnitureData {
         levelMap.forEach((regionPos, regionMap) -> {
             regionMap.forEach((regionLocalBlockPos, packedFurnitureData) -> {
                 BlockPos blockPos = FurnitureUtils.regionLocalBlockPosToBlockPos(regionPos, regionLocalBlockPos);
-                FurnitureData data = new FurnitureData(packedFurnitureData);
-                renderFurnitureBlockDebug(blockPos, data, camera, poseStack, bufferSource);
+                FurnitureData[] layers = FurnitureUtils.unpackFurnitureDataLayers(packedFurnitureData);
+                renderFurnitureBlockDebug(blockPos, layers[0], camera, poseStack, bufferSource);
             });
         });
     }

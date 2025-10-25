@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
-public record FurnitureDataPayload(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int packedFurnitureData) implements CustomPacketPayload {
+public record FurnitureDataPayload(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int layer, int packedFurnitureData) implements CustomPacketPayload {
 
     public static final Type<FurnitureDataPayload> TYPE = new Type<>(FurnitureMod.id("furniture_data"));
 
@@ -25,12 +25,14 @@ public record FurnitureDataPayload(ResourceKey<Level> dimension, long regionPos,
             ByteBufCodecs.VAR_INT,
             FurnitureDataPayload::regionLocalBlockPos,
             ByteBufCodecs.VAR_INT,
+            FurnitureDataPayload::layer,
+            ByteBufCodecs.VAR_INT,
             FurnitureDataPayload::packedFurnitureData,
             FurnitureDataPayload::new
     );
 
     public static void handleClient(FurnitureDataPayload payload, Executor executor) {
-        executor.execute(() -> LocalFurnitureData.set(payload.dimension(), payload.regionPos(), payload.regionLocalBlockPos(), payload.packedFurnitureData()));
+        executor.execute(() -> LocalFurnitureData.set(payload.dimension(), payload.regionPos(), payload.regionLocalBlockPos(), payload.layer(), (short) payload.packedFurnitureData()));
     }
 
     @Override

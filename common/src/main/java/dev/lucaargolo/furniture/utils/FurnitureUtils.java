@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture.utils;
 
+import dev.lucaargolo.furniture.data.FurnitureData;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -9,6 +10,34 @@ import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 public class FurnitureUtils {
+
+    public static long updatePackedFurnitureDataLayers(long packedFurnitureDataLayers, int layer, short packedFurnitureData) {
+        if (layer < 0 || layer > 3) {
+            throw new IllegalArgumentException("Layer must be between 0 and 3");
+        }
+
+        int shift = (3 - layer) * 16;
+        long mask = 0xFFFFL << shift;
+        long value = ((long) packedFurnitureData & 0xFFFFL) << shift;
+
+        return (packedFurnitureDataLayers & ~mask) | value;
+    }
+
+    public static long packFurnitureDataLayers(FurnitureData s1, FurnitureData s2, FurnitureData s3, FurnitureData s4) {
+        return ((long) (s1.getPacked() & 0xFFFF) << 48)
+                | ((long) (s2.getPacked() & 0xFFFF) << 32)
+                | ((long) (s3.getPacked() & 0xFFFF) << 16)
+                | ((long) (s4.getPacked() & 0xFFFF));
+    }
+
+    public static FurnitureData[] unpackFurnitureDataLayers(long packed) {
+        FurnitureData[] result = new FurnitureData[4];
+        result[0] = new FurnitureData((short) ((packed >>> 48) & 0xFFFF));
+        result[1] = new FurnitureData((short) ((packed >>> 32) & 0xFFFF));
+        result[2] = new FurnitureData((short) ((packed >>> 16) & 0xFFFF));
+        result[3] = new FurnitureData((short) (packed & 0xFFFF));
+        return result;
+    }
 
     public static int blockPosToRegionLocalBlockPos(BlockPos pos) {
         int localX = pos.getX() & 511;

@@ -3,8 +3,8 @@ package dev.lucaargolo.furniture.data;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.network.RegionFurnitureDataPayload;
 import dev.lucaargolo.furniture.utils.FurnitureUtils;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2LongMap;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -25,28 +25,33 @@ public class RegionFurnitureData extends SavedData {
     private static final Factory<RegionFurnitureData> factory = new Factory<>(RegionFurnitureData::new, RegionFurnitureData::create, null);
     private static final Map<ResourceKey<Level>, Map<UUID, Set<ChunkPos>>> playerTrackingMap = new HashMap<>();
 
-    private final Int2IntMap regionMap = new Int2IntOpenHashMap();
+    private final Int2LongMap regionMap = new Int2LongOpenHashMap();
 
     public RegionFurnitureData() {
-        regionMap.defaultReturnValue(FurnitureData.DEFAULT.getPacked());
+        regionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
     }
 
-    protected FurnitureData get(int regionLocalBlockPos) {
-        int packed = regionMap.get(regionLocalBlockPos);
-        if(packed != FurnitureData.DEFAULT.getPacked()) {
-            return new FurnitureData(packed);
+    protected FurnitureData get(int regionLocalBlockPos, int layer) {
+        long packed = regionMap.get(regionLocalBlockPos);
+        if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
+            return FurnitureUtils.unpackFurnitureDataLayers(packed)[layer];
         }
         return FurnitureData.DEFAULT;
     }
 
-    protected void set(int regionLocalBlockPos, FurnitureData data) {
+    protected void set(int regionLocalBlockPos, int layer, FurnitureData data) {
         boolean isDefault = data.equals(FurnitureData.DEFAULT);
-        if(!isDefault) {
-            regionMap.put(regionLocalBlockPos, data.getPacked());
-        }else{
-            regionMap.remove(regionLocalBlockPos);
+
+        long packed = regionMap.get(regionLocalBlockPos);
+        if(packed != FurnitureData.DEFAULT_PACKED_LAYERS || !isDefault) {
+            packed = FurnitureUtils.updatePackedFurnitureDataLayers(packed, layer, data.getPacked());
+            if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
+                regionMap.put(regionLocalBlockPos, packed);
+            }else{
+                regionMap.remove(regionLocalBlockPos);
+            }
+            this.setDirty();
         }
-        this.setDirty();
     }
 
     public static void watchChunk(ServerLevel level, ServerPlayer player, ChunkPos pos) {
@@ -85,17 +90,17 @@ public class RegionFurnitureData extends SavedData {
     public @NotNull CompoundTag save(@NotNull CompoundTag tag, @NotNull HolderLookup.Provider registries) {
         int size = regionMap.size();
         int[] keys = new int[size];
-        int[] values = new int[size];
+        long[] values = new long[size];
 
         int i = 0;
-        for (Int2IntMap.Entry e : regionMap.int2IntEntrySet()) {
+        for (Int2LongMap.Entry e : regionMap.int2LongEntrySet()) {
             keys[i] = e.getIntKey();
-            values[i] = e.getIntValue();
+            values[i] = e.getLongValue();
             i++;
         }
 
         tag.putIntArray("keys", keys);
-        tag.putIntArray("values", values);
+        tag.putLongArray("values", values);
         return tag;
     }
 
@@ -103,7 +108,7 @@ public class RegionFurnitureData extends SavedData {
         RegionFurnitureData data = new RegionFurnitureData();
 
         int[] keys = tag.getIntArray("keys");
-        int[] values = tag.getIntArray("values");
+        long[] values = tag.getLongArray("values");
 
         for (int i = 0; i < keys.length; i++) {
             data.regionMap.put(keys[i], values[i]);

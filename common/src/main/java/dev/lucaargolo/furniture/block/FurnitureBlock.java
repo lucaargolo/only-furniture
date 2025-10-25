@@ -61,7 +61,7 @@ public class FurnitureBlock extends Block {
 
     @Override
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
-        FurnitureData data = FurnitureData.get(pLevel, pPos);
+        FurnitureData data = FurnitureData.get(pLevel, pPos, 0);
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
 
         VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
@@ -72,7 +72,7 @@ public class FurnitureBlock extends Block {
             for(BlockPos intersectingPos: intersectingPositions) {
                 if(!pPos.equals(intersectingPos)) {
                     FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos));
-                    FurnitureData.set(pLevel, intersectingPos, intersectingData);
+                    FurnitureData.set(pLevel, intersectingPos, 0, intersectingData);
                     pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState());
                 }
             }
@@ -112,25 +112,25 @@ public class FurnitureBlock extends Block {
     @Override
     protected void onRemove(@NotNull BlockState pState, @NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pNewState, boolean pMovedByPiston) {
         if (!pState.is(pNewState.getBlock())) {
-            FurnitureData data = FurnitureData.get(pLevel, pPos);
+            FurnitureData data = FurnitureData.get(pLevel, pPos, 0);
             if(data.getDirectionToOriginal() == null) {
                 Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, pPos);
                 for (BlockPos intersectingPos : intersectingPositions) {
                     pLevel.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
                 }
             }else{
-                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos);
+                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, 0);
                 BlockPos pos = pPos.offset(pair.getSecond());
                 pLevel.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
             }
-            FurnitureData.set(pLevel, pPos, FurnitureData.DEFAULT);
+            FurnitureData.set(pLevel, pPos, 0, FurnitureData.DEFAULT);
         }
         super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
     }
 
     @Override
     protected @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos);
+        Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, 0);
         FurnitureData data = pair.getFirst();
         Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
         toOriginal = toOriginal.add(data.getX(), 0.0, data.getZ());
@@ -154,7 +154,7 @@ public class FurnitureBlock extends Block {
         for(Direction direction : Direction.values()) {
             BlockPos relativePos = originalPos.relative(direction);
             if(!intersectingPositions.contains(relativePos)) {
-                FurnitureData data = FurnitureData.get(level, relativePos);
+                FurnitureData data = FurnitureData.get(level, relativePos, 0);
                 if(data.getDirectionToOriginal() == direction.getOpposite()) {
                     intersectingPositions.add(relativePos);
                     calculateIntersectingPositions(level, relativePos, intersectingPositions);
@@ -222,7 +222,7 @@ public class FurnitureBlock extends Block {
 
     public static boolean renderFurnitureOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
         if(state.getBlock() instanceof FurnitureBlock) {
-            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(levelRenderer.getLevel(), pos);
+            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(levelRenderer.getLevel(), pos, 0);
             FurnitureData data = pair.getFirst();
             if(data.getRotation() != 0) {
                 VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());

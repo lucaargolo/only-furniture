@@ -58,7 +58,7 @@ public class FurnitureBlockItem extends BlockItem {
         Player player = pContext.getPlayer();
         BlockPos pos = pContext.getClickedPos();
         Vec3 location = pContext.getClickLocation();
-        FurnitureData.set(pContext.getLevel(), pos, new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), FurnitureBlock.getRotation(player), null));
+        FurnitureData.set(pContext.getLevel(), pos, 0, new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), FurnitureBlock.getRotation(player), null));
         return placed;
     }
 

@@ -49,7 +49,7 @@ public class NeoForgeFurnitureBakedModel extends FurnitureBakedModel {
 
     @Override
     public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
-        return modelData.derive().with(FURNITURE_DATA_PROPERTY, FurnitureData.get(level, pos)).build();
+        return modelData.derive().with(FURNITURE_DATA_PROPERTY, FurnitureData.get(level, pos, 0)).build();
     }
 
 }

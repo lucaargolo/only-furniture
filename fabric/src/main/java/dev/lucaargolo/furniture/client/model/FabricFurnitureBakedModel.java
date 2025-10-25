@@ -24,7 +24,7 @@ public class FabricFurnitureBakedModel extends FurnitureBakedModel implements Fa
 
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        FurnitureData data = FurnitureData.get(blockView, pos);
+        FurnitureData data = FurnitureData.get(blockView, pos, 0);
         if(data.getDirectionToOriginal() == null) {
             Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
             Matrix4f transform = new Matrix4f()
