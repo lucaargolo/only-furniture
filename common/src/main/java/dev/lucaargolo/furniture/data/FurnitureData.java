@@ -1,9 +1,11 @@
 package dev.lucaargolo.furniture.data;
 
+import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.network.FurnitureDataPayload;
 import dev.lucaargolo.furniture.utils.FurnitureUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -12,7 +14,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class FurnitureData {
 
@@ -65,6 +69,20 @@ public class FurnitureData {
     @Override
     public int hashCode() {
         return Objects.hashCode(packed);
+    }
+
+    public static Pair<FurnitureData, Vec3i> getOriginal(BlockGetter level, BlockPos pos) {
+        FurnitureData data = FurnitureData.get(level, pos);
+        Vec3i toOriginal = Vec3i.ZERO;
+        Set<BlockPos> positions = new HashSet<>();
+        while (data.getDirectionToOriginal() != null && !positions.contains(pos)) {
+            positions.add(pos);
+            Direction direction = data.getDirectionToOriginal();
+            pos = pos.relative(direction);
+            toOriginal = toOriginal.relative(direction);
+            data = FurnitureData.get(level, pos);
+        }
+        return Pair.of(data, toOriginal);
     }
 
     public static FurnitureData get(BlockGetter level, BlockPos pos) {

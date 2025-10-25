@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -62,10 +63,11 @@ public class FurnitureBlock extends Block {
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
         FurnitureData data = FurnitureData.get(pLevel, pPos);
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        AABB bounds = this.shapes.getOrDefault(facing, Shapes.empty()).bounds().deflate(0.001).move(pPos).move(data.getX(), 0, data.getZ());
-        List<BlockPos> intersectingPositions = BlockPos.betweenClosedStream(bounds).filter(p -> !p.equals(pPos)).map(BlockPos::new).toList();
-        Map<BlockPos, Direction> intersectingDirections = calculateIntersectingDirections(pPos, intersectingPositions);
 
+        VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
+        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pPos, shape, Vec3.atLowerCornerOf(pPos).add(data.getX(), 0, data.getZ()));
+
+        Map<BlockPos, Direction> intersectingDirections = calculateIntersectingDirections(pPos, intersectingPositions);
         if(intersectingDirections != null) {
             for(BlockPos intersectingPos: intersectingPositions) {
                 if(!pPos.equals(intersectingPos)) {
@@ -89,8 +91,9 @@ public class FurnitureBlock extends Block {
 
         FurnitureData data = new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), getRotation(player), null);
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        AABB bounds = this.shapes.getOrDefault(facing, Shapes.empty()).bounds().deflate(0.001).move(pos).move(data.getX(), 0, data.getZ());
-        List<BlockPos> intersectingPositions = BlockPos.betweenClosedStream(bounds).filter(p -> !p.equals(pos)).map(BlockPos::new).toList();
+
+        VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
+        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pos, shape, Vec3.atLowerCornerOf(pos).add(data.getX(), 0, data.getZ()));
 
         for(BlockPos intersectingPos: intersectingPositions) {
             BlockState intersectingState = level.getBlockState(intersectingPos);
@@ -111,12 +114,12 @@ public class FurnitureBlock extends Block {
         if (!pState.is(pNewState.getBlock())) {
             FurnitureData data = FurnitureData.get(pLevel, pPos);
             if(data.getDirectionToOriginal() == null) {
-                List<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, pPos);
+                Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, pPos);
                 for (BlockPos intersectingPos : intersectingPositions) {
                     pLevel.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
                 }
             }else{
-                Pair<FurnitureData, Vec3i> pair = getOriginal(pLevel, pPos);
+                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos);
                 BlockPos pos = pPos.offset(pair.getSecond());
                 pLevel.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
             }
@@ -127,7 +130,7 @@ public class FurnitureBlock extends Block {
 
     @Override
     protected @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        Pair<FurnitureData, Vec3i> pair = getOriginal(pLevel, pPos);
+        Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos);
         FurnitureData data = pair.getFirst();
         Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
         toOriginal = toOriginal.add(data.getX(), 0.0, data.getZ());
@@ -143,11 +146,11 @@ public class FurnitureBlock extends Block {
         rotations.put(player.getUUID(), rotation);
     }
 
-    public static List<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos) {
-        return calculateIntersectingPositions(level, originalPos, new ArrayList<>());
+    private static Set<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos) {
+        return calculateIntersectingPositions(level, originalPos, new HashSet<>());
     }
 
-    public static List<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos, List<BlockPos> intersectingPositions) {
+    private static Set<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos, Set<BlockPos> intersectingPositions) {
         for(Direction direction : Direction.values()) {
             BlockPos relativePos = originalPos.relative(direction);
             if(!intersectingPositions.contains(relativePos)) {
@@ -161,49 +164,65 @@ public class FurnitureBlock extends Block {
         return intersectingPositions;
     }
 
-    @Nullable
-    public static Map<BlockPos, Direction> calculateIntersectingDirections(BlockPos originalPos, List<BlockPos> intersectingPositions) {
-        Map<BlockPos, Direction> intersectingDirections = new HashMap<>();
-        Queue<BlockPos> queue = new LinkedList<>();
-        Map<BlockPos, Direction> firstMoveMap = new HashMap<>();
+    private static Set<BlockPos> calculateIntersectingPositions(BlockPos originalPos, VoxelShape shape, Vec3 offset) {
+        Set<BlockPos> positions = new HashSet<>();
 
-        queue.add(originalPos);
-        firstMoveMap.put(originalPos, null);
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (AABB box : shape.toAabbs()) {
+            box = box.deflate(0.001).move(offset);
 
-        Set<BlockPos> visited = new HashSet<>();
-        visited.add(originalPos);
-
-        while (!queue.isEmpty()) {
-            BlockPos cur = queue.poll();
-            Direction rootDir = firstMoveMap.get(cur);
-
-            for (Direction dir : Direction.values()) {
-                BlockPos neighbor = cur.relative(dir);
-
-                if (!visited.contains(neighbor) && intersectingPositions.contains(neighbor)) {
-                    Direction directionTowardOrigin = (rootDir == null) ? dir.getOpposite() : rootDir;
-
-                    firstMoveMap.put(neighbor, directionTowardOrigin);
-                    intersectingDirections.put(neighbor, directionTowardOrigin);
-
-                    queue.add(neighbor);
-                    visited.add(neighbor);
+            for (int x = Mth.floor(box.minX); x < Mth.ceil(box.maxX); x++) {
+                for (int y = Mth.floor(box.minY); y < Mth.ceil(box.maxY); y++) {
+                    for (int z = Mth.floor(box.minZ); z < Mth.ceil(box.maxZ); z++) {
+                        pos.set(x, y, z);
+                        if(!pos.equals(originalPos)) {
+                            positions.add(pos.immutable());
+                        }
+                    }
                 }
             }
         }
 
+        return positions;
+    }
+
+    @Nullable
+    public static Map<BlockPos, Direction> calculateIntersectingDirections(BlockPos originalPos, Set<BlockPos> intersectingPositions) {
+        Map<BlockPos, Direction> result = new HashMap<>();
+
         for (BlockPos pos : intersectingPositions) {
-            if (!intersectingDirections.containsKey(pos)) {
-                return null;
+            if (pos.equals(originalPos)) {
+                result.put(pos, null);
+                continue;
+            }
+
+            int dx = originalPos.getX() - pos.getX();
+            int dz = originalPos.getZ() - pos.getZ();
+            int dy = originalPos.getY() - pos.getY();
+
+            Direction directionToOriginal = null;
+            if (dx > 0) directionToOriginal = Direction.EAST;
+            else if (dx < 0) directionToOriginal = Direction.WEST;
+            else if (dz > 0) directionToOriginal = Direction.SOUTH;
+            else if (dz < 0) directionToOriginal = Direction.NORTH;
+            else if (dy > 0) directionToOriginal = Direction.UP;
+            else if (dy < 0) directionToOriginal = Direction.DOWN;
+
+            if(directionToOriginal != null) {
+                result.put(pos, directionToOriginal);
             }
         }
 
-        return intersectingDirections;
+        for (BlockPos p : intersectingPositions) {
+            if (!result.containsKey(p)) return null;
+        }
+
+        return result;
     }
 
     public static boolean renderFurnitureOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
         if(state.getBlock() instanceof FurnitureBlock) {
-            Pair<FurnitureData, Vec3i> pair = getOriginal(levelRenderer.getLevel(), pos);
+            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(levelRenderer.getLevel(), pos);
             FurnitureData data = pair.getFirst();
             if(data.getRotation() != 0) {
                 VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
@@ -228,20 +247,6 @@ public class FurnitureBlock extends Block {
 
     private static void renderHitOutline(LevelRendererAccessor levelRenderer, PoseStack pPoseStack, VertexConsumer pConsumer, Entity pEntity, double pCamX, double pCamY, double pCamZ, BlockPos pPos, BlockState pState) {
         LevelRendererAccessor.invokeRenderShape(pPoseStack, pConsumer, pState.getShape(levelRenderer.getLevel(), pPos, CollisionContext.of(pEntity)), (double)pPos.getX() - pCamX, (double)pPos.getY() - pCamY, (double)pPos.getZ() - pCamZ, 0.0F, 0.0F, 0.0F, 0.4F);
-    }
-
-    private static Pair<FurnitureData, Vec3i> getOriginal(BlockGetter level, BlockPos pos) {
-        FurnitureData data = FurnitureData.get(level, pos);
-        Vec3i toOriginal = Vec3i.ZERO;
-        Set<BlockPos> positions = new HashSet<>();
-        while (data.getDirectionToOriginal() != null && !positions.contains(pos)) {
-            positions.add(pos);
-            Direction direction = data.getDirectionToOriginal();
-            pos = pos.relative(direction);
-            toOriginal = toOriginal.relative(direction);
-            data = FurnitureData.get(level, pos);
-        }
-        return Pair.of(data, toOriginal);
     }
 
 }
