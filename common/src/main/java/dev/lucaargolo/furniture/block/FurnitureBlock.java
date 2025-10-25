@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.data.FurnitureData;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;

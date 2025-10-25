@@ -1,8 +1,8 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.data.FurnitureData;
-import dev.lucaargolo.furniture.data.LocalFurnitureData;
+import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;

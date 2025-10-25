@@ -6,7 +6,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
-import dev.lucaargolo.furniture.data.LocalFurnitureData;
+import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import net.minecraft.client.Camera;

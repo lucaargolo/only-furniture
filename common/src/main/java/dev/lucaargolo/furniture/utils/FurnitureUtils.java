@@ -1,6 +1,5 @@
 package dev.lucaargolo.furniture.utils;
 
-import dev.lucaargolo.furniture.data.FurnitureData;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;

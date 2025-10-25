@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.data.RegionFurnitureData;
+import dev.lucaargolo.furniture.utils.RegionFurnitureData;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.utils.ModRegistry;

@@ -20,6 +20,9 @@
     ],
     "client": [
       "dev.lucaargolo.furniture.client.FabricFurnitureModClient"
+    ],
+    "fabric-datagen": [
+      "dev.lucaargolo.furniture.data.FurnitureModData"
     ]
   },
   "mixins": [

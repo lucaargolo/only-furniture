@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.data.LocalFurnitureData;
+import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;

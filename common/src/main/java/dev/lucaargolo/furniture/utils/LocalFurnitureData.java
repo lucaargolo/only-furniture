@@ -1,9 +1,8 @@
-package dev.lucaargolo.furniture.data;
+package dev.lucaargolo.furniture.utils;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
-import dev.lucaargolo.furniture.utils.FurnitureUtils;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;

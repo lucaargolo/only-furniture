@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Axis;
-import dev.lucaargolo.furniture.data.FurnitureData;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.resources.model.BakedModel;

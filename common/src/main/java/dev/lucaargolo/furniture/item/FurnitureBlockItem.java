@@ -7,7 +7,7 @@ import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.FurnitureModClient;
-import dev.lucaargolo.furniture.data.FurnitureData;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.network.FurnitureRotationPayload;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;

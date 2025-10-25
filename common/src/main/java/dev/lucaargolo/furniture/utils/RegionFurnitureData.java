@@ -1,8 +1,7 @@
-package dev.lucaargolo.furniture.data;
+package dev.lucaargolo.furniture.utils;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.network.RegionFurnitureDataPayload;
-import dev.lucaargolo.furniture.utils.FurnitureUtils;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import net.minecraft.core.HolderLookup;
