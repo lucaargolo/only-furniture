@@ -7,8 +7,8 @@ import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.FurnitureModClient;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.network.FurnitureRotationPayload;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -55,10 +55,12 @@ public class FurnitureBlockItem extends BlockItem {
     @Override
     protected boolean placeBlock(@NotNull BlockPlaceContext pContext, @NotNull BlockState pState) {
         boolean placed = super.placeBlock(pContext, pState);
-        Player player = pContext.getPlayer();
-        BlockPos pos = pContext.getClickedPos();
-        Vec3 location = pContext.getClickLocation();
-        FurnitureData.set(pContext.getLevel(), pos, 0, new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), FurnitureBlock.getRotation(player), null));
+        if(placed) {
+            Player player = pContext.getPlayer();
+            BlockPos pos = pContext.getClickedPos();
+            Vec3 location = pContext.getClickLocation();
+            FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), FurnitureBlock.getRotation(player), null, true));
+        }
         return placed;
     }
 

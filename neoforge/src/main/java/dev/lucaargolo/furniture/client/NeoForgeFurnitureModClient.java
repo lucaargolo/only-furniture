@@ -30,8 +30,10 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     public void onModelRegister(ModelEvent.ModifyBakingResult event) {
         ModBlocks.BLOCKS.forEach((path, block) -> {
             if(block.get() instanceof FurnitureBlock) {
-                ModelResourceLocation location = new ModelResourceLocation(FurnitureMod.id(path), "");
-                event.getModels().compute(location, (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=0"), (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=1"), (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=2"), (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=3"), (k, model) -> new FurnitureBakedModel(model));
             }
         });
     }

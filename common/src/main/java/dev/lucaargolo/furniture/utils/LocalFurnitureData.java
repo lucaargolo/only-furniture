@@ -32,29 +32,31 @@ public class LocalFurnitureData {
     private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2LongMap>> dimensionToLevelMap = new HashMap<>();
     private static final Map<ResourceKey<Level>, Set<ChunkPos>> trackingMap = new HashMap<>();
 
-    public static synchronized FurnitureData get(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int layer) {
+    public static synchronized FurnitureData[] get(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos) {
         Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(dimension);
         if(levelMap != null) {
             Int2LongMap regionMap = levelMap.get(regionPos);
             if(regionMap != null) {
                 long packed = regionMap.get(regionLocalBlockPos);
                 if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
-                    return FurnitureUtils.unpackFurnitureDataLayers(packed)[layer];
+                    return FurnitureUtils.unpackFurnitureDataLayers(packed);
                 }
             }
         }
-        return FurnitureData.DEFAULT;
+        return FurnitureData.DEFAULT_LAYERS.clone();
     }
 
-    public static synchronized void set(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int layer, short packedFurnitureData) {
-        boolean isDefault = packedFurnitureData == FurnitureData.DEFAULT.getPacked();
+    public static synchronized void set(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, FurnitureData[] layers) {
+        long newPacked = FurnitureUtils.packFurnitureDataLayers(layers);
+        boolean isDefault = newPacked == FurnitureData.DEFAULT_PACKED_LAYERS;
+
         Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(dimension);
         if(levelMap != null) {
             Int2LongMap regionMap = levelMap.get(regionPos);
             if(regionMap != null) {
                 long packed = regionMap.get(regionLocalBlockPos);
                 if(packed != FurnitureData.DEFAULT_PACKED_LAYERS || !isDefault) {
-                    packed = FurnitureUtils.updatePackedFurnitureDataLayers(packed, layer, packedFurnitureData);
+                    packed = newPacked;
                     if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
                         regionMap.put(regionLocalBlockPos, packed);
                     }else{
@@ -67,7 +69,7 @@ public class LocalFurnitureData {
             }else if(!isDefault) {
                 Int2LongMap newRegionMap = new Int2LongOpenHashMap();
                 newRegionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
-                newRegionMap.put(regionLocalBlockPos, FurnitureUtils.updatePackedFurnitureDataLayers(FurnitureData.DEFAULT_PACKED_LAYERS, layer, packedFurnitureData));
+                newRegionMap.put(regionLocalBlockPos, newPacked);
                 levelMap.put(regionPos, newRegionMap);
             }
             if(levelMap.isEmpty()) {
@@ -77,7 +79,7 @@ public class LocalFurnitureData {
             Long2ObjectMap<Int2LongMap> newLevelMap = new Long2ObjectOpenHashMap<>();
             Int2LongMap newRegionMap = new Int2LongOpenHashMap();
             newRegionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
-            newRegionMap.put(regionLocalBlockPos, FurnitureUtils.updatePackedFurnitureDataLayers(FurnitureData.DEFAULT_PACKED_LAYERS, layer, packedFurnitureData));
+            newRegionMap.put(regionLocalBlockPos, newPacked);
             newLevelMap.put(regionPos, newRegionMap);
             dimensionToLevelMap.put(dimension, newLevelMap);
         }
@@ -134,12 +136,14 @@ public class LocalFurnitureData {
             regionMap.forEach((regionLocalBlockPos, packedFurnitureData) -> {
                 BlockPos blockPos = FurnitureUtils.regionLocalBlockPosToBlockPos(regionPos, regionLocalBlockPos);
                 FurnitureData[] layers = FurnitureUtils.unpackFurnitureDataLayers(packedFurnitureData);
-                renderFurnitureBlockDebug(blockPos, layers[0], camera, poseStack, bufferSource);
+                for(int layer = 0; layer < layers.length; layer++) {
+                    renderFurnitureBlockDebug(blockPos, layers[layer], camera, poseStack, bufferSource, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
+                }
             });
         });
     }
 
-    private static void renderFurnitureBlockDebug(BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
+    private static void renderFurnitureBlockDebug(BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource, int color) {
         Vec3 pos = Vec3.atLowerCornerOf(blockPos);
 
         poseStack.pushPose();
@@ -147,20 +151,22 @@ public class LocalFurnitureData {
 
         Direction toOriginal = data.getDirectionToOriginal();
 
-        int color = toOriginal == null ? 0x00FF00 : 0xFFFF00;
         float red = FastColor.ARGB32.red(color)/255f;
         float green = FastColor.ARGB32.green(color)/255f;
         float blue = FastColor.ARGB32.blue(color)/255f;
 
         VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
-        LevelRenderer.renderLineBox(poseStack, lineConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 1f);
-        if(toOriginal != null) {
-            Vec3 vector = new Vec3(toOriginal.getStepX(), toOriginal.getStepY(), toOriginal.getStepZ()).multiply(0.5, 0.5, 0.5);
-            RenderHelper.renderArrow(poseStack, lineConsumer, new Vec3(0.5, 0.5, 0.5), vector, 0f, 0f, 1f, 1f);
+        if(data.hasOriginal() || toOriginal != null) {
+            LevelRenderer.renderLineBox(poseStack, lineConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 1f);
+            if(toOriginal != null) {
+                Vec3 vector = new Vec3(toOriginal.getStepX(), toOriginal.getStepY(), toOriginal.getStepZ()).multiply(0.5, 0.5, 0.5);
+                RenderHelper.renderArrow(poseStack, lineConsumer, new Vec3(0.5, 0.5, 0.5), vector, red, green, blue, 1f);
+            }
+            if(data.hasOriginal()) {
+                VertexConsumer atlasConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
+                RenderHelper.renderFilledBox(poseStack, atlasConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 0.3f);
+            }
         }
-
-        VertexConsumer atlasConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
-        RenderHelper.renderFilledBox(poseStack, atlasConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 0.3f);
 
         poseStack.popPose();
     }

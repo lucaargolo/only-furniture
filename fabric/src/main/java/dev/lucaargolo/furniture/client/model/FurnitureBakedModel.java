@@ -28,8 +28,20 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
 
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        FurnitureData data = FurnitureData.get(blockView, pos, 0);
-        if(data.getDirectionToOriginal() == null) {
+        FurnitureData[] layers = FurnitureData.get(blockView, pos);
+        FurnitureData data = null;
+        boolean hasData = false;
+        for (FurnitureData furnitureData : layers) {
+            data = furnitureData;
+            if (data.hasOriginal()) {
+                hasData = true;
+                break;
+            }else{
+                hasData = hasData || furnitureData.getDirectionToOriginal() != null;
+                data = null;
+            }
+        }
+        if(data != null) {
             Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
             Matrix4f transform = new Matrix4f()
                     .translate(data.getX(), 0f, data.getZ())
@@ -49,6 +61,8 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             this.wrapped.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 
             context.popTransform();
+        }else if(!hasData){
+            super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
         }
     }
 

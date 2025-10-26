@@ -36,7 +36,7 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                     String namespace = location.id().getNamespace();
                     String path = location.id().getPath();
                     String variant = location.variant();
-                    if(namespace.equals(FurnitureMod.MOD_ID) && variant.isEmpty()) {
+                    if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
                         ModRegistry.ModEntry<? extends Block> entry = ModBlocks.BLOCKS.get(path);
                         if(entry != null && entry.get() instanceof FurnitureBlock) {
                             return new FurnitureBakedModel(model);

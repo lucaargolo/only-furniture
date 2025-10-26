@@ -1,10 +1,10 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.utils.RegionFurnitureData;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.utils.ModRegistry;
+import dev.lucaargolo.furniture.utils.RegionFurnitureData;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;

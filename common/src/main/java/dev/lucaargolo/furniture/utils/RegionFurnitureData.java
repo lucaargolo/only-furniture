@@ -30,20 +30,21 @@ public class RegionFurnitureData extends SavedData {
         regionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
     }
 
-    protected FurnitureData get(int regionLocalBlockPos, int layer) {
+    protected FurnitureData[] get(int regionLocalBlockPos) {
         long packed = regionMap.get(regionLocalBlockPos);
         if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
-            return FurnitureUtils.unpackFurnitureDataLayers(packed)[layer];
+            return FurnitureUtils.unpackFurnitureDataLayers(packed);
         }
-        return FurnitureData.DEFAULT;
+        return FurnitureData.DEFAULT_LAYERS.clone();
     }
 
-    protected void set(int regionLocalBlockPos, int layer, FurnitureData data) {
-        boolean isDefault = data.equals(FurnitureData.DEFAULT);
+    protected void set(int regionLocalBlockPos, FurnitureData[] layers) {
+        long newPacked = FurnitureUtils.packFurnitureDataLayers(layers);
+        boolean isDefault = newPacked == FurnitureData.DEFAULT_PACKED_LAYERS;
 
         long packed = regionMap.get(regionLocalBlockPos);
         if(packed != FurnitureData.DEFAULT_PACKED_LAYERS || !isDefault) {
-            packed = FurnitureUtils.updatePackedFurnitureDataLayers(packed, layer, data.getPacked());
+            packed = newPacked;
             if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
                 regionMap.put(regionLocalBlockPos, packed);
             }else{

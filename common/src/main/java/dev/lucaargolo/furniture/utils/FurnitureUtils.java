@@ -10,23 +10,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class FurnitureUtils {
 
-    public static long updatePackedFurnitureDataLayers(long packedFurnitureDataLayers, int layer, short packedFurnitureData) {
-        if (layer < 0 || layer > 3) {
-            throw new IllegalArgumentException("Layer must be between 0 and 3");
-        }
-
-        int shift = (3 - layer) * 16;
-        long mask = 0xFFFFL << shift;
-        long value = ((long) packedFurnitureData & 0xFFFFL) << shift;
-
-        return (packedFurnitureDataLayers & ~mask) | value;
-    }
-
-    public static long packFurnitureDataLayers(FurnitureData s1, FurnitureData s2, FurnitureData s3, FurnitureData s4) {
-        return ((long) (s1.getPacked() & 0xFFFF) << 48)
-                | ((long) (s2.getPacked() & 0xFFFF) << 32)
-                | ((long) (s3.getPacked() & 0xFFFF) << 16)
-                | ((long) (s4.getPacked() & 0xFFFF));
+    public static long packFurnitureDataLayers(FurnitureData[] layers) {
+        return ((long) (layers[0].getPacked() & 0xFFFF) << 48)
+                | ((long) (layers[1].getPacked() & 0xFFFF) << 32)
+                | ((long) (layers[2].getPacked() & 0xFFFF) << 16)
+                | ((long) (layers[3].getPacked() & 0xFFFF));
     }
 
     public static FurnitureData[] unpackFurnitureDataLayers(long packed) {

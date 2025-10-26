@@ -19,8 +19,9 @@ import java.util.Set;
 
 public class FurnitureData {
 
-    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f, null);
-    public static long DEFAULT_PACKED_LAYERS = FurnitureUtils.packFurnitureDataLayers(DEFAULT, DEFAULT, DEFAULT, DEFAULT);
+    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f, null, false);
+    public static FurnitureData[] DEFAULT_LAYERS = new FurnitureData[] {DEFAULT, DEFAULT, DEFAULT, DEFAULT};
+    public static long DEFAULT_PACKED_LAYERS = FurnitureUtils.packFurnitureDataLayers(DEFAULT_LAYERS);
 
     private final short packed;
 
@@ -28,12 +29,13 @@ public class FurnitureData {
         this.packed = packed;
     }
 
-    public FurnitureData(float x, float z, float rotation, @Nullable Direction toOriginal) {
+    public FurnitureData(float x, float z, float rotation, @Nullable Direction toOriginal, boolean hasOriginal) {
         int ofx = Mth.clamp(Mth.floor(x * 16f), 0, 15);
         int ofz = Mth.clamp(Mth.floor(z * 16f), 0, 15);
         int rot = Mth.floor(Math.min(rotation, 359f) / 22.5f);
         int dir = (toOriginal == null ? 0 : toOriginal.ordinal() + 1);
-        this.packed = (short) ((dir << 12) | (rot << 8) | (ofz << 4) | ofx);
+        int origBit = hasOriginal ? 1 : 0;
+        this.packed = (short) ((origBit << 15) | (dir << 12) | (rot << 8) | (ofz << 4) | ofx);
     }
 
     public float getX() {
@@ -55,8 +57,13 @@ public class FurnitureData {
     @Nullable
     public Direction getDirectionToOriginal() {
         int value = packed & 0xFFFF;
-        int dir = (value >> 12) & 0b1111;
+        int dir = (value >> 12) & 0b111;
         return dir == 0 ? null : Direction.values()[dir - 1];
+    }
+
+    public boolean hasOriginal() {
+        int value = packed & 0xFFFF;
+        return ((value >> 15) & 0b1) != 0;
     }
 
     public short getPacked() {
@@ -79,7 +86,7 @@ public class FurnitureData {
         FurnitureData data = FurnitureData.get(level, pos, layer);
         Vec3i toOriginal = Vec3i.ZERO;
         Set<BlockPos> positions = new HashSet<>();
-        while (data.getDirectionToOriginal() != null && !positions.contains(pos)) {
+        while (data.getDirectionToOriginal() != null && !positions.contains(pos) && positions.size() < 32) {
             positions.add(pos);
             Direction direction = data.getDirectionToOriginal();
             pos = pos.relative(direction);
@@ -90,29 +97,39 @@ public class FurnitureData {
     }
 
     public static FurnitureData get(BlockGetter level, BlockPos pos, int layer) {
+        return FurnitureData.get(level, pos)[layer];
+    }
+
+    public static FurnitureData[] get(BlockGetter level, BlockPos pos) {
         ChunkPos chunkPos = new ChunkPos(pos);
         long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
         int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
         if(level instanceof ServerLevel serverLevel) {
-            return RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).get(regionLocalBlockPos, layer);
+            return RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).get(regionLocalBlockPos);
         }else{
             ResourceKey<Level> dimension = FurnitureUtils.getBlockGetterDimension(level);
             if(dimension != null) {
-                return LocalFurnitureData.get(dimension, regionPos, regionLocalBlockPos, layer);
+                return LocalFurnitureData.get(dimension, regionPos, regionLocalBlockPos);
             }
         }
-        return FurnitureData.DEFAULT;
+        return FurnitureData.DEFAULT_LAYERS.clone();
     }
 
     public static void set(Level level, BlockPos pos, int layer, FurnitureData data) {
+        FurnitureData[] layers = FurnitureData.get(level, pos);
+        layers[layer] = data;
+        set(level, pos, layers);
+    }
+
+    public static void set(Level level, BlockPos pos, FurnitureData[] layers) {
         ChunkPos chunkPos = new ChunkPos(pos);
         long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
         int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
         if(level instanceof ServerLevel serverLevel) {
-            RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).set(regionLocalBlockPos, layer, data);
-            RegionFurnitureData.sendToPlayersTrackingRegion(serverLevel, regionPos, new FurnitureDataPayload(level.dimension(), regionPos, regionLocalBlockPos, layer, data.getPacked()));
+            RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).set(regionLocalBlockPos, layers);
+            RegionFurnitureData.sendToPlayersTrackingRegion(serverLevel, regionPos, new FurnitureDataPayload(level.dimension(), regionPos, regionLocalBlockPos, layers));
         }else {
-            LocalFurnitureData.set(level.dimension(), regionPos, regionLocalBlockPos, layer, data.getPacked());
+            LocalFurnitureData.set(level.dimension(), regionPos, regionLocalBlockPos, layers);
         }
     }
 

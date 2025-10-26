@@ -1,6 +1,8 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.FurnitureUtils;
 import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.registries.Registries;
@@ -13,9 +15,21 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
-public record FurnitureDataPayload(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, int layer, int packedFurnitureData) implements CustomPacketPayload {
+public record FurnitureDataPayload(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, FurnitureData[] layers) implements CustomPacketPayload {
 
     public static final Type<FurnitureDataPayload> TYPE = new Type<>(FurnitureMod.id("furniture_data"));
+
+    private static final StreamCodec<ByteBuf, FurnitureData[]> LAYER_CODEC = new StreamCodec<>() {
+        @Override
+        public FurnitureData @NotNull [] decode(@NotNull ByteBuf buffer) {
+            return FurnitureUtils.unpackFurnitureDataLayers(buffer.readLong());
+        }
+
+        @Override
+        public void encode(@NotNull ByteBuf buffer, FurnitureData @NotNull [] value) {
+            buffer.writeLong(FurnitureUtils.packFurnitureDataLayers(value));
+        }
+    };
 
     public static final StreamCodec<ByteBuf, FurnitureDataPayload> STREAM_CODEC = StreamCodec.composite(
             ResourceKey.streamCodec(Registries.DIMENSION),
@@ -24,15 +38,13 @@ public record FurnitureDataPayload(ResourceKey<Level> dimension, long regionPos,
             FurnitureDataPayload::regionPos,
             ByteBufCodecs.VAR_INT,
             FurnitureDataPayload::regionLocalBlockPos,
-            ByteBufCodecs.VAR_INT,
-            FurnitureDataPayload::layer,
-            ByteBufCodecs.VAR_INT,
-            FurnitureDataPayload::packedFurnitureData,
+            LAYER_CODEC,
+            FurnitureDataPayload::layers,
             FurnitureDataPayload::new
     );
 
     public static void handleClient(FurnitureDataPayload payload, Executor executor) {
-        executor.execute(() -> LocalFurnitureData.set(payload.dimension(), payload.regionPos(), payload.regionLocalBlockPos(), payload.layer(), (short) payload.packedFurnitureData()));
+        executor.execute(() -> LocalFurnitureData.set(payload.dimension(), payload.regionPos(), payload.regionLocalBlockPos(), payload.layers()));
     }
 
     @Override

@@ -4,15 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -21,6 +21,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -29,6 +30,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
@@ -41,6 +44,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class FurnitureBlock extends Block {
+
+    public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 3);
 
     private static final Map<UUID, Float> rotations = new HashMap<>();
     private final Map<Direction, VoxelShape> shapes;
@@ -57,11 +62,44 @@ public class FurnitureBlock extends Block {
         builder.put(Direction.SOUTH, VoxelShapeUtils.rotate(shape, Direction.SOUTH));
         builder.put(Direction.WEST, VoxelShapeUtils.rotate(shape, Direction.WEST));
         this.shapes = builder.build();
+        this.registerDefaultState(this.stateDefinition.any().setValue(LAYER, 0));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
+        builder.add(LAYER);
+    }
+
+    @Override
+    protected boolean canBeReplaced(@NotNull BlockState state, @NotNull BlockPlaceContext useContext) {
+        Level level = useContext.getLevel();
+        BlockPos pos = useContext.getClickedPos();
+        ItemStack stack = useContext.getItemInHand();
+        Item item = stack.getItem();
+        if (item instanceof FurnitureBlockItem) {
+            FurnitureData[] layers = FurnitureData.get(level, pos);
+            for (FurnitureData data : layers) {
+                if(data.hasOriginal()) {
+                    return false;
+                }
+            }
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
-        FurnitureData data = FurnitureData.get(pLevel, pPos, 0);
+        FurnitureData[] layers = FurnitureData.get(pLevel, pPos);
+        int layer = -1;
+        for(int i = 0; i < layers.length; i++) {
+            if(layers[i].hasOriginal()) {
+                layer = i;
+                break;
+            }
+        }
+        FurnitureData data = layers[layer];
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
 
         VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
@@ -71,9 +109,9 @@ public class FurnitureBlock extends Block {
         if(intersectingDirections != null) {
             for(BlockPos intersectingPos: intersectingPositions) {
                 if(!pPos.equals(intersectingPos)) {
-                    FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos));
-                    FurnitureData.set(pLevel, intersectingPos, 0, intersectingData);
-                    pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState());
+                    FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
+                    FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
+                    pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState().setValue(LAYER, layer));
                 }
             }
         }else{
@@ -89,7 +127,7 @@ public class FurnitureBlock extends Block {
         Vec3 location = pContext.getClickLocation();
         Player player = pContext.getPlayer();
 
-        FurnitureData data = new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), getRotation(player), null);
+        FurnitureData data = new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), getRotation(player), null, true);
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
 
         VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
@@ -102,40 +140,111 @@ public class FurnitureBlock extends Block {
             }
         }
 
+        int layer = calculateAvailableLayer(level, pos, intersectingPositions);
+        if(layer == -1) {
+            return null;
+        }
+
         if(calculateIntersectingDirections(pos, intersectingPositions) != null) {
-            return this.defaultBlockState();
+            return this.defaultBlockState().setValue(LAYER, layer);
         }else {
             return null;
         }
     }
 
+    private int calculateAvailableLayer(Level level, BlockPos pos, Set<BlockPos> intersectingPositions) {
+        Set<BlockPos> allPositions = new HashSet<>(intersectingPositions);
+        allPositions.add(pos);
+
+        IntSet commonLayers = null;
+
+        for (BlockPos currentPos : allPositions) {
+            FurnitureData[] layers = FurnitureData.get(level, currentPos);
+            IntSet availableLayers = new IntArraySet();
+
+            for (int i = layers.length - 1; i >= 0; i--) {
+                if (!layers[i].hasOriginal() && layers[i].getDirectionToOriginal() == null) {
+                    availableLayers.add(i);
+                }
+            }
+
+            if (commonLayers == null) {
+                commonLayers = availableLayers;
+            } else {
+                commonLayers.retainAll(availableLayers);
+            }
+
+            if (commonLayers.isEmpty()) {
+                return -1;
+            }
+        }
+
+        return commonLayers.intStream().min().orElse(-1);
+    }
+
     @Override
     protected void onRemove(@NotNull BlockState pState, @NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pNewState, boolean pMovedByPiston) {
-        if (!pState.is(pNewState.getBlock())) {
-            FurnitureData data = FurnitureData.get(pLevel, pPos, 0);
-            if(data.getDirectionToOriginal() == null) {
-                Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, pPos);
-                for (BlockPos intersectingPos : intersectingPositions) {
-                    pLevel.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
+        if (!(pNewState.getBlock() instanceof FurnitureBlock)) {
+            FurnitureData[] layers = FurnitureData.get(pLevel, pPos);
+            for (int layer = 0; layer < layers.length; layer++) {
+                FurnitureData data = layers[layer];
+                if(data.hasOriginal()) {
+                    Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, pPos, layer);
+                    for (BlockPos intersectingPos : intersectingPositions) {
+                        FurnitureData[] intersectingLayers = FurnitureData.get(pLevel, intersectingPos);
+                        boolean hasAnother = false;
+                        for (int intersectingLayer = 0; intersectingLayer < intersectingLayers.length; intersectingLayer++) {
+                            if(intersectingLayer != layer) {
+                                FurnitureData intersectingData = intersectingLayers[intersectingLayer];
+                                hasAnother = hasAnother || intersectingData.hasOriginal() || intersectingData.getDirectionToOriginal() != null;
+                            }
+                        }
+                        if(!hasAnother) {
+                            pLevel.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
+                            FurnitureData.set(pLevel, intersectingPos, FurnitureData.DEFAULT_LAYERS);
+                        }else{
+                            FurnitureData.set(pLevel, intersectingPos, layer, FurnitureData.DEFAULT);
+                        }
+                    }
+                }else{
+                    //TODO: Theoretically we need to check which layer was hit but that logic will be done somewhere else.
+                    if(data.getDirectionToOriginal() != null) {
+                        Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, layer);
+                        BlockPos pos = pPos.offset(pair.getSecond());
+                        pLevel.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                    }
                 }
-            }else{
-                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, 0);
-                BlockPos pos = pPos.offset(pair.getSecond());
-                pLevel.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
             }
-            FurnitureData.set(pLevel, pPos, 0, FurnitureData.DEFAULT);
+            FurnitureData.set(pLevel, pPos, FurnitureData.DEFAULT_LAYERS);
         }
         super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
     }
 
     @Override
     protected @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, 0);
-        FurnitureData data = pair.getFirst();
-        Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
-        toOriginal = toOriginal.add(data.getX(), 0.0, data.getZ());
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        return this.shapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z);
+        FurnitureData[] layers = FurnitureData.get(pLevel, pPos);
+        List<VoxelShape> shapes = new ArrayList<>();
+        for(int layer = 0; layer < layers.length; layer++) {
+            FurnitureData data = layers[layer];
+            if(data.hasOriginal() || data.getDirectionToOriginal() != null) {
+                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, layer);
+                FurnitureData originalData = pair.getFirst();
+                Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
+                toOriginal = toOriginal.add(originalData.getX(), 0.0, originalData.getZ());
+                Direction facing = Direction.fromYRot(originalData.getRotation() + 180);
+                //TODO: Get shape from original block instead of the current since they can be different. Also optimize this, maybe build the voxel state after placing instead of every frame? :skull:
+                shapes.add(this.shapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z));
+            }
+        }
+        if(shapes.isEmpty()) {
+            return this.shapes.get(Direction.NORTH);
+        }else{
+            VoxelShape shape = shapes.removeFirst();
+            while (!shapes.isEmpty()) {
+                shape = Shapes.join(shape, shapes.removeFirst(), BooleanOp.OR);
+            }
+            return shape;
+        }
     }
 
     public static float getRotation(@Nullable Player player) {
@@ -146,18 +255,18 @@ public class FurnitureBlock extends Block {
         rotations.put(player.getUUID(), rotation);
     }
 
-    private static Set<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos) {
-        return calculateIntersectingPositions(level, originalPos, new HashSet<>());
+    private static Set<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos, int layer) {
+        return calculateIntersectingPositions(level, originalPos, layer, new HashSet<>());
     }
 
-    private static Set<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos, Set<BlockPos> intersectingPositions) {
+    private static Set<BlockPos> calculateIntersectingPositions(Level level, BlockPos originalPos, int layer, Set<BlockPos> intersectingPositions) {
         for(Direction direction : Direction.values()) {
             BlockPos relativePos = originalPos.relative(direction);
             if(!intersectingPositions.contains(relativePos)) {
-                FurnitureData data = FurnitureData.get(level, relativePos, 0);
+                FurnitureData data = FurnitureData.get(level, relativePos, layer);
                 if(data.getDirectionToOriginal() == direction.getOpposite()) {
                     intersectingPositions.add(relativePos);
-                    calculateIntersectingPositions(level, relativePos, intersectingPositions);
+                    calculateIntersectingPositions(level, relativePos, layer, intersectingPositions);
                 }
             }
         }
@@ -221,27 +330,28 @@ public class FurnitureBlock extends Block {
     }
 
     public static boolean renderFurnitureOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
-        if(state.getBlock() instanceof FurnitureBlock) {
-            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(levelRenderer.getLevel(), pos, 0);
-            FurnitureData data = pair.getFirst();
-            if(data.getRotation() != 0) {
-                VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
-
-                Vec3 offsetVec = Vec3.atLowerCornerOf(pair.getSecond());
-                offsetVec = offsetVec.add(data.getX(), 0.0, data.getZ());
-                Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
-
-                poseStack.pushPose();
-                poseStack.translate(offsetPos.x-camera.getPosition().x, offsetPos.y-camera.getPosition().y, offsetPos.z-camera.getPosition().z);
-                Direction facing = Direction.fromYRot(data.getRotation() + 180);
-                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
-                poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
-
-                renderHitOutline(levelRenderer, poseStack, consumer, camera.getEntity(), offsetPos.x, offsetPos.y, offsetPos.z, pos, state);
-                poseStack.popPose();
-                return true;
-            }
-        }
+//        if(state.getBlock() instanceof FurnitureBlock) {
+//            //TODO: Socorro
+//            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(levelRenderer.getLevel(), pos, 0);
+//            FurnitureData data = pair.getFirst();
+//            if(data.getRotation() != 0) {
+//                VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
+//
+//                Vec3 offsetVec = Vec3.atLowerCornerOf(pair.getSecond());
+//                offsetVec = offsetVec.add(data.getX(), 0.0, data.getZ());
+//                Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
+//
+//                poseStack.pushPose();
+//                poseStack.translate(offsetPos.x-camera.getPosition().x, offsetPos.y-camera.getPosition().y, offsetPos.z-camera.getPosition().z);
+//                Direction facing = Direction.fromYRot(data.getRotation() + 180);
+//                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
+//                poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
+//
+//                renderHitOutline(levelRenderer, poseStack, consumer, camera.getEntity(), offsetPos.x, offsetPos.y, offsetPos.z, pos, state);
+//                poseStack.popPose();
+//                return true;
+//            }
+//        }
         return false;
     }
 
