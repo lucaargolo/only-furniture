@@ -9,7 +9,9 @@ import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -111,7 +113,10 @@ public class FurnitureBlock extends Block {
                 if(!pPos.equals(intersectingPos)) {
                     FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
                     FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
-                    pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState().setValue(LAYER, layer));
+                    BlockState intersectingState = pLevel.getBlockState(intersectingPos);
+                    if(!(intersectingState.getBlock() instanceof FurnitureBlock)) {
+                        pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState().setValue(LAYER, layer));
+                    }
                 }
             }
         }else{
@@ -189,35 +194,64 @@ public class FurnitureBlock extends Block {
             for (int layer = 0; layer < layers.length; layer++) {
                 FurnitureData data = layers[layer];
                 if(data.hasOriginal()) {
-                    Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, pPos, layer);
-                    for (BlockPos intersectingPos : intersectingPositions) {
-                        FurnitureData[] intersectingLayers = FurnitureData.get(pLevel, intersectingPos);
-                        boolean hasAnother = false;
-                        for (int intersectingLayer = 0; intersectingLayer < intersectingLayers.length; intersectingLayer++) {
-                            if(intersectingLayer != layer) {
-                                FurnitureData intersectingData = intersectingLayers[intersectingLayer];
-                                hasAnother = hasAnother || intersectingData.hasOriginal() || intersectingData.getDirectionToOriginal() != null;
-                            }
-                        }
-                        if(!hasAnother) {
-                            pLevel.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
-                            FurnitureData.set(pLevel, intersectingPos, FurnitureData.DEFAULT_LAYERS);
-                        }else{
-                            FurnitureData.set(pLevel, intersectingPos, layer, FurnitureData.DEFAULT);
-                        }
-                    }
+                    onRemoveOriginal(true, pLevel, pPos, layer);
                 }else{
                     //TODO: Theoretically we need to check which layer was hit but that logic will be done somewhere else.
                     if(data.getDirectionToOriginal() != null) {
                         Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, layer);
-                        BlockPos pos = pPos.offset(pair.getSecond());
-                        pLevel.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
+                        BlockPos originalPos = pPos.offset(pair.getSecond());
+                        FurnitureData[] originalLayers = FurnitureData.get(pLevel, originalPos);
+                        boolean hasAnother = false;
+                        for (int intersectingLayer = 0; intersectingLayer < originalLayers.length; intersectingLayer++) {
+                            if(intersectingLayer != layer) {
+                                FurnitureData intersectingData = originalLayers[intersectingLayer];
+                                hasAnother = hasAnother || intersectingData.hasOriginal() || intersectingData.getDirectionToOriginal() != null;
+                            }
+                        }
+                        if(!hasAnother) {
+                            pLevel.setBlockAndUpdate(originalPos, Blocks.AIR.defaultBlockState());
+                        }else{
+                            onRemoveOriginal(false, pLevel, originalPos, layer);
+                            FurnitureData.set(pLevel, originalPos, layer, FurnitureData.DEFAULT);
+                        }
                     }
                 }
             }
             FurnitureData.set(pLevel, pPos, FurnitureData.DEFAULT_LAYERS);
         }
         super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
+    }
+
+    private static void onRemoveOriginal(boolean originalRemoved, @NotNull Level pLevel, @NotNull BlockPos originalPos, int layer) {
+        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pLevel, originalPos, layer);
+        if(!originalRemoved) {
+            intersectingPositions.add(originalPos);
+        }
+        for (BlockPos intersectingPos : intersectingPositions) {
+            FurnitureData[] intersectingLayers = FurnitureData.get(pLevel, intersectingPos);
+            IntList anotherLayers = new IntArrayList();
+            for (int intersectingLayer = 0; intersectingLayer < intersectingLayers.length; intersectingLayer++) {
+                if(intersectingLayer != layer) {
+                    FurnitureData intersectingData = intersectingLayers[intersectingLayer];
+                    if(intersectingData.hasOriginal() || intersectingData.getDirectionToOriginal() != null) {
+                        anotherLayers.add(intersectingLayer);
+                    }
+                }
+            }
+            if(anotherLayers.isEmpty()) {
+                pLevel.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
+                FurnitureData.set(pLevel, intersectingPos, FurnitureData.DEFAULT_LAYERS);
+            }else{
+                if(!originalRemoved) {
+                    int anotherLayer = anotherLayers.getFirst();
+                    Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, intersectingPos, anotherLayer);
+                    BlockPos anotherPos = intersectingPos.offset(pair.getSecond());
+                    BlockState anotherState = pLevel.getBlockState(anotherPos);
+                    pLevel.setBlockAndUpdate(originalPos, anotherState);
+                }
+                FurnitureData.set(pLevel, intersectingPos, layer, FurnitureData.DEFAULT);
+            }
+        }
     }
 
     @Override
@@ -229,11 +263,18 @@ public class FurnitureBlock extends Block {
             if(data.hasOriginal() || data.getDirectionToOriginal() != null) {
                 Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(pLevel, pPos, layer);
                 FurnitureData originalData = pair.getFirst();
+                BlockPos originalPos = pPos.offset(pair.getSecond());
+                BlockState originalState = pLevel.getBlockState(originalPos);
+                Map<Direction, VoxelShape> originalShapes = this.shapes;
+                if(originalState.getBlock() instanceof FurnitureBlock originalBlock) {
+                    originalShapes = originalBlock.shapes;
+                }
+
                 Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
                 toOriginal = toOriginal.add(originalData.getX(), 0.0, originalData.getZ());
                 Direction facing = Direction.fromYRot(originalData.getRotation() + 180);
-                //TODO: Get shape from original block instead of the current since they can be different. Also optimize this, maybe build the voxel state after placing instead of every frame? :skull:
-                shapes.add(this.shapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z));
+
+                shapes.add(originalShapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z));
             }
         }
         if(shapes.isEmpty()) {
@@ -241,7 +282,7 @@ public class FurnitureBlock extends Block {
         }else{
             VoxelShape shape = shapes.removeFirst();
             while (!shapes.isEmpty()) {
-                shape = Shapes.join(shape, shapes.removeFirst(), BooleanOp.OR);
+                shape = Shapes.joinUnoptimized(shape, shapes.removeFirst(), BooleanOp.OR);
             }
             return shape;
         }
