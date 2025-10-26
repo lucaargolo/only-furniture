@@ -62,7 +62,11 @@ public abstract class FurnitureModClient {
     }
 
     public final boolean onDrawBlockOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
-        return FurnitureBlock.renderFurnitureOutline(levelRenderer, camera, pos, state, poseStack, bufferSource);
+        if(state.getBlock() instanceof FurnitureBlock block) {
+            return block.renderFurnitureOutline(levelRenderer.getLevel(), camera, pos, state, poseStack, bufferSource);
+        }else{
+            return false;
+        }
     }
 
     public final void onFinishTranslucentLayer(LevelRendererAccessor levelRenderer, Camera camera, PoseStack poseStack) {

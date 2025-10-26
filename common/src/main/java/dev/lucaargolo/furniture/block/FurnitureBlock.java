@@ -4,17 +4,16 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntArraySet;
-import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -35,11 +34,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +50,7 @@ public class FurnitureBlock extends Block {
     private final Map<Direction, VoxelShape> shapes;
 
     public FurnitureBlock(Block base, VoxelShape... shapes) {
-        super(BlockBehaviour.Properties.ofFullCopy(base).noOcclusion());
+        super(BlockBehaviour.Properties.ofFullCopy(base).dynamicShape());
         VoxelShape shape = Shapes.empty();
         for (VoxelShape s : shapes) {
             shape = Shapes.join(shape, s, BooleanOp.OR);
@@ -255,9 +252,64 @@ public class FurnitureBlock extends Block {
     }
 
     @Override
-    protected @NotNull VoxelShape getShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
+    protected @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+        if(context instanceof EntityCollisionContext entityContext && entityContext.getEntity() != null) {
+            Pair<Integer, VoxelShape> pair = getLookingAtShape(level, pos, entityContext.getEntity());
+            if (pair != null) return pair.getSecond();
+        }
+        return this.getCollisionShape(state, level, pos, context);
+    }
+
+    @Override
+    protected @NotNull VoxelShape getCollisionShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
+        Int2ObjectMap<VoxelShape> shapes = getShapes(pLevel, pPos);
+        if(shapes.isEmpty()) {
+            return this.shapes.get(Direction.NORTH);
+        }else{
+            Iterator<VoxelShape> iterator = shapes.values().iterator();
+            VoxelShape shape = iterator.next();
+            while (iterator.hasNext()) {
+                shape = Shapes.joinUnoptimized(shape, iterator.next(), BooleanOp.OR);
+            }
+            return shape;
+        }
+    }
+
+    private @Nullable Pair<Integer, VoxelShape> getLookingAtShape(@NotNull BlockGetter level, @NotNull BlockPos pos, Entity entity) {
+        Int2ObjectMap<VoxelShape> shapes = getShapes(level, pos);
+        if(!shapes.isEmpty()) {
+            Vec3 eyePos = entity.getEyePosition();
+            Vec3 lookVec = entity.getLookAngle();
+            //TODO: Get entity reach
+            Vec3 reachEnd = eyePos.add(lookVec.scale(5.0D));
+
+            double closest = Double.MAX_VALUE;
+            int bestLayer = -1;
+            VoxelShape bestShape = Shapes.empty();
+
+            for (Int2ObjectMap.Entry<VoxelShape> entry : shapes.int2ObjectEntrySet()) {
+                VoxelShape shape = entry.getValue();
+                BlockHitResult hit = shape.clip(eyePos, reachEnd, pos);
+                if (hit != null) {
+                    double dist = hit.getLocation().distanceToSqr(eyePos);
+                    if (dist < closest) {
+                        closest = dist;
+                        bestLayer = entry.getIntKey();
+                        bestShape = shape;
+                    }
+                }
+            }
+
+            if(!bestShape.isEmpty()) {
+                return Pair.of(bestLayer, bestShape);
+            }
+        }
+        return null;
+    }
+
+    private @NotNull Int2ObjectMap<VoxelShape> getShapes(@NotNull BlockGetter pLevel, @NotNull BlockPos pPos) {
+        Int2ObjectMap<VoxelShape> shapes = new Int2ObjectArrayMap<>();
         FurnitureData[] layers = FurnitureData.get(pLevel, pPos);
-        List<VoxelShape> shapes = new ArrayList<>();
         for(int layer = 0; layer < layers.length; layer++) {
             FurnitureData data = layers[layer];
             if(data.hasOriginal() || data.getDirectionToOriginal() != null) {
@@ -274,18 +326,36 @@ public class FurnitureBlock extends Block {
                 toOriginal = toOriginal.add(originalData.getX(), 0.0, originalData.getZ());
                 Direction facing = Direction.fromYRot(originalData.getRotation() + 180);
 
-                shapes.add(originalShapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z));
+                shapes.put(layer, originalShapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z));
             }
         }
-        if(shapes.isEmpty()) {
-            return this.shapes.get(Direction.NORTH);
-        }else{
-            VoxelShape shape = shapes.removeFirst();
-            while (!shapes.isEmpty()) {
-                shape = Shapes.joinUnoptimized(shape, shapes.removeFirst(), BooleanOp.OR);
+        return shapes;
+    }
+
+    public boolean renderFurnitureOutline(Level level, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
+        Pair<Integer, VoxelShape> lookingAtPair = getLookingAtShape(level, pos, camera.getEntity());
+        if (lookingAtPair != null) {
+            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(level, pos, lookingAtPair.getFirst());
+            FurnitureData data = pair.getFirst();
+            if(data.getRotation() != 0) {
+                VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
+
+                Vec3 offsetVec = Vec3.atLowerCornerOf(pair.getSecond());
+                offsetVec = offsetVec.add(data.getX(), 0.0, data.getZ());
+                Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
+
+                poseStack.pushPose();
+                poseStack.translate(offsetPos.x-camera.getPosition().x, offsetPos.y-camera.getPosition().y, offsetPos.z-camera.getPosition().z);
+                Direction facing = Direction.fromYRot(data.getRotation() + 180);
+                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
+                poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
+
+                LevelRendererAccessor.invokeRenderShape(poseStack, consumer, lookingAtPair.getSecond(), (double)pos.getX() - offsetPos.x, (double)pos.getY() - offsetPos.y, (double)pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);
+                poseStack.popPose();
+                return true;
             }
-            return shape;
         }
+        return false;
     }
 
     public static float getRotation(@Nullable Player player) {
@@ -337,7 +407,7 @@ public class FurnitureBlock extends Block {
     }
 
     @Nullable
-    public static Map<BlockPos, Direction> calculateIntersectingDirections(BlockPos originalPos, Set<BlockPos> intersectingPositions) {
+    private static Map<BlockPos, Direction> calculateIntersectingDirections(BlockPos originalPos, Set<BlockPos> intersectingPositions) {
         Map<BlockPos, Direction> result = new HashMap<>();
 
         for (BlockPos pos : intersectingPositions) {
@@ -368,36 +438,6 @@ public class FurnitureBlock extends Block {
         }
 
         return result;
-    }
-
-    public static boolean renderFurnitureOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
-//        if(state.getBlock() instanceof FurnitureBlock) {
-//            //TODO: Socorro
-//            Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(levelRenderer.getLevel(), pos, 0);
-//            FurnitureData data = pair.getFirst();
-//            if(data.getRotation() != 0) {
-//                VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
-//
-//                Vec3 offsetVec = Vec3.atLowerCornerOf(pair.getSecond());
-//                offsetVec = offsetVec.add(data.getX(), 0.0, data.getZ());
-//                Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
-//
-//                poseStack.pushPose();
-//                poseStack.translate(offsetPos.x-camera.getPosition().x, offsetPos.y-camera.getPosition().y, offsetPos.z-camera.getPosition().z);
-//                Direction facing = Direction.fromYRot(data.getRotation() + 180);
-//                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
-//                poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
-//
-//                renderHitOutline(levelRenderer, poseStack, consumer, camera.getEntity(), offsetPos.x, offsetPos.y, offsetPos.z, pos, state);
-//                poseStack.popPose();
-//                return true;
-//            }
-//        }
-        return false;
-    }
-
-    private static void renderHitOutline(LevelRendererAccessor levelRenderer, PoseStack pPoseStack, VertexConsumer pConsumer, Entity pEntity, double pCamX, double pCamY, double pCamZ, BlockPos pPos, BlockState pState) {
-        LevelRendererAccessor.invokeRenderShape(pPoseStack, pConsumer, pState.getShape(levelRenderer.getLevel(), pPos, CollisionContext.of(pEntity)), (double)pPos.getX() - pCamX, (double)pPos.getY() - pCamY, (double)pPos.getZ() - pCamZ, 0.0F, 0.0F, 0.0F, 0.4F);
     }
 
 }
