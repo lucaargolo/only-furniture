@@ -230,13 +230,11 @@ public class FurnitureBlock extends Block {
                 level.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
                 FurnitureData.set(level, intersectingPos, FurnitureData.DEFAULT_LAYERS);
             }else{
-                if(!alreadyRemoved) {
-                    int anotherLayer = anotherLayers.getFirst();
-                    Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(level, intersectingPos, anotherLayer);
-                    BlockPos anotherPos = intersectingPos.offset(pair.getSecond());
-                    BlockState anotherState = level.getBlockState(anotherPos);
-                    level.setBlockAndUpdate(pos, anotherState);
-                }
+                int anotherLayer = anotherLayers.getFirst();
+                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(level, intersectingPos, anotherLayer);
+                BlockPos anotherPos = intersectingPos.offset(pair.getSecond());
+                BlockState anotherState = level.getBlockState(anotherPos);
+                level.setBlockAndUpdate(intersectingPos, anotherState);
                 FurnitureData.set(level, intersectingPos, layer, FurnitureData.DEFAULT);
             }
         }
