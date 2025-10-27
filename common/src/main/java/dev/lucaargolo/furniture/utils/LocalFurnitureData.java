@@ -38,7 +38,7 @@ public class LocalFurnitureData {
     private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2LongMap>> dimensionToLevelMap = new HashMap<>();
     private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2ObjectMap<VoxelShape>>> cachedShapes = new HashMap<>();
 
-    public static VoxelShape cachedShape(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, Supplier<VoxelShape> shapeSupplier) {
+    public static synchronized VoxelShape cachedShape(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, Supplier<VoxelShape> shapeSupplier) {
         Long2ObjectMap<Int2ObjectMap<VoxelShape>> shapeLevelMap = cachedShapes.computeIfAbsent(dimension, k -> new Long2ObjectOpenHashMap<>());
         Int2ObjectMap<VoxelShape> shapeRegionMap = shapeLevelMap.computeIfAbsent(regionPos, k -> new Int2ObjectOpenHashMap<>());
         return shapeRegionMap.computeIfAbsent(regionLocalBlockPos, k -> shapeSupplier.get());
