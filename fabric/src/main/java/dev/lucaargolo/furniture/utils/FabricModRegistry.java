@@ -4,6 +4,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -32,14 +33,14 @@ public class FabricModRegistry<T> extends ModRegistry<T>{
     }
 
     @Override
-    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier) {
-        ModEntry<E> entry = new ModEntry<>(supplier);
+    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
+        ModEntry<E> entry = new ModEntry<>(supplier, tags);
         entries.put(path, (ModEntry<T>) entry);
         return entry;
     }
 
     @Override
-    public void forEach(BiConsumer<String, Supplier<? extends T>> consumer) {
+    public void forEach(BiConsumer<String, ModEntry<? extends T>> consumer) {
         entries.forEach(consumer);
     }
 

@@ -15,7 +15,7 @@ public class ModItems {
 
     static {
         ModBlocks.BLOCKS.forEach((path, block) -> {
-            ITEMS.register(path, () -> getBlockItem(block.get(), new Item.Properties()));
+            ITEMS.register(path, () -> getBlockItem(block.get(), new Item.Properties()), block.getTags());
         });
     }
 

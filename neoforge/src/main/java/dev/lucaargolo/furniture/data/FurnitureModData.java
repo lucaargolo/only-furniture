@@ -24,6 +24,8 @@ public class FurnitureModData {
         generator.addProvider(true, builtinProvider);
         generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
         generator.addProvider(event.includeClient(), new ModModelProvider(output, exFileHelper));
+        generator.addProvider(event.includeServer(), ModTagsProvider.item(output, event.getLookupProvider(), exFileHelper));
+        generator.addProvider(event.includeServer(), ModTagsProvider.block(output, event.getLookupProvider(), exFileHelper));
     }
 
     public static RegistrySetBuilder bootstrapRegistries() {

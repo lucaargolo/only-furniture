@@ -8,7 +8,7 @@ public class WoodFurnitureBlock extends FurnitureBlock implements WoodBlock {
 
     private final WoodType wood;
 
-    public WoodFurnitureBlock(Block base, WoodType wood, VoxelShape... shapes) {
+    public WoodFurnitureBlock(Block base, WoodType wood, VoxelShape[] shapes) {
         super(base, shapes);
         this.wood = wood;
     }

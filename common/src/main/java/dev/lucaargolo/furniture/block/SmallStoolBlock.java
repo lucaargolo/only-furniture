@@ -8,7 +8,7 @@ public class SmallStoolBlock extends FurnitureSeatBlock implements WoodBlock {
 
     private final WoodType wood;
 
-    public SmallStoolBlock(Block base, WoodType wood, VoxelShape... shapes) {
+    public SmallStoolBlock(Block base, WoodType wood, VoxelShape[] shapes) {
         super(base, shapes);
         this.wood = wood;
     }

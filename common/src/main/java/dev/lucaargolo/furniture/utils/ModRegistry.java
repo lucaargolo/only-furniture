@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.utils;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
@@ -17,22 +18,33 @@ public abstract class ModRegistry<T> {
 
     public abstract void init();
 
-    public abstract <E extends T> ModEntry<E> register(String path, Supplier<E> supplier);
+    public abstract <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags);
 
-    public abstract void forEach(BiConsumer<String, Supplier<? extends T>> consumer);
+    public abstract void forEach(BiConsumer<String, ModEntry<? extends T>> consumer);
 
     @Nullable
     public abstract ModEntry<? extends T> get(String path);
 
+    public ResourceKey<Registry<T>> getRegistryKey() {
+        return registryKey;
+    }
+
     public static class ModEntry<E> implements Supplier<E> {
 
         private final Supplier<E> supplier;
+        private final TagKey<?>[] tags;
+
 
         private boolean supplied = false;
         private E value;
 
-        public ModEntry(Supplier<E> supplier) {
+        public ModEntry(Supplier<E> supplier, TagKey<?>... tags) {
             this.supplier = supplier;
+            this.tags = tags;
+        }
+
+        public TagKey<?>[] getTags() {
+            return tags;
         }
 
         @Override

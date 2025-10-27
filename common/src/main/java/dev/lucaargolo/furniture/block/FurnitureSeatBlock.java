@@ -55,11 +55,11 @@ import java.util.Optional;
 
 public class FurnitureSeatBlock extends FurnitureBlock {
 
-    public FurnitureSeatBlock(Properties properties, VoxelShape... shapes) {
+    public FurnitureSeatBlock(Properties properties, VoxelShape[] shapes) {
         super(properties, shapes);
     }
 
-    public FurnitureSeatBlock(Block base, VoxelShape... shapes) {
+    public FurnitureSeatBlock(Block base, VoxelShape[] shapes) {
         super(base, shapes);
     }
 

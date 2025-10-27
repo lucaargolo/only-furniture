@@ -4,6 +4,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,17 +29,15 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     }
 
     @Override
-    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier) {
-        ModEntry<E> entry = new ModEntry<>(this.registry.register(path, supplier));
+    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
+        ModEntry<E> entry = new ModEntry<>(this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
     }
 
     @Override
-    public void forEach(BiConsumer<String, Supplier<? extends T>> consumer) {
-        this.registry.getEntries().forEach(holder -> {
-            consumer.accept(holder.getId().getPath(), holder);
-        });
+    public void forEach(BiConsumer<String, ModEntry<? extends T>> consumer) {
+        this.entries.forEach(consumer);
     }
 
     @Override

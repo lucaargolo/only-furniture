@@ -62,7 +62,7 @@ public class FurnitureBlock extends Block {
 
     protected final Map<Direction, VoxelShape> shapes;
 
-    public FurnitureBlock(Block.Properties properties, VoxelShape... shapes) {
+    public FurnitureBlock(Block.Properties properties, VoxelShape[] shapes) {
         super(properties);
         VoxelShape shape = Shapes.empty();
         for (VoxelShape s : shapes) {
