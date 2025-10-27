@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "layer=0": {
+      "model": "furniture:block/dark_oak_small_table"
+    },
+    "layer=1": {
+      "model": "furniture:block/dark_oak_small_table"
+    },
+    "layer=2": {
+      "model": "furniture:block/dark_oak_small_table"
+    },
+    "layer=3": {
+      "model": "furniture:block/dark_oak_small_table"
+    }
+  }
+}

@@ -2,11 +2,12 @@ package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.WoodFurnitureBlock;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.VariantBlockStateBuilder;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 public class ModModelProvider extends BlockStateProvider {
@@ -17,12 +18,19 @@ public class ModModelProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        ModBlocks.BLOCKS.forEach((path, block) -> {
-            ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/"+path));
-            ConfiguredModel model = new ConfiguredModel(parentModel);
-            VariantBlockStateBuilder builder = this.getVariantBuilder(block.get());
-            builder.forAllStates(state -> new ConfiguredModel[] { model });
-            this.models().getBuilder("item/"+path).parent(parentModel);
+        ModBlocks.BLOCKS.forEach((path, supplier) -> {
+            Block block = supplier.get();
+            if(block instanceof WoodFurnitureBlock furniture) {
+                ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/"+path.replace(furniture.getWood().name()+"_", "")));
+                this.models().getBuilder("block/"+path)
+                        .parent(parentModel)
+                        .texture("log", DataHelper.getWoodLog(furniture.getWood()))
+                        .texture("planks", DataHelper.getWoodPlanks(furniture.getWood()))
+                        .texture("particle", DataHelper.getWoodLog(furniture.getWood()));
+            }
+            ModelFile model = this.models().getExistingFile(FurnitureMod.id("block/"+path));
+            this.getVariantBuilder(block).forAllStates(state -> new ConfiguredModel[]{new ConfiguredModel(model)});
+            this.models().getBuilder("item/" + path).parent(model);
         });
     }
 

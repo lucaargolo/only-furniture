@@ -1,13 +1,24 @@
 package dev.lucaargolo.furniture.data;
 
+import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.WoodFurnitureBlock;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
+import net.minecraft.data.models.model.ModelTemplate;
+import net.minecraft.data.models.model.TextureMapping;
+import net.minecraft.data.models.model.TextureSlot;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 public class ModModelProvider extends FabricModelProvider {
+
+    private static final TextureSlot LOG = TextureSlot.create("log");
+    private static final TextureSlot PLANKS = TextureSlot.create("planks");
 
     public ModModelProvider(FabricDataOutput output) {
         super(output);
@@ -15,8 +26,18 @@ public class ModModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(BlockModelGenerators blockModelGenerators) {
-        ModBlocks.BLOCKS.forEach((path, block) -> {
-            blockModelGenerators.createNonTemplateModelBlock(block.get());
+        ModBlocks.BLOCKS.forEach((path, supplier) -> {
+            Block block = supplier.get();
+            if(block instanceof WoodFurnitureBlock furniture) {
+                ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+path.replace(furniture.getWood().name()+"_", ""))), Optional.empty(), LOG, PLANKS, TextureSlot.PARTICLE);
+                TextureMapping mapping = new TextureMapping();
+                mapping.put(LOG, DataHelper.getWoodLog(furniture.getWood()));
+                mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));
+                mapping.put(TextureSlot.PARTICLE, DataHelper.getWoodLog(furniture.getWood()));
+                blockModelGenerators.createTrivialBlock(block, mapping, template);
+            }else{
+                blockModelGenerators.createNonTemplateModelBlock(block);
+            }
         });
     }
 

@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.utils.ModRegistry;
@@ -29,6 +30,7 @@ public abstract class FurnitureMod {
         INSTANCE = this;
         ModBlocks.BLOCKS.init();
         ModItems.ITEMS.init();
+        ModCreativeTabs.CREATIVE_TABS.init();
         packetManager.init();
     }
 
