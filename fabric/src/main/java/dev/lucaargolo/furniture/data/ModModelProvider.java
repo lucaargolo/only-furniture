@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.block.WoodFurnitureBlock;
+import dev.lucaargolo.furniture.block.WoodBlock;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -28,7 +28,7 @@ public class ModModelProvider extends FabricModelProvider {
     public void generateBlockStateModels(BlockModelGenerators blockModelGenerators) {
         ModBlocks.BLOCKS.forEach((path, supplier) -> {
             Block block = supplier.get();
-            if(block instanceof WoodFurnitureBlock furniture) {
+            if(block instanceof WoodBlock furniture) {
                 ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+path.replace(furniture.getWood().name()+"_", ""))), Optional.empty(), LOG, PLANKS, TextureSlot.PARTICLE);
                 TextureMapping mapping = new TextureMapping();
                 mapping.put(LOG, DataHelper.getWoodLog(furniture.getWood()));

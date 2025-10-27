@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -33,6 +34,11 @@ public class RegionFurnitureData extends SavedData {
 
     public RegionFurnitureData() {
         regionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
+    }
+
+    @Nullable
+    public VoxelShape getCachedShape(int regionLocalBlockPos) {
+        return cachedShapes.get(regionLocalBlockPos);
     }
 
     public VoxelShape cachedShape(int regionLocalBlockPos, Supplier<VoxelShape> shapeSupplier) {

@@ -6,6 +6,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
+import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.utils.LocalFurnitureData;
@@ -13,10 +14,15 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.function.BiConsumer;
 
 public abstract class FurnitureModClient {
 
@@ -32,12 +38,12 @@ public abstract class FurnitureModClient {
         shaderManager.init();
     }
 
-    public ModShaderManager getShaderManager() {
-        return shaderManager;
-    }
-
     public ModRenderTypeManager getRenderTypeManager() {
         return renderTypeManager;
+    }
+
+    public final void onRegisterEntityRenderers(BiConsumer<EntityType<?>, EntityRendererProvider<?>> consumer) {
+        consumer.accept(ModEntityTypes.SEAT.get(), NoopRenderer::new);
     }
 
     public final void onClientChunkWatch(Level level, ChunkPos pos) {

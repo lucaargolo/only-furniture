@@ -22,6 +22,7 @@ public class FurnitureModData {
         ExistingFileHelper exFileHelper = event.getExistingFileHelper();
         DatapackBuiltinEntriesProvider builtinProvider = new DatapackBuiltinEntriesProvider(output, event.getLookupProvider(), bootstrapRegistries(), Set.of(FurnitureMod.MOD_ID));
         generator.addProvider(true, builtinProvider);
+        generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
         generator.addProvider(event.includeClient(), new ModModelProvider(output, exFileHelper));
     }
 

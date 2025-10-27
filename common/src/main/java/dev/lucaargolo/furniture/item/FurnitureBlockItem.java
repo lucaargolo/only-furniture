@@ -59,7 +59,18 @@ public class FurnitureBlockItem extends BlockItem {
             Player player = pContext.getPlayer();
             BlockPos pos = pContext.getClickedPos();
             Vec3 location = pContext.getClickLocation();
-            FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), FurnitureBlock.getRotation(player), null, true));
+
+            boolean snapToGrid = player == null || !player.isShiftKeyDown();
+            float ox, oz;
+            if(snapToGrid) {
+                ox = 0.5f;
+                oz = 0.5f;
+            }else{
+                ox = (float) (location.x - pos.getX());
+                oz = (float) (location.z - pos.getZ());
+            }
+
+            FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData(ox, oz, FurnitureBlock.getRotation(player), null, true));
         }
         return placed;
     }
@@ -100,8 +111,15 @@ public class FurnitureBlockItem extends BlockItem {
                 BlockPos blockPos = context.getClickedPos();
                 Vec3 location = context.getClickLocation();
 
-                double ox = Math.floor((location.x - blockPos.getX())*16.0)/16.0;
-                double oz = Math.floor((location.z - blockPos.getZ())*16.0)/16.0;
+                boolean snapToGrid = !player.isShiftKeyDown();
+                double ox, oz;
+                if(snapToGrid) {
+                    ox = 0.5;
+                    oz = 0.5;
+                }else{
+                    ox = Math.floor((location.x - blockPos.getX())*16.0)/16.0;
+                    oz = Math.floor((location.z - blockPos.getZ())*16.0)/16.0;
+                }
 
                 Vec3 pos = new Vec3(blockPos.getX()+ox, blockPos.getY(), blockPos.getZ()+oz);
 

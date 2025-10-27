@@ -14,9 +14,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.ChunkPos;
@@ -159,8 +161,52 @@ public class LocalFurnitureData {
                 for(int layer = 0; layer < layers.length; layer++) {
                     renderFurnitureBlockDebug(blockPos, layers[layer], camera, poseStack, bufferSource, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
                 }
+
+                IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                if(server != null) {
+                    renderServerFurnitureShapeDebug(server, level, blockPos, camera, poseStack, bufferSource, regionPos, regionLocalBlockPos);
+                }else{
+                    renderClientFurnitureShapeDebug(level, regionPos, regionLocalBlockPos, blockPos, camera, poseStack, bufferSource);
+                }
             });
         });
+    }
+
+    private static void renderServerFurnitureShapeDebug(IntegratedServer server, Level level, BlockPos blockPos, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource, Long regionPos, Integer regionLocalBlockPos) {
+        Vec3 pos = Vec3.atLowerCornerOf(blockPos);
+        poseStack.pushPose();
+        poseStack.translate(pos.x- camera.getPosition().x, pos.y- camera.getPosition().y, pos.z- camera.getPosition().z);
+        ServerLevel serverLevel = server.getLevel(level.dimension());
+        if(serverLevel != null) {
+            VoxelShape shape = RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).getCachedShape(regionLocalBlockPos);
+            if(shape != null) {
+                shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                    VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
+                    LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, 1f, 1f, 1f, 1f);
+                });
+            }
+        }
+        poseStack.popPose();
+    }
+
+    private static void renderClientFurnitureShapeDebug(Level level, long regionPos, int regionLocalBlockPos, BlockPos blockPos, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
+        Vec3 pos = Vec3.atLowerCornerOf(blockPos);
+        poseStack.pushPose();
+        poseStack.translate(pos.x- camera.getPosition().x, pos.y- camera.getPosition().y, pos.z- camera.getPosition().z);
+        Long2ObjectMap<Int2ObjectMap<VoxelShape>> shapeLevelMap = cachedShapes.get(level.dimension());
+        if(shapeLevelMap != null) {
+            Int2ObjectMap<VoxelShape> shapeRegionMap = shapeLevelMap.get(regionPos);
+            if(shapeRegionMap != null) {
+                VoxelShape shape = shapeRegionMap.get(regionLocalBlockPos);
+                if(shape != null) {
+                    shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                        VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
+                        LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, 1f, 1f, 1f, 1f);
+                    });
+                }
+            }
+        }
+        poseStack.popPose();
     }
 
     private static void renderFurnitureBlockDebug(BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource, int color) {
@@ -177,6 +223,7 @@ public class LocalFurnitureData {
 
         VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
         if(data.hasOriginal() || toOriginal != null) {
+
             LevelRenderer.renderLineBox(poseStack, lineConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 1f);
             if(toOriginal != null) {
                 Vec3 vector = new Vec3(toOriginal.getStepX(), toOriginal.getStepY(), toOriginal.getStepZ()).multiply(0.5, 0.5, 0.5);

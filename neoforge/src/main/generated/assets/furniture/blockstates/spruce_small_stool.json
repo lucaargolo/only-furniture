@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "layer=0": {
+      "model": "furniture:block/spruce_small_stool"
+    },
+    "layer=1": {
+      "model": "furniture:block/spruce_small_stool"
+    },
+    "layer=2": {
+      "model": "furniture:block/spruce_small_stool"
+    },
+    "layer=3": {
+      "model": "furniture:block/spruce_small_stool"
+    }
+  }
+}

@@ -10,11 +10,14 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -24,11 +27,16 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     @Override
     public void onInitializeClient() {
         this.init();
+        this.registerModelPlugins();
+        this.registerEntityRenderers();
+        ClientChunkEvents.CHUNK_LOAD.register(this::onChunkLoad);
+        ClientChunkEvents.CHUNK_UNLOAD.register(this::onChunkUnload);
+        ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         WorldRenderEvents.BLOCK_OUTLINE.register(this::onBlockOutline);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(this::onAfterTranslucent);
-        ClientChunkEvents.CHUNK_LOAD.register(this::onChunkLoad);
-        ClientChunkEvents.CHUNK_UNLOAD.register(this::oChunkUnload);
-        ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
+    }
+
+    private void registerModelPlugins() {
         ModelLoadingPlugin.register(plugin -> {
             plugin.modifyModelAfterBake().register((model, context) -> {
                 ModelResourceLocation location = context.topLevelId();
@@ -48,11 +56,18 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         });
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void registerEntityRenderers() {
+        this.onRegisterEntityRenderers((entityType, entityRendererProvider) -> {
+            EntityRendererRegistry.register((EntityType) entityType, (EntityRendererProvider) entityRendererProvider);
+        });
+    }
+
     private void onChunkLoad(Level level, LevelChunk chunk) {
         this.onClientChunkWatch(level, chunk.getPos());
     }
 
-    private void oChunkUnload(Level level, LevelChunk chunk) {
+    private void onChunkUnload(Level level, LevelChunk chunk) {
         this.onClientChunkUnwatch(level, chunk.getPos());
     }
 

@@ -59,10 +59,11 @@ public class FurnitureBlock extends Block {
     public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 3);
 
     private static final Map<UUID, Float> rotations = new HashMap<>();
-    private final Map<Direction, VoxelShape> shapes;
 
-    public FurnitureBlock(Block base, VoxelShape... shapes) {
-        super(BlockBehaviour.Properties.ofFullCopy(base).dynamicShape().noTerrainParticles());
+    protected final Map<Direction, VoxelShape> shapes;
+
+    public FurnitureBlock(Block.Properties properties, VoxelShape... shapes) {
+        super(properties);
         VoxelShape shape = Shapes.empty();
         for (VoxelShape s : shapes) {
             shape = Shapes.join(shape, s, BooleanOp.OR);
@@ -74,6 +75,10 @@ public class FurnitureBlock extends Block {
         builder.put(Direction.WEST, VoxelShapeUtils.rotate(shape, Direction.WEST));
         this.shapes = builder.build();
         this.registerDefaultState(this.stateDefinition.any().setValue(LAYER, 0));
+    }
+
+    public FurnitureBlock(Block base, VoxelShape... shapes) {
+        this(BlockBehaviour.Properties.ofFullCopy(base).dynamicShape().noTerrainParticles(), shapes);
     }
 
     @Override
@@ -107,7 +112,17 @@ public class FurnitureBlock extends Block {
         Vec3 location = pContext.getClickLocation();
         Player player = pContext.getPlayer();
 
-        FurnitureData data = new FurnitureData((float) (location.x - pos.getX()), (float) (location.z - pos.getZ()), getRotation(player), null, true);
+        boolean snapToGrid = player == null || !player.isShiftKeyDown();
+        float ox, oz;
+        if(snapToGrid) {
+            ox = 0.5f;
+            oz = 0.5f;
+        }else{
+            ox = (float) (location.x - pos.getX());
+            oz = (float) (location.z - pos.getZ());
+        }
+
+        FurnitureData data = new FurnitureData(ox, oz, getRotation(player), null, true);
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
 
         VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
@@ -152,12 +167,12 @@ public class FurnitureBlock extends Block {
         if(intersectingDirections != null) {
             for(BlockPos intersectingPos: intersectingPositions) {
                 if(!pPos.equals(intersectingPos)) {
-                    FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
-                    FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
                     BlockState intersectingState = pLevel.getBlockState(intersectingPos);
                     if(!(intersectingState.getBlock() instanceof FurnitureBlock)) {
                         pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState().setValue(LAYER, layer));
                     }
+                    FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
+                    FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
                 }
             }
         }else{
@@ -178,7 +193,7 @@ public class FurnitureBlock extends Block {
                 toOriginal = toOriginal == null && data.getDirectionToOriginal() != null ? data.getDirectionToOriginal() : toOriginal;
             }
             if(originalLayer != -1 && toOriginal != null) {
-                onRemoveOriginalLayer(true, pLevel, pPos, pState, originalLayer);
+                onRemoveLayer(pLevel, pPos, pState, originalLayer);
                 pLevel.setBlockAndUpdate(pPos, pLevel.getBlockState(pPos.relative(toOriginal)));
             }else {
                 for (int layer = 0; layer < 4; layer++) {

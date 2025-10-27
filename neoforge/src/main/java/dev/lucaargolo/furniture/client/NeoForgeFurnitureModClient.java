@@ -6,7 +6,9 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
@@ -18,6 +20,7 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     public NeoForgeFurnitureModClient() {
         this.init();
         NeoForgeFurnitureMod.getModBus().addListener(this::onModelRegister);
+        NeoForgeFurnitureMod.getModBus().addListener(this::onRenderersRegister);
         NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
         NeoForge.EVENT_BUS.addListener(this::onChunkUnload);
         NeoForge.EVENT_BUS.addListener(this::onLoggingOut);
@@ -35,6 +38,14 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
                 event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=2"), (k, model) -> new FurnitureBakedModel(model));
                 event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=3"), (k, model) -> new FurnitureBakedModel(model));
             }
+        });
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void onRenderersRegister(EntityRenderersEvent.RegisterRenderers event) {
+        this.onRegisterEntityRenderers((entityType, entityRendererProvider) -> {
+            event.registerEntityRenderer((EntityType) entityType, (EntityRendererProvider) entityRendererProvider);
         });
     }
 

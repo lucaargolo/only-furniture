@@ -19,4 +19,23 @@ public class DataHelper {
         }
     }
 
+    public static String defaultTranslation(String string) {
+        String[] words = string.replace("_", " ").split(" ");
+        for (int i = 0; i < words.length; i++) {
+            words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1);
+        }
+        return String.join(" ", words);
+    }
+
+    public static String woodBlockTranslation(String string) {
+        String[] words = string.replace("_", " ").split(" ");
+        if(words.length < 2) {
+            return defaultTranslation(string);
+        }else{
+            String wood = words[0];
+            words[0] = words[1];
+            words[1] = wood;
+            return defaultTranslation(String.join(" ", words));
+        }
+    }
 }

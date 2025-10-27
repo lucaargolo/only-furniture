@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
@@ -11,6 +12,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +33,11 @@ public abstract class FurnitureMod {
         ModBlocks.BLOCKS.init();
         ModItems.ITEMS.init();
         ModCreativeTabs.CREATIVE_TABS.init();
+        ModEntityTypes.ENTITY_TYPES.init();
         packetManager.init();
     }
+
+    public abstract boolean isFakePlayer(Player player);
 
     public abstract String getPlatform();
 
@@ -69,5 +74,6 @@ public abstract class FurnitureMod {
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
+
 
 }
