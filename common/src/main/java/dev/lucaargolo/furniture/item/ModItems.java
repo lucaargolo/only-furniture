@@ -14,8 +14,8 @@ public class ModItems {
     public static final ModRegistry<Item> ITEMS = FurnitureMod.INSTANCE.registry(Registries.ITEM);
 
     static {
-        ModBlocks.BLOCKS.forEach((path, block) -> {
-            ITEMS.register(path, () -> getBlockItem(block.get(), new Item.Properties()), block.getTags());
+        ModBlocks.BLOCKS.forEach((entry) -> {
+            ITEMS.register(entry.path(), () -> getBlockItem(entry.get(), new Item.Properties()), entry.getTags());
         });
     }
 

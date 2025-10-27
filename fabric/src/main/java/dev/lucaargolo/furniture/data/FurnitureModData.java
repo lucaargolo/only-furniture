@@ -12,6 +12,7 @@ public class FurnitureModData implements DataGeneratorEntrypoint {
         pack.addProvider(ModModelProvider::new);
         pack.addProvider(ModTagsProvider::item);
         pack.addProvider(ModTagsProvider::block);
+        pack.addProvider(ModBlockLootProvider::new);
     }
 
 }

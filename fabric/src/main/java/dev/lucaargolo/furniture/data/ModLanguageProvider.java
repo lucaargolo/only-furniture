@@ -17,12 +17,12 @@ public class ModLanguageProvider extends FabricLanguageProvider {
 
     @Override
     public void generateTranslations(HolderLookup.Provider provider, TranslationBuilder translationBuilder) {
-        ModBlocks.BLOCKS.forEach((path, supplier) -> {
-            Block block = supplier.get();
+        ModBlocks.BLOCKS.forEach((entry) -> {
+            Block block = entry.get();
             if(block instanceof WoodBlock) {
-                translationBuilder.add(block, DataHelper.woodBlockTranslation(path));
+                translationBuilder.add(block, DataHelper.woodBlockTranslation(entry.path()));
             }else{
-                translationBuilder.add(block, DataHelper.defaultTranslation(path));
+                translationBuilder.add(block, DataHelper.defaultTranslation(entry.path()));
             }
         });
     }

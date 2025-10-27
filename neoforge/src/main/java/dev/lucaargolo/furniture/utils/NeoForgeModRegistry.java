@@ -6,11 +6,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 public class NeoForgeModRegistry<T> extends ModRegistry<T> {
@@ -30,15 +31,16 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
     @Override
     public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
-        ModEntry<E> entry = new ModEntry<>(this.registry.register(path, supplier), tags);
+        ModEntry<E> entry = new ModEntry<>(path, this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
     }
 
     @Override
-    public void forEach(BiConsumer<String, ModEntry<? extends T>> consumer) {
-        this.entries.forEach(consumer);
+    public @NotNull Iterator<ModEntry<? extends T>> iterator() {
+        return entries.values().iterator();
     }
+
 
     @Override
     @Nullable

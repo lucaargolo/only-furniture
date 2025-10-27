@@ -24,7 +24,7 @@ public class ModTagsProvider<T> extends FabricTagProvider<T> {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        this.registry.forEach((path, entry) -> {
+        this.registry.forEach((entry) -> {
             Arrays.stream(entry.getTags()).map(t -> t.cast(registryKey)).filter(Optional::isPresent).map(Optional::get).forEach(tag -> {
                 getOrCreateTagBuilder(tag).add(entry.get()).setReplace(false);
             });

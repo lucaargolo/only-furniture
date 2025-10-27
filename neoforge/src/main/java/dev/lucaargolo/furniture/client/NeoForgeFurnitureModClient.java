@@ -1,6 +1,5 @@
 package dev.lucaargolo.furniture.client;
 
-import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
@@ -31,12 +30,12 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
     @SubscribeEvent
     public void onModelRegister(ModelEvent.ModifyBakingResult event) {
-        ModBlocks.BLOCKS.forEach((path, block) -> {
-            if(block.get() instanceof FurnitureBlock) {
-                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=0"), (k, model) -> new FurnitureBakedModel(model));
-                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=1"), (k, model) -> new FurnitureBakedModel(model));
-                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=2"), (k, model) -> new FurnitureBakedModel(model));
-                event.getModels().compute(new ModelResourceLocation(FurnitureMod.id(path), "layer=3"), (k, model) -> new FurnitureBakedModel(model));
+        ModBlocks.BLOCKS.forEach((entry) -> {
+            if(entry.get() instanceof FurnitureBlock) {
+                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=0"), (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=1"), (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=2"), (k, model) -> new FurnitureBakedModel(model));
+                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=3"), (k, model) -> new FurnitureBakedModel(model));
             }
         });
     }

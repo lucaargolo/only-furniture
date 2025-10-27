@@ -15,12 +15,12 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
-        ModBlocks.BLOCKS.forEach((path, supplier) -> {
-            Block block = supplier.get();
+        ModBlocks.BLOCKS.forEach((entry) -> {
+            Block block = entry.get();
             if(block instanceof WoodBlock) {
-                add(block, DataHelper.woodBlockTranslation(path));
+                add(block, DataHelper.woodBlockTranslation(entry.path()));
             }else{
-                add(block, DataHelper.defaultTranslation(path));
+                add(block, DataHelper.defaultTranslation(entry.path()));
             }
         });
     }

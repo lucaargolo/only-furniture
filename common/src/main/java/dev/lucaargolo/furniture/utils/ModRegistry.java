@@ -1,14 +1,15 @@
 package dev.lucaargolo.furniture.utils;
 
+import dev.lucaargolo.furniture.FurnitureMod;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public abstract class ModRegistry<T> {
+public abstract class ModRegistry<T> implements Iterable<ModRegistry.ModEntry<? extends T>> {
 
     protected final ResourceKey<Registry<T>> registryKey;
 
@@ -20,8 +21,6 @@ public abstract class ModRegistry<T> {
 
     public abstract <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags);
 
-    public abstract void forEach(BiConsumer<String, ModEntry<? extends T>> consumer);
-
     @Nullable
     public abstract ModEntry<? extends T> get(String path);
 
@@ -31,14 +30,15 @@ public abstract class ModRegistry<T> {
 
     public static class ModEntry<E> implements Supplier<E> {
 
+        private final String path;
         private final Supplier<E> supplier;
         private final TagKey<?>[] tags;
-
 
         private boolean supplied = false;
         private E value;
 
-        public ModEntry(Supplier<E> supplier, TagKey<?>... tags) {
+        public ModEntry(String path, Supplier<E> supplier, TagKey<?>... tags) {
+            this.path = path;
             this.supplier = supplier;
             this.tags = tags;
         }
@@ -55,6 +55,14 @@ public abstract class ModRegistry<T> {
         public void set(E value) {
             this.supplied = true;
             this.value = value;
+        }
+
+        public String path() {
+            return this.path;
+        }
+
+        public ResourceLocation key() {
+            return FurnitureMod.id(path);
         }
 
     }

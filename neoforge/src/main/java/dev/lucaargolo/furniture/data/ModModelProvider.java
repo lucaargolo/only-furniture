@@ -18,19 +18,19 @@ public class ModModelProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        ModBlocks.BLOCKS.forEach((path, supplier) -> {
-            Block block = supplier.get();
+        ModBlocks.BLOCKS.forEach((entry) -> {
+            Block block = entry.get();
             if(block instanceof WoodBlock furniture) {
-                ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/"+path.replace(furniture.getWood().name()+"_", "")));
-                this.models().getBuilder("block/"+path)
+                ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/"+entry.path().replace(furniture.getWood().name()+"_", "")));
+                this.models().getBuilder("block/"+entry.path())
                         .parent(parentModel)
                         .texture("log", DataHelper.getWoodLog(furniture.getWood()))
                         .texture("planks", DataHelper.getWoodPlanks(furniture.getWood()))
                         .texture("particle", DataHelper.getWoodLog(furniture.getWood()));
             }
-            ModelFile model = this.models().getExistingFile(FurnitureMod.id("block/"+path));
+            ModelFile model = this.models().getExistingFile(FurnitureMod.id("block/"+entry.path()));
             this.getVariantBuilder(block).forAllStates(state -> new ConfiguredModel[]{new ConfiguredModel(model)});
-            this.models().getBuilder("item/" + path).parent(model);
+            this.models().getBuilder("item/" + entry.path()).parent(model);
         });
     }
 

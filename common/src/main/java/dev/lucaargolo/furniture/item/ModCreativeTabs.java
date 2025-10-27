@@ -17,7 +17,7 @@ public class ModCreativeTabs {
             .title(Component.translatable("itemGroup."+FurnitureMod.MOD_ID+".creative_tab"))
             .icon(ModBlocks.LAMP_POST.get().asItem()::getDefaultInstance)
             .displayItems(((parameters, output) -> {
-                ModItems.ITEMS.forEach((path, item) -> output.accept(item.get()));
+                ModItems.ITEMS.forEach((entry) -> output.accept(entry.get()));
             }))
             .build()
     );

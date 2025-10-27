@@ -27,9 +27,9 @@ public class ModTagsProvider<T> extends TagsProvider<T> {
 
     @Override
     protected void addTags(HolderLookup.@NotNull Provider provider) {
-        this.registry.forEach((path, entry) -> {
+        this.registry.forEach((entry) -> {
             Arrays.stream(entry.getTags()).map(t -> t.cast(registryKey)).filter(Optional::isPresent).map(Optional::get).forEach(tag -> {
-                getOrCreateRawBuilder(tag).addElement(FurnitureMod.id(path)).replace(false);
+                getOrCreateRawBuilder(tag).addElement(entry.key()).replace(false);
             });
         });
     }

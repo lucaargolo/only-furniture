@@ -26,10 +26,10 @@ public class ModModelProvider extends FabricModelProvider {
 
     @Override
     public void generateBlockStateModels(BlockModelGenerators blockModelGenerators) {
-        ModBlocks.BLOCKS.forEach((path, supplier) -> {
-            Block block = supplier.get();
+        ModBlocks.BLOCKS.forEach((entry) -> {
+            Block block = entry.get();
             if(block instanceof WoodBlock furniture) {
-                ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+path.replace(furniture.getWood().name()+"_", ""))), Optional.empty(), LOG, PLANKS, TextureSlot.PARTICLE);
+                ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+entry.path().replace(furniture.getWood().name()+"_", ""))), Optional.empty(), LOG, PLANKS, TextureSlot.PARTICLE);
                 TextureMapping mapping = new TextureMapping();
                 mapping.put(LOG, DataHelper.getWoodLog(furniture.getWood()));
                 mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));
