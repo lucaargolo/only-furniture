@@ -63,7 +63,7 @@ public abstract class FurnitureModClient {
 
     public final boolean onDrawBlockOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
         if(state.getBlock() instanceof FurnitureBlock block) {
-            return block.renderFurnitureOutline(levelRenderer.getLevel(), camera, pos, poseStack, bufferSource);
+            return block.renderFurnitureOutline(levelRenderer.getLevel(), camera, pos, state, poseStack, bufferSource);
         }else{
             return false;
         }
