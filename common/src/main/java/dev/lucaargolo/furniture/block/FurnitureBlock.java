@@ -8,7 +8,7 @@ import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
-import dev.lucaargolo.furniture.network.SpawnDestroyParticlesPayload;
+import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
 import it.unimi.dsi.fastutil.ints.*;
@@ -23,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -165,7 +166,7 @@ public class FurnitureBlock extends Block {
         Int2ObjectMap.Entry<Pair<VoxelShape, BlockState>> entry = getLookedAtShapeAndState(level, pos, player);
         if(entry != null) {
 
-            FurnitureMod.INSTANCE.getPacketManager().sendToPlayersTrackingChunk(level, new ChunkPos(pos), new SpawnDestroyParticlesPayload(pos, entry.getValue().getFirst(), entry.getValue().getSecond()));
+            FurnitureMod.INSTANCE.getPacketManager().sendToPlayersTrackingChunk(level, new ChunkPos(pos), new DestroyEffectsPayload(pos, entry.getValue().getFirst(), entry.getValue().getSecond()));
             onRemoveLayer(level, pos, entry.getIntKey());
             return !Arrays.equals(FurnitureData.get(level, pos), FurnitureData.DEFAULT_LAYERS);
         }
@@ -244,12 +245,6 @@ public class FurnitureBlock extends Block {
     @Override
     protected void spawnDestroyParticles(@NotNull Level level, @NotNull Player player, @NotNull BlockPos pos, @NotNull BlockState state) {
         //Since we're rewriting vanilla logic, we need to overwrite this method.
-    }
-
-    @Override
-    protected @NotNull SoundType getSoundType(@NotNull BlockState state) {
-        //Since we're rewriting vanilla logic, we need to overwrite this method.
-        return SoundType.EMPTY;
     }
 
     @Override
@@ -356,7 +351,9 @@ public class FurnitureBlock extends Block {
         return false;
     }
 
-    public static void spawnDestroyParticles(ClientLevel level, BlockPos pos, BlockState state, VoxelShape shape) {
+    public static void destroyEffects(ClientLevel level, BlockPos pos, BlockState state, VoxelShape shape) {
+        SoundType soundType = state.getSoundType();
+        level.playLocalSound(pos, soundType.getBreakSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
         shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
             double xSize = Math.min(1.0, maxX - minX);
             double ySize = Math.min(1.0, maxY - minY);

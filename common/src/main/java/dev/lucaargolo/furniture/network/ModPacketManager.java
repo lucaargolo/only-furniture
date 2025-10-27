@@ -15,7 +15,7 @@ public abstract class ModPacketManager {
 
         register(PacketInfo.PLAY_TO_CLIENT, FurnitureDataPayload.class);
         register(PacketInfo.PLAY_TO_CLIENT, RegionFurnitureDataPayload.class);
-        register(PacketInfo.PLAY_TO_CLIENT, SpawnDestroyParticlesPayload.class);
+        register(PacketInfo.PLAY_TO_CLIENT, DestroyEffectsPayload.class);
     }
 
     protected abstract <T extends CustomPacketPayload> void register(PacketInfo info, Class<T> klass);

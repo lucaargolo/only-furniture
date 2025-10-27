@@ -21,9 +21,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-public record SpawnDestroyParticlesPayload(BlockPos blockPos, VoxelShape shape, int state) implements CustomPacketPayload {
+public record DestroyEffectsPayload(BlockPos blockPos, VoxelShape shape, int state) implements CustomPacketPayload {
 
-    public static final Type<SpawnDestroyParticlesPayload> TYPE = new Type<>(FurnitureMod.id("layer_remove"));
+    public static final Type<DestroyEffectsPayload> TYPE = new Type<>(FurnitureMod.id("destroy_effects"));
 
     private static final StreamCodec<ByteBuf, VoxelShape> VOXEL_SHAPE_CODEC = new StreamCodec<>() {
         @Override
@@ -52,28 +52,28 @@ public record SpawnDestroyParticlesPayload(BlockPos blockPos, VoxelShape shape, 
     };
 
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SpawnDestroyParticlesPayload> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, DestroyEffectsPayload> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
-            SpawnDestroyParticlesPayload::blockPos,
+            DestroyEffectsPayload::blockPos,
             VOXEL_SHAPE_CODEC,
-            SpawnDestroyParticlesPayload::shape,
+            DestroyEffectsPayload::shape,
             ByteBufCodecs.VAR_INT,
-            SpawnDestroyParticlesPayload::state,
-            SpawnDestroyParticlesPayload::new
+            DestroyEffectsPayload::state,
+            DestroyEffectsPayload::new
     );
 
-    public static void handleClient(SpawnDestroyParticlesPayload payload, Executor executor) {
+    public static void handleClient(DestroyEffectsPayload payload, Executor executor) {
         executor.execute(() -> {
             Minecraft minecraft = Minecraft.getInstance();
             ClientLevel level = minecraft.level;
             if(level != null) {
-                FurnitureBlock.spawnDestroyParticles(level, payload.blockPos, Block.stateById(payload.state), payload.shape);
+                FurnitureBlock.destroyEffects(level, payload.blockPos, Block.stateById(payload.state), payload.shape);
             }
 
         });
     }
 
-    public SpawnDestroyParticlesPayload(BlockPos blockPos, VoxelShape shape, BlockState state) {
+    public DestroyEffectsPayload(BlockPos blockPos, VoxelShape shape, BlockState state) {
         this(blockPos, shape, Block.getId(state));
     }
 
