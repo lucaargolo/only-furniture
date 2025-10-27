@@ -1,16 +1,20 @@
 package dev.lucaargolo.furniture;
 
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.utils.ModRegistry;
 import dev.lucaargolo.furniture.utils.RegionFurnitureData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.state.BlockState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +40,14 @@ public abstract class FurnitureMod {
 
     public final ModPacketManager getPacketManager() {
         return packetManager;
+    }
+
+    public final boolean beforeBlockBreak(BlockState state, ServerLevel level, BlockPos pos, Player player) {
+        if(state.getBlock() instanceof FurnitureBlock block) {
+            return block.onBeforeRemove(level, pos, player);
+        }else{
+            return false;
+        }
     }
 
     public final void onServerChunkWatch(ServerLevel level, ServerPlayer player, ChunkPos pos) {
