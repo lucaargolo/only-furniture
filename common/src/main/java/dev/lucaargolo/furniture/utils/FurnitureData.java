@@ -11,11 +11,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class FurnitureData {
 
@@ -80,6 +82,21 @@ public class FurnitureData {
     @Override
     public int hashCode() {
         return Objects.hashCode(packed);
+    }
+
+    public static VoxelShape cachedShape(BlockGetter level, BlockPos pos, Supplier<VoxelShape> shapeSupplier) {
+        ChunkPos chunkPos = new ChunkPos(pos);
+        long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
+        int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
+        if(level instanceof ServerLevel serverLevel) {
+            return RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).cachedShape(regionLocalBlockPos, shapeSupplier);
+        }else{
+            ResourceKey<Level> dimension = FurnitureUtils.getBlockGetterDimension(level);
+            if(dimension != null) {
+                return LocalFurnitureData.cachedShape(dimension, regionPos, regionLocalBlockPos, shapeSupplier);
+            }
+        }
+        return shapeSupplier.get();
     }
 
     public static Pair<FurnitureData, Vec3i> getOriginal(BlockGetter level, BlockPos pos, int layer) {

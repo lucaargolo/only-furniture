@@ -260,12 +260,14 @@ public class FurnitureBlock extends Block {
         if(shapesAndStates.isEmpty()) {
             return this.shapes.get(Direction.NORTH);
         }else{
-            Iterator<Pair<VoxelShape, BlockState>> iterator = shapesAndStates.values().iterator();
-            VoxelShape shape = iterator.next().getFirst();
-            while (iterator.hasNext()) {
-                shape = Shapes.joinUnoptimized(shape, iterator.next().getFirst(), BooleanOp.OR);
-            }
-            return shape;
+            return FurnitureData.cachedShape(pLevel, pPos, () -> {
+                Iterator<Pair<VoxelShape, BlockState>> iterator = shapesAndStates.values().iterator();
+                VoxelShape shape = iterator.next().getFirst();
+                while (iterator.hasNext()) {
+                    shape = Shapes.joinUnoptimized(shape, iterator.next().getFirst(), BooleanOp.OR);
+                }
+                return shape;
+            });
         }
     }
 

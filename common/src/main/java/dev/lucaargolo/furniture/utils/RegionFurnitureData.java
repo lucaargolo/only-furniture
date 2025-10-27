@@ -4,6 +4,8 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.network.RegionFurnitureDataPayload;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -13,9 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RegionFurnitureData extends SavedData {
@@ -25,12 +29,17 @@ public class RegionFurnitureData extends SavedData {
     private static final Map<ResourceKey<Level>, Map<UUID, Set<ChunkPos>>> playerTrackingMap = new HashMap<>();
 
     private final Int2LongMap regionMap = new Int2LongOpenHashMap();
+    private final Int2ObjectMap<VoxelShape> cachedShapes = new Int2ObjectOpenHashMap<>();
 
     public RegionFurnitureData() {
         regionMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
     }
 
-    protected FurnitureData[] get(int regionLocalBlockPos) {
+    public VoxelShape cachedShape(int regionLocalBlockPos, Supplier<VoxelShape> shapeSupplier) {
+        return cachedShapes.computeIfAbsent(regionLocalBlockPos, key -> shapeSupplier.get());
+    }
+
+    public FurnitureData[] get(int regionLocalBlockPos) {
         long packed = regionMap.get(regionLocalBlockPos);
         if(packed != FurnitureData.DEFAULT_PACKED_LAYERS) {
             return FurnitureUtils.unpackFurnitureDataLayers(packed);
@@ -38,7 +47,9 @@ public class RegionFurnitureData extends SavedData {
         return FurnitureData.DEFAULT_LAYERS.clone();
     }
 
-    protected void set(int regionLocalBlockPos, FurnitureData[] layers) {
+    public void set(int regionLocalBlockPos, FurnitureData[] layers) {
+        cachedShapes.remove(regionLocalBlockPos);
+
         long newPacked = FurnitureUtils.packFurnitureDataLayers(layers);
         boolean isDefault = newPacked == FurnitureData.DEFAULT_PACKED_LAYERS;
 

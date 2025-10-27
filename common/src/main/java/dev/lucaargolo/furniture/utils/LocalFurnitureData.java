@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
@@ -20,17 +22,27 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LocalFurnitureData {
 
-    private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2LongMap>> dimensionToLevelMap = new HashMap<>();
     private static final Map<ResourceKey<Level>, Set<ChunkPos>> trackingMap = new HashMap<>();
+
+    private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2LongMap>> dimensionToLevelMap = new HashMap<>();
+    private static final HashMap<ResourceKey<Level>, Long2ObjectMap<Int2ObjectMap<VoxelShape>>> cachedShapes = new HashMap<>();
+
+    public static VoxelShape cachedShape(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, Supplier<VoxelShape> shapeSupplier) {
+        Long2ObjectMap<Int2ObjectMap<VoxelShape>> shapeLevelMap = cachedShapes.computeIfAbsent(dimension, k -> new Long2ObjectOpenHashMap<>());
+        Int2ObjectMap<VoxelShape> shapeRegionMap = shapeLevelMap.computeIfAbsent(regionPos, k -> new Int2ObjectOpenHashMap<>());
+        return shapeRegionMap.computeIfAbsent(regionLocalBlockPos, k -> shapeSupplier.get());
+    }
 
     public static synchronized FurnitureData[] get(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos) {
         Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(dimension);
@@ -47,6 +59,14 @@ public class LocalFurnitureData {
     }
 
     public static synchronized void set(ResourceKey<Level> dimension, long regionPos, int regionLocalBlockPos, FurnitureData[] layers) {
+        Long2ObjectMap<Int2ObjectMap<VoxelShape>> shapeLevelMap = cachedShapes.get(dimension);
+        if(shapeLevelMap != null) {
+            Int2ObjectMap<VoxelShape> shapeRegionMap = shapeLevelMap.get(regionPos);
+            if(shapeRegionMap != null) {
+                shapeRegionMap.remove(regionLocalBlockPos);
+            }
+        }
+
         long newPacked = FurnitureUtils.packFurnitureDataLayers(layers);
         boolean isDefault = newPacked == FurnitureData.DEFAULT_PACKED_LAYERS;
 
