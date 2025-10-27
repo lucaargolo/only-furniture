@@ -1,11 +1,9 @@
-package dev.lucaargolo.furniture.utils;
+package dev.lucaargolo.furniture;
 
-import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,24 +12,29 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class NeoForgeModRegistry<T> extends ModRegistry<T> {
+@SuppressWarnings("unchecked")
+public class FabricModRegistry<T> extends ModRegistry<T> {
 
     private final Map<String, ModEntry<? extends T>> entries = new HashMap<>();
-    private final DeferredRegister<T> registry;
+    private final Registry<T> registry;
 
-    public NeoForgeModRegistry(ResourceKey<Registry<T>> registryKey) {
+    public FabricModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
-        this.registry = DeferredRegister.create(registryKey, FurnitureMod.MOD_ID);
+        this.registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(registryKey.location());
     }
 
     @Override
     public void init() {
-        this.registry.register(NeoForgeFurnitureMod.getModBus());
+        entries.forEach(this::registerEntry);
+    }
+
+    private <E extends T> void registerEntry(String path, ModEntry<E> entry) {
+        entry.set(Registry.register(registry, entry.key(), entry.get()));
     }
 
     @Override
     public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
-        ModEntry<E> entry = new ModEntry<>(path, this.registry.register(path, supplier), tags);
+        ModEntry<E> entry = new ModEntry<>(path, supplier, tags);
         entries.put(path, entry);
         return entry;
     }
@@ -40,7 +43,6 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     public @NotNull Iterator<ModEntry<? extends T>> iterator() {
         return entries.values().iterator();
     }
-
 
     @Override
     @Nullable

@@ -1,8 +1,8 @@
 package dev.lucaargolo.furniture.item;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.utils.ModRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;

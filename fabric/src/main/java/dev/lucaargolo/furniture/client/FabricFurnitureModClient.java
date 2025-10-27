@@ -1,11 +1,11 @@
 package dev.lucaargolo.furniture.client;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
-import dev.lucaargolo.furniture.utils.ModRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;

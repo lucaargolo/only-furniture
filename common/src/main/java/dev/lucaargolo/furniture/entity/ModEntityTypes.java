@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.entity;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.utils.ModRegistry;
+import dev.lucaargolo.furniture.ModRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

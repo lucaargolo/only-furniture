@@ -5,7 +5,6 @@ import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
-import dev.lucaargolo.furniture.utils.ModRegistry;
 import dev.lucaargolo.furniture.utils.RegionFurnitureData;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
