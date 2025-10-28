@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "layer=0": {
+      "model": "furniture:block/iron_dual_lamp_post"
+    },
+    "layer=1": {
+      "model": "furniture:block/iron_dual_lamp_post"
+    },
+    "layer=2": {
+      "model": "furniture:block/iron_dual_lamp_post"
+    },
+    "layer=3": {
+      "model": "furniture:block/iron_dual_lamp_post"
+    }
+  }
+}

@@ -1,6 +1,10 @@
 package dev.lucaargolo.furniture.data;
 
+import dev.lucaargolo.furniture.block.MetalBlock;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
 public class DataHelper {
@@ -17,6 +21,12 @@ public class DataHelper {
         } else {
             return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_log");
         }
+    }
+
+    public static ResourceLocation getMetal(MetalBlock.MetalType metal, WeatheringCopper.WeatherState age) {
+        Block block = metal.getTexture(age);
+        ResourceLocation location = BuiltInRegistries.BLOCK.getKey(block);
+        return location.withPrefix("block/");
     }
 
     public static String defaultTranslation(String string) {
@@ -38,4 +48,6 @@ public class DataHelper {
             return defaultTranslation(String.join(" ", words));
         }
     }
+
+
 }

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "furniture:iron_dual_lamp_post"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "furniture:blocks/iron_dual_lamp_post"
+}

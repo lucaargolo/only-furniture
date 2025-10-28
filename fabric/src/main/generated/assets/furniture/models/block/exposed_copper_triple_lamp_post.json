@@ -1,0 +1,7 @@
+{
+  "parent": "furniture:block/triple_lamp_post",
+  "textures": {
+    "metal": "minecraft:block/exposed_copper",
+    "particle": "minecraft:block/exposed_copper"
+  }
+}

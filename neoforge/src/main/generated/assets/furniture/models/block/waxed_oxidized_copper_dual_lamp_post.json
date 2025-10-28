@@ -1,0 +1,7 @@
+{
+  "parent": "furniture:block/dual_lamp_post",
+  "textures": {
+    "metal": "minecraft:block/oxidized_copper",
+    "particle": "minecraft:block/oxidized_copper"
+  }
+}

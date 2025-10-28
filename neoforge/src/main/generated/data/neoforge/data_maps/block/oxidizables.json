@@ -1,0 +1,31 @@
+{
+  "values": {
+    "furniture:copper_dual_lamp_post": {
+      "next_oxidation_stage": "furniture:exposed_copper_dual_lamp_post"
+    },
+    "furniture:copper_lamp_post": {
+      "next_oxidation_stage": "furniture:exposed_copper_lamp_post"
+    },
+    "furniture:copper_triple_lamp_post": {
+      "next_oxidation_stage": "furniture:exposed_copper_triple_lamp_post"
+    },
+    "furniture:exposed_copper_dual_lamp_post": {
+      "next_oxidation_stage": "furniture:weathered_copper_dual_lamp_post"
+    },
+    "furniture:exposed_copper_lamp_post": {
+      "next_oxidation_stage": "furniture:weathered_copper_lamp_post"
+    },
+    "furniture:exposed_copper_triple_lamp_post": {
+      "next_oxidation_stage": "furniture:weathered_copper_triple_lamp_post"
+    },
+    "furniture:weathered_copper_dual_lamp_post": {
+      "next_oxidation_stage": "furniture:oxidized_copper_dual_lamp_post"
+    },
+    "furniture:weathered_copper_lamp_post": {
+      "next_oxidation_stage": "furniture:oxidized_copper_lamp_post"
+    },
+    "furniture:weathered_copper_triple_lamp_post": {
+      "next_oxidation_stage": "furniture:oxidized_copper_triple_lamp_post"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "furniture:block/lamp_post",
+  "textures": {
+    "metal": "minecraft:block/weathered_copper",
+    "particle": "minecraft:block/weathered_copper"
+  }
+}
