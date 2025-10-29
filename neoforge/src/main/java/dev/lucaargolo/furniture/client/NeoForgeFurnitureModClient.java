@@ -1,18 +1,24 @@
 package dev.lucaargolo.furniture.client;
 
+import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+
+import java.util.Map;
 
 public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
@@ -30,14 +36,18 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
     @SubscribeEvent
     public void onModelRegister(ModelEvent.ModifyBakingResult event) {
-        ModBlocks.BLOCKS.forEach((entry) -> {
-            if(entry.get() instanceof FurnitureBlock) {
-                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=0"), (k, model) -> new FurnitureBakedModel(model));
-                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=1"), (k, model) -> new FurnitureBakedModel(model));
-                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=2"), (k, model) -> new FurnitureBakedModel(model));
-                event.getModels().compute(new ModelResourceLocation(entry.key(), "layer=3"), (k, model) -> new FurnitureBakedModel(model));
+        for (Map.Entry<ModelResourceLocation, BakedModel> mapEntry : event.getModels().entrySet()) {
+            ModelResourceLocation location = mapEntry.getKey();
+            String namespace = location.id().getNamespace();
+            String path = location.id().getPath();
+            String variant = location.variant();
+            if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
+                ModRegistry.ModEntry<? extends Block> entry = ModBlocks.BLOCKS.get(path);
+                if(entry != null && entry.get() instanceof FurnitureBlock) {
+                    mapEntry.setValue(new FurnitureBakedModel(mapEntry.getValue()));
+                }
             }
-        });
+        }
     }
 
     @SubscribeEvent
