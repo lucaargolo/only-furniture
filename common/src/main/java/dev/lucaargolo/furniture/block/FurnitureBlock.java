@@ -243,23 +243,28 @@ public class FurnitureBlock extends Block {
         for (BlockPos intersectingPos : intersectingPositions) {
             FurnitureData[] intersectingLayers = FurnitureData.get(level, intersectingPos);
             IntList anotherLayers = new IntArrayList();
+            boolean hasOriginal = false;
             for (int intersectingLayer = 0; intersectingLayer < intersectingLayers.length; intersectingLayer++) {
                 if(intersectingLayer != layer) {
                     FurnitureData intersectingData = intersectingLayers[intersectingLayer];
-                    if(intersectingData.hasOriginal() || intersectingData.getDirectionToOriginal() != null) {
+                    if(intersectingData.hasOriginal()) {
+                        hasOriginal = true;
+                    }else if(intersectingData.getDirectionToOriginal() != null) {
                         anotherLayers.add(intersectingLayer);
                     }
                 }
             }
-            if(anotherLayers.isEmpty()) {
+            if(!hasOriginal && anotherLayers.isEmpty()) {
                 level.setBlockAndUpdate(intersectingPos, Blocks.AIR.defaultBlockState());
                 FurnitureData.set(level, intersectingPos, FurnitureData.DEFAULT_LAYERS);
-            }else{
-                int anotherLayer = anotherLayers.getFirst();
-                Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(level, intersectingPos, anotherLayer);
-                BlockPos anotherPos = intersectingPos.offset(pair.getSecond());
-                BlockState anotherState = level.getBlockState(anotherPos);
-                level.setBlockAndUpdate(intersectingPos, anotherState);
+            }else {
+                if(!hasOriginal) {
+                    int anotherLayer = anotherLayers.getFirst();
+                    Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(level, intersectingPos, anotherLayer);
+                    BlockPos anotherPos = intersectingPos.offset(pair.getSecond());
+                    BlockState anotherState = level.getBlockState(anotherPos);
+                    level.setBlockAndUpdate(intersectingPos, anotherState);
+                }
                 FurnitureData.set(level, intersectingPos, layer, FurnitureData.DEFAULT);
             }
         }
