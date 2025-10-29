@@ -1,14 +1,20 @@
 package dev.lucaargolo.furniture.block;
 
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ModBlockShapes {
 
-    public static VoxelShape[] SMALL_TABLE = new VoxelShape[] {
+    public static VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
         Shapes.box(0.125,0,0.125,0.875,0.625,0.875),
         Shapes.box(0,0.625,0.125,1,0.75,0.875),
         Shapes.box(0.125,0.625,0,0.875,0.75,1)
+    };
+
+    public static final VoxelShape[] TABLE = new VoxelShape[] {
+        Block.box(2, 0, 2, 14, 12, 14),
+        Block.box(0, 12, 0, 16, 16, 16)
     };
 
     public static VoxelShape[] SMALL_STOOL = new VoxelShape[] {

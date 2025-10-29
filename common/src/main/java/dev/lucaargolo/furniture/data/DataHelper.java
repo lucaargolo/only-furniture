@@ -7,6 +7,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
+import java.util.Arrays;
+import java.util.Set;
+
 public class DataHelper {
 
     public static ResourceLocation getWoodPlanks(WoodType type) {
@@ -30,24 +33,29 @@ public class DataHelper {
     }
 
     public static String defaultTranslation(String string) {
-        String[] words = string.replace("_", " ").split(" ");
-        for (int i = 0; i < words.length; i++) {
-            words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1);
-        }
-        return String.join(" ", words);
-    }
-
-    public static String woodBlockTranslation(String string) {
-        String[] words = string.replace("_", " ").split(" ");
-        if(words.length < 2) {
-            return defaultTranslation(string);
+        if(!string.isBlank()) {
+            String[] words = string.replace("_", " ").split(" ");
+            for (int i = 0; i < words.length; i++) {
+                words[i] = words[i].substring(0, 1).toUpperCase() + words[i].substring(1);
+            }
+            return String.join(" ", words);
         }else{
-            String wood = words[0];
-            words[0] = words[1];
-            words[1] = wood;
-            return defaultTranslation(String.join(" ", words));
+            return string;
         }
     }
 
+    private static final Set<String> ADJECTIVES = Set.of("small", "large", "medium");
+
+    public static String woodBlockTranslation(WoodType wood, String string) {
+        String[] words = string.replace(wood.name()+"_", "").replace("_", " ").split(" ");
+        String[] adjectives = Arrays.stream(words).filter(ADJECTIVES::contains).toArray(String[]::new);
+        String[] nouns = Arrays.stream(words).filter(s -> !ADJECTIVES.contains(s)).toArray(String[]::new);
+
+        String first = defaultTranslation(String.join(" ", adjectives));
+        String middle = defaultTranslation(wood.name());
+        String last = defaultTranslation(String.join(" ", nouns));
+
+        return !first.isBlank() ? first + " " + middle + " " + last : middle + " " + last;
+    }
 
 }

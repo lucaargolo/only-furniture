@@ -27,16 +27,14 @@ public class ModBlocks {
     public static final ModRegistry<Block> BLOCKS = FurnitureMod.INSTANCE.registry(Registries.BLOCK);
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
-    public static final Map<WoodType, Supplier<WoodFurnitureBlock>> SMALL_TABLE_MAP = registerForWoodType("small_table", WoodFurnitureBlock::new, ModBlockShapes.SMALL_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<WoodFurnitureBlock>> COFFEE_TABLE_MAP = registerForWoodType("coffee_table", WoodFurnitureBlock::new, ModBlockShapes.COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<WoodFurnitureBlock>> TABLE_MAP = registerForWoodType("table", WoodFurnitureBlock::new, ModBlockShapes.TABLE, BlockTags.MINEABLE_WITH_AXE);
+
     public static final Map<WoodType, Supplier<SmallStoolBlock>> SMALL_STOOL_MAP = registerForWoodType("small_stool", SmallStoolBlock::new, ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
 
     public static Supplier<MetalLightFurnitureBlock> LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<MetalLightFurnitureBlock> DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<MetalLightFurnitureBlock> TRIPLE_LAMP_POST = BLOCKS.register("iron_triple_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-
-    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<MetalLightFurnitureBlock>, Supplier<MetalLightFurnitureBlock>>> COPPER_LAMP_POST = registerWeatheringCopper("copper_lamp_post", WeatheringMetalLightFurnitureBlock::new, MetalLightFurnitureBlock::new, ModBlockShapes.LAMP_POST, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<MetalLightFurnitureBlock>, Supplier<MetalLightFurnitureBlock>>> COPPER_DUAL_LAMP_POST = registerWeatheringCopper("copper_dual_lamp_post", WeatheringMetalLightFurnitureBlock::new, MetalLightFurnitureBlock::new, ModBlockShapes.DUAL_LAMP_POST, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<MetalLightFurnitureBlock>, Supplier<MetalLightFurnitureBlock>>> COPPER_TRIPLE_LAMP_POST = registerWeatheringCopper("copper_triple_lamp_post", WeatheringMetalLightFurnitureBlock::new, MetalLightFurnitureBlock::new, ModBlockShapes.TRIPLE_LAMP_POST, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodType(String path, TriFunction<Block, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
         Map<WoodType, Supplier<T>> map = new HashMap<>();

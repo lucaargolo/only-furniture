@@ -17,8 +17,8 @@ public class ModLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         ModBlocks.BLOCKS.forEach((entry) -> {
             Block block = entry.get();
-            if(block instanceof WoodBlock) {
-                add(block, DataHelper.woodBlockTranslation(entry.path()));
+            if(block instanceof WoodBlock furniture) {
+                add(block, DataHelper.woodBlockTranslation(furniture.getWood(), entry.path()));
             }else{
                 add(block, DataHelper.defaultTranslation(entry.path()));
             }

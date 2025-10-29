@@ -19,8 +19,8 @@ public class ModLanguageProvider extends FabricLanguageProvider {
     public void generateTranslations(HolderLookup.Provider provider, TranslationBuilder translationBuilder) {
         ModBlocks.BLOCKS.forEach((entry) -> {
             Block block = entry.get();
-            if(block instanceof WoodBlock) {
-                translationBuilder.add(block, DataHelper.woodBlockTranslation(entry.path()));
+            if(block instanceof WoodBlock furniture) {
+                translationBuilder.add(block, DataHelper.woodBlockTranslation(furniture.getWood(), entry.path()));
             }else{
                 translationBuilder.add(block, DataHelper.defaultTranslation(entry.path()));
             }
