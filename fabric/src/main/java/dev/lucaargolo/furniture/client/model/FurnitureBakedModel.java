@@ -42,11 +42,13 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             }
         }
         if(data != null) {
+            float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
             Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
             Matrix4f transform = new Matrix4f()
                     .translate(data.getX(), 0f, data.getZ())
                     .translate(0.5f, 0.5f, 0.5f)
                     .rotate(rotation)
+                    .scale(1f + offset, 1f + offset, 1f + offset)
                     .translate(-0.5f, -0.5f, -0.5f);
 
             context.pushTransform((quad) -> {

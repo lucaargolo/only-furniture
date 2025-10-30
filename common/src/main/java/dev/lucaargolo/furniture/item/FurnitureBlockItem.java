@@ -125,9 +125,10 @@ public class FurnitureBlockItem extends BlockItem {
 
                 poseStack.pushPose();
                 poseStack.translate(pos.x-camera.getPosition().x-0.5, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z-0.5);
-                poseStack.translate(0.5, 0.0, 0.5);
+                poseStack.translate(0.5, 0.5, 0.5);
                 poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
-                poseStack.translate(-0.5, 0.0, -0.5);
+                poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
+                poseStack.translate(-0.5, -0.5, -0.5);
 
                 FurnitureBlock block = holding.getFirst().getFurnitureBlock();
                 BlockState state = block.defaultBlockState();
@@ -144,7 +145,6 @@ public class FurnitureBlockItem extends BlockItem {
                     random.setSeed(42L);
                     renderQuadList(poseStack, consumer, model.getQuads(state, direction, random), packedLight, packedColor);
                 }
-
                 random.setSeed(42L);
                 renderQuadList(poseStack, consumer, model.getQuads(state, null, random), packedLight, packedColor);
 
@@ -168,11 +168,7 @@ public class FurnitureBlockItem extends BlockItem {
 
     private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, int packedLight, int packedColor) {
         for (BakedQuad bakedquad : quads) {
-            poseStack.pushPose();
-            float offset = (random.nextFloat() - 0.5f)/1000f;
-            poseStack.translate(offset, offset, offset);
             consumer.putBulkData(poseStack.last(), bakedquad, FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
-            poseStack.popPose();
         }
     }
 

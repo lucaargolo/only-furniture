@@ -123,15 +123,24 @@ public class FurnitureBlock extends Block {
         }
 
         FurnitureData data = new FurnitureData(ox, oz, getRotation(player), null, true);
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-
-        VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
-        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pos, shape, Vec3.atLowerCornerOf(pos).add(data.getX(), 0, data.getZ()));
+        VoxelShape shape = this.getShapeForData(data);
+        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pos, shape, Vec3.atLowerCornerOf(pos));
+        intersectingPositions.add(pos);
 
         for(BlockPos intersectingPos: intersectingPositions) {
             BlockState intersectingState = level.getBlockState(intersectingPos);
             if(!intersectingState.canBeReplaced(pContext)) {
                 return null;
+            }else if(intersectingState.getBlock() instanceof FurnitureBlock) {
+                VoxelShape intersectingShape = intersectingState.getShape(level, intersectingPos).move(
+                        intersectingPos.getX()-pos.getX(),
+                        intersectingPos.getY()-pos.getY(),
+                        intersectingPos.getZ()-pos.getZ()
+                );
+                boolean collides = Shapes.joinIsNotEmpty(shape, intersectingShape, BooleanOp.AND);
+                if(collides) {
+                    return null;
+                }
             }
         }
 
@@ -158,22 +167,18 @@ public class FurnitureBlock extends Block {
             }
         }
         FurnitureData data = layers[layer];
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-
-        VoxelShape shape = this.shapes.getOrDefault(facing, Shapes.empty());
-        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pPos, shape, Vec3.atLowerCornerOf(pPos).add(data.getX(), 0, data.getZ()));
+        VoxelShape shape = this.getShapeForData(data);
+        Set<BlockPos> intersectingPositions = calculateIntersectingPositions(pPos, shape, Vec3.atLowerCornerOf(pPos));
 
         Map<BlockPos, Direction> intersectingDirections = calculateIntersectingDirections(pPos, intersectingPositions);
         if(intersectingDirections != null) {
             for(BlockPos intersectingPos: intersectingPositions) {
-                if(!pPos.equals(intersectingPos)) {
-                    BlockState intersectingState = pLevel.getBlockState(intersectingPos);
-                    if(!(intersectingState.getBlock() instanceof FurnitureBlock)) {
-                        pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState().setValue(LAYER, layer));
-                    }
-                    FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
-                    FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
+                BlockState intersectingState = pLevel.getBlockState(intersectingPos);
+                if(!(intersectingState.getBlock() instanceof FurnitureBlock)) {
+                    pLevel.setBlockAndUpdate(intersectingPos, this.defaultBlockState().setValue(LAYER, layer));
                 }
+                FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
+                FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
             }
         }else{
             //This should technically never be reached since calculateIntersectingDirections is already validated in getStateForPlacement, but we never know
@@ -292,7 +297,7 @@ public class FurnitureBlock extends Block {
     protected @NotNull VoxelShape getCollisionShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
         List<FurnitureShape> shapes = getShapes(pLevel, pPos);
         if(shapes.isEmpty()) {
-            return this.shapes.get(Direction.NORTH);
+            return Shapes.block();
         }else{
             return FurnitureData.cachedShape(pLevel, pPos, () -> {
                 Iterator<FurnitureShape> iterator = shapes.iterator();
@@ -337,20 +342,25 @@ public class FurnitureBlock extends Block {
                 FurnitureData originalData = pair.getFirst();
                 BlockPos originalPos = pPos.offset(pair.getSecond());
                 BlockState originalState = pLevel.getBlockState(originalPos);
-                Map<Direction, VoxelShape> originalShapes = this.shapes;
-                if(originalState.getBlock() instanceof FurnitureBlock originalBlock) {
-                    originalShapes = originalBlock.shapes;
-                }
-
+                FurnitureBlock originalBlock = originalState.getBlock() instanceof FurnitureBlock furnitureBlock ? furnitureBlock : this;
                 Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
-                toOriginal = toOriginal.add(originalData.getX(), 0.0, originalData.getZ());
-                Direction facing = Direction.fromYRot(originalData.getRotation() + 180);
-
-                VoxelShape originalShape = originalShapes.getOrDefault(facing, Shapes.empty()).move(toOriginal.x, toOriginal.y, toOriginal.z);
+                VoxelShape originalShape = originalBlock.getShapeForData(toOriginal, originalData);
                 shapes.add(new FurnitureShape(layer, originalData, originalPos, originalState, pair.getSecond(), originalShape));
             }
         }
         return shapes;
+    }
+
+    @NotNull
+    public VoxelShape getShapeForData(FurnitureData data) {
+        return getShapeForData(Vec3.ZERO, data);
+    }
+
+    private @NotNull VoxelShape getShapeForData(Vec3 offset, FurnitureData data) {
+        offset = offset.add(data.getX(), 0.0, data.getZ());
+        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+
+        return this.shapes.getOrDefault(facing, Shapes.empty()).move(offset.x, offset.y, offset.z);
     }
 
     public boolean renderFurnitureOutline(Level level, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
@@ -439,7 +449,7 @@ public class FurnitureBlock extends Block {
         return intersectingPositions;
     }
 
-    private static Set<BlockPos> calculateIntersectingPositions(BlockPos originalPos, VoxelShape shape, Vec3 offset) {
+    public static Set<BlockPos> calculateIntersectingPositions(BlockPos originalPos, VoxelShape shape, Vec3 offset) {
         Set<BlockPos> positions = new HashSet<>();
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
