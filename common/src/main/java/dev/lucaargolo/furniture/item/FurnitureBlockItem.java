@@ -54,23 +54,24 @@ public class FurnitureBlockItem extends BlockItem {
 
     @Override
     protected boolean placeBlock(@NotNull BlockPlaceContext pContext, @NotNull BlockState pState) {
+        Player player = pContext.getPlayer();
+        BlockPos pos = pContext.getClickedPos();
+        Vec3 location = pContext.getClickLocation();
+
+        boolean snapToGrid = player == null || !player.isShiftKeyDown();
+        float ox, oz;
+        if(snapToGrid) {
+            ox = 0.5f;
+            oz = 0.5f;
+        }else{
+            ox = (float) (location.x - pos.getX());
+            oz = (float) (location.z - pos.getZ());
+        }
+
+        FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData(ox, oz, FurnitureBlock.getRotation(player), null, true));
         boolean placed = super.placeBlock(pContext, pState);
-        if(placed) {
-            Player player = pContext.getPlayer();
-            BlockPos pos = pContext.getClickedPos();
-            Vec3 location = pContext.getClickLocation();
-
-            boolean snapToGrid = player == null || !player.isShiftKeyDown();
-            float ox, oz;
-            if(snapToGrid) {
-                ox = 0.5f;
-                oz = 0.5f;
-            }else{
-                ox = (float) (location.x - pos.getX());
-                oz = (float) (location.z - pos.getZ());
-            }
-
-            FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData(ox, oz, FurnitureBlock.getRotation(player), null, true));
+        if(!placed) {
+            FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), FurnitureData.DEFAULT);
         }
         return placed;
     }

@@ -1,0 +1,7 @@
+{
+  "parent": "furniture:block/table_feet",
+  "textures": {
+    "log": "minecraft:block/oak_log",
+    "particle": "minecraft:block/oak_log"
+  }
+}

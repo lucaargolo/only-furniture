@@ -1,0 +1,7 @@
+{
+  "parent": "furniture:block/table_center",
+  "textures": {
+    "particle": "minecraft:block/oak_log",
+    "planks": "minecraft:block/oak_planks"
+  }
+}

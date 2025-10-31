@@ -1,3 +1,8 @@
 {
-  "parent": "furniture:block/birch_table"
+  "parent": "furniture:item/table",
+  "textures": {
+    "log": "minecraft:block/birch_log",
+    "particle": "minecraft:block/birch_log",
+    "planks": "minecraft:block/birch_planks"
+  }
 }

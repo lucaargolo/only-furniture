@@ -1,0 +1,7 @@
+{
+  "parent": "furniture:block/table_center",
+  "textures": {
+    "particle": "minecraft:block/crimson_stem",
+    "planks": "minecraft:block/crimson_planks"
+  }
+}

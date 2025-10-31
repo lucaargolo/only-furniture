@@ -1,8 +1,0 @@
-{
-  "parent": "furniture:block/table",
-  "textures": {
-    "log": "minecraft:block/mangrove_log",
-    "particle": "minecraft:block/mangrove_log",
-    "planks": "minecraft:block/mangrove_planks"
-  }
-}

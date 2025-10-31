@@ -1,7 +1,48 @@
 {
-  "variants": {
-    "": {
-      "model": "furniture:block/bamboo_table"
+  "multipart": [
+    {
+      "apply": {
+        "model": "furniture:block/bamboo_table_center"
+      }
+    },
+    {
+      "apply": {
+        "model": "furniture:block/bamboo_table_feet"
+      },
+      "when": {
+        "east": "false",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "furniture:block/bamboo_table_feet",
+        "y": 90
+      },
+      "when": {
+        "east": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "furniture:block/bamboo_table_feet",
+        "y": 180
+      },
+      "when": {
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "furniture:block/bamboo_table_feet",
+        "y": 270
+      },
+      "when": {
+        "north": "false",
+        "west": "false"
+      }
     }
-  }
+  ]
 }
