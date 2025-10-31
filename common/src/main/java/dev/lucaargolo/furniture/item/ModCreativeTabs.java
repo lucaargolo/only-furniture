@@ -51,8 +51,8 @@ public class ModCreativeTabs {
                 }
                 return -1;
             })
-            // Step 5: Finally, alphabetical by path
-            .thenComparing(ModRegistry.ModEntry::path, String::compareToIgnoreCase);
+            // Step 5: Finally, by register order
+            .thenComparingInt(ModRegistry.ModEntry::getLocalId);
 
 
     public static final ModRegistry<CreativeModeTab> CREATIVE_TABS = FurnitureMod.INSTANCE.registry(Registries.CREATIVE_MODE_TAB);

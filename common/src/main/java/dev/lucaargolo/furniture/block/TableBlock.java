@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -65,8 +66,10 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
     }
 
     private final WoodType wood;
+    private final TagKey<Block> connecting;
 
-    public TableBlock(Block base, WoodType wood) {
+
+    public TableBlock(Block base, WoodType wood, TagKey<Block> connecting) {
         super(base);
         this.registerDefaultState(this.defaultBlockState()
             .setValue(NORTH, false)
@@ -75,6 +78,7 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
             .setValue(WEST, false)
         );
         this.wood = wood;
+        this.connecting = connecting;
     }
 
     @Override
@@ -109,10 +113,10 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
                 BlockPos neighborPos = pos.relative(neighborDirection);
                 BlockState neighborState = level.getBlockState(neighborPos);
 
-                if(neighborState.getBlock() instanceof TableBlock) {
+                if(neighborState.is(this.connecting)) {
                     FurnitureData[] neighborLayers = FurnitureData.get(level, neighborPos);
                     for(FurnitureData neighborData : neighborLayers) {
-                        if(neighborData.equals(data)) {
+                        if(neighborData.equalsIgnoreRotation(data) && neighborData.getRotation() % 90f == 0f) {
                             north = north || neighborDirection == Direction.NORTH;
                             east = east || neighborDirection == Direction.EAST;
                             south = south || neighborDirection == Direction.SOUTH;

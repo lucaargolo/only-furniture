@@ -72,6 +72,13 @@ public class FurnitureData {
         return packed;
     }
 
+    public boolean equalsIgnoreRotation(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        FurnitureData that = (FurnitureData) o;
+        int mask = 0b1111_0000_1111_1111; // or 0xF8FF
+        return (packed & mask) == (that.packed & mask);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

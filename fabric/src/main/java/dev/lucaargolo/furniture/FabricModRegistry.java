@@ -17,6 +17,7 @@ public class FabricModRegistry<T> extends ModRegistry<T> {
 
     private final Map<String, ModEntry<? extends T>> entries = new HashMap<>();
     private final Registry<T> registry;
+    private int id = 0;
 
     public FabricModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
@@ -34,7 +35,7 @@ public class FabricModRegistry<T> extends ModRegistry<T> {
 
     @Override
     public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
-        ModEntry<E> entry = new ModEntry<>(path, supplier, tags);
+        ModEntry<E> entry = new ModEntry<>(id++, path, supplier, tags);
         entries.put(path, entry);
         return entry;
     }

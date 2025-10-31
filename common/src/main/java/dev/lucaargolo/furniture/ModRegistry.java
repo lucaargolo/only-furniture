@@ -29,6 +29,7 @@ public abstract class ModRegistry<T> implements Iterable<ModRegistry.ModEntry<? 
 
     public static class ModEntry<E> implements Supplier<E> {
 
+        private final int localId;
         private final String path;
         private final Supplier<E> supplier;
         private final TagKey<?>[] tags;
@@ -36,14 +37,11 @@ public abstract class ModRegistry<T> implements Iterable<ModRegistry.ModEntry<? 
         private boolean supplied = false;
         private E value;
 
-        public ModEntry(String path, Supplier<E> supplier, TagKey<?>... tags) {
+        public ModEntry(int localId, String path, Supplier<E> supplier, TagKey<?>... tags) {
+            this.localId = localId;
             this.path = path;
             this.supplier = supplier;
             this.tags = tags;
-        }
-
-        public TagKey<?>[] getTags() {
-            return tags;
         }
 
         @Override
@@ -54,6 +52,14 @@ public abstract class ModRegistry<T> implements Iterable<ModRegistry.ModEntry<? 
         public void set(E value) {
             this.supplied = true;
             this.value = value;
+        }
+
+        public int getLocalId() {
+            return localId;
+        }
+
+        public TagKey<?>[] getTags() {
+            return tags;
         }
 
         public String path() {

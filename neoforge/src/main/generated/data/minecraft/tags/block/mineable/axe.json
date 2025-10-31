@@ -5,8 +5,8 @@
     "furniture:cherry_coffee_table",
     "furniture:warped_small_stool",
     "furniture:crimson_coffee_table",
-    "furniture:dark_oak_coffee_table",
     "furniture:warped_coffee_table",
+    "furniture:dark_oak_coffee_table",
     "furniture:oak_table",
     "furniture:jungle_coffee_table",
     "furniture:birch_table",
@@ -26,12 +26,12 @@
     "furniture:birch_small_stool",
     "furniture:spruce_small_stool",
     "furniture:crimson_table",
-    "furniture:cherry_table",
     "furniture:acacia_table",
-    "furniture:acacia_coffee_table",
+    "furniture:cherry_table",
     "furniture:spruce_table",
+    "furniture:acacia_coffee_table",
     "furniture:dark_oak_table",
-    "furniture:crimson_small_stool",
-    "furniture:oak_small_stool"
+    "furniture:oak_small_stool",
+    "furniture:crimson_small_stool"
   ]
 }

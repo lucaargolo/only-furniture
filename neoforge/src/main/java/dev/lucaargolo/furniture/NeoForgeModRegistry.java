@@ -16,6 +16,7 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
     private final Map<String, ModEntry<? extends T>> entries = new HashMap<>();
     private final DeferredRegister<T> registry;
+    private int id = 0;
 
     public NeoForgeModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
@@ -29,7 +30,7 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
     @Override
     public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
-        ModEntry<E> entry = new ModEntry<>(path, this.registry.register(path, supplier), tags);
+        ModEntry<E> entry = new ModEntry<>(id++, path, this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
     }
