@@ -109,7 +109,7 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
                 BlockPos neighborPos = pos.relative(neighborDirection);
                 BlockState neighborState = level.getBlockState(neighborPos);
 
-                if(neighborState.getBlock() == this) {
+                if(neighborState.getBlock() instanceof TableBlock) {
                     FurnitureData[] neighborLayers = FurnitureData.get(level, neighborPos);
                     for(FurnitureData neighborData : neighborLayers) {
                         if(neighborData.equals(data)) {

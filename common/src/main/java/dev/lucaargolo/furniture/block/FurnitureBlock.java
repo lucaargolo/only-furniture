@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -61,7 +62,7 @@ public class FurnitureBlock extends Block {
     protected final Map<Direction, VoxelShape> shapes;
 
     public FurnitureBlock(Block.Properties properties, VoxelShape[] shapes) {
-        super(properties);
+        super(properties.dynamicShape().pushReaction(PushReaction.BLOCK).noOcclusion().noTerrainParticles());
         VoxelShape shape = Shapes.empty();
         for (VoxelShape s : shapes) {
             shape = Shapes.join(shape, s, BooleanOp.OR);
@@ -76,7 +77,7 @@ public class FurnitureBlock extends Block {
     }
 
     public FurnitureBlock(Block base, VoxelShape... shapes) {
-        this(BlockBehaviour.Properties.ofFullCopy(base).dynamicShape().noOcclusion().noTerrainParticles(), shapes);
+        this(BlockBehaviour.Properties.ofFullCopy(base), shapes);
     }
 
     @Override
