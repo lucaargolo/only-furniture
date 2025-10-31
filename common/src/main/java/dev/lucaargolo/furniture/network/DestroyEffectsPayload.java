@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
-public record DestroyEffectsPayload(BlockPos blockPos, int state, int layer) implements CustomPacketPayload {
+public record DestroyEffectsPayload(BlockPos blockPos, int state, int packedData) implements CustomPacketPayload {
 
     public static final Type<DestroyEffectsPayload> TYPE = new Type<>(FurnitureMod.id("destroy_effects"));
 
@@ -24,7 +25,7 @@ public record DestroyEffectsPayload(BlockPos blockPos, int state, int layer) imp
             ByteBufCodecs.VAR_INT,
             DestroyEffectsPayload::state,
             ByteBufCodecs.VAR_INT,
-            DestroyEffectsPayload::layer,
+            DestroyEffectsPayload::packedData,
             DestroyEffectsPayload::new
     );
 
@@ -33,7 +34,7 @@ public record DestroyEffectsPayload(BlockPos blockPos, int state, int layer) imp
             Minecraft minecraft = Minecraft.getInstance();
             ClientLevel level = minecraft.level;
             if(level != null) {
-                FurnitureBlock.destroyEffects(level, payload.blockPos, Block.stateById(payload.state), payload.layer);
+                FurnitureBlock.destroyEffects(level, payload.blockPos, Block.stateById(payload.state), new FurnitureData((short) payload.packedData));
             }
 
         });

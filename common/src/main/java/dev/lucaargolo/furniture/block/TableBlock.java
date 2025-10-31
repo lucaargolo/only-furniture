@@ -1,6 +1,9 @@
 package dev.lucaargolo.furniture.block;
 
 import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
+import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
+import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -12,6 +15,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +26,43 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
     public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
     public static final BooleanProperty WEST = BlockStateProperties.WEST;
+
+    private static final VoxelShape CENTER = Block.box(0, 12, 0, 16, 16, 16);
+
+    private static final VoxelShape FEET_NORTH_EAST = Block.box(11, 0, 2, 14, 12, 5);
+    private static final VoxelShape FEET_SOUTH_EAST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.EAST);
+    private static final VoxelShape FEET_SOUTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.SOUTH);
+    private static final VoxelShape FEET_NORTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.WEST);
+
+    private static final Byte2ObjectMap<VoxelShape> NORTH_SHAPES = new Byte2ObjectOpenHashMap<>();
+    private static final Byte2ObjectMap<VoxelShape> EAST_SHAPES = new Byte2ObjectOpenHashMap<>();
+    private static final Byte2ObjectMap<VoxelShape> SOUTH_SHAPES = new Byte2ObjectOpenHashMap<>();
+    private static final Byte2ObjectMap<VoxelShape> WEST_SHAPES = new Byte2ObjectOpenHashMap<>();
+
+    static {
+        for (int i = 0; i < 16; i++) {
+            boolean north = (i & 1) != 0;
+            boolean east  = (i & 2) != 0;
+            boolean south = (i & 4) != 0;
+            boolean west  = (i & 8) != 0;
+
+            VoxelShape combinedShape = CENTER;
+
+            if (!north && !east)
+                combinedShape = Shapes.join(combinedShape, FEET_NORTH_EAST, BooleanOp.OR);
+            if (!south && !east)
+                combinedShape = Shapes.join(combinedShape, FEET_SOUTH_EAST, BooleanOp.OR);
+            if (!south && !west)
+                combinedShape = Shapes.join(combinedShape, FEET_SOUTH_WEST, BooleanOp.OR);
+            if (!north && !west)
+                combinedShape = Shapes.join(combinedShape, FEET_NORTH_WEST, BooleanOp.OR);
+
+            NORTH_SHAPES.put((byte) i, combinedShape);
+            EAST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.WEST));
+            SOUTH_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.SOUTH));
+            WEST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.EAST));
+        }
+    }
 
     private final WoodType wood;
 
@@ -51,6 +92,7 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
 
     @Override
     protected @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
+        super.updateShape(state, direction, neighborState, level, pos, neighborPos);
         int layer = state.getValue(LAYER);
         FurnitureData data = FurnitureData.get(level, pos, layer);
         return computeState(level, pos, state, data);
@@ -96,7 +138,18 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
 
     @Override
     protected VoxelShape getShapes(BlockState state, Direction facing) {
-        return Shapes.block();
+        int key = 0;
+        if (state.getValue(NORTH)) key |= 1;
+        if (state.getValue(EAST)) key |= 2;
+        if (state.getValue(SOUTH)) key |= 4;
+        if (state.getValue(WEST)) key |= 8;
+        return switch (facing) {
+            case NORTH -> NORTH_SHAPES.get((byte) key);
+            case EAST -> EAST_SHAPES.get((byte) key);
+            case SOUTH -> SOUTH_SHAPES.get((byte) key);
+            case WEST -> WEST_SHAPES.get((byte) key);
+            default -> throw new IllegalStateException("Unexpected value: " + facing);
+        };
     }
 
     @Override

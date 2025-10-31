@@ -20,7 +20,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FastColor;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -154,25 +153,26 @@ public class LocalFurnitureData {
             return;
         }
 
+        VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
         levelMap.forEach((regionPos, regionMap) -> {
             regionMap.forEach((regionLocalBlockPos, packedFurnitureData) -> {
                 BlockPos blockPos = FurnitureUtils.regionLocalBlockPosToBlockPos(regionPos, regionLocalBlockPos);
                 FurnitureData[] layers = FurnitureUtils.unpackFurnitureDataLayers(packedFurnitureData);
                 for(int layer = 0; layer < layers.length; layer++) {
-                    renderFurnitureBlockDebug(blockPos, layers[layer], camera, poseStack, bufferSource, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
+                    renderFurnitureBlockDebug(blockPos, layers[layer], camera, poseStack, lineConsumer, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
                 }
 
                 IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-                if(server != null) {
-                    renderServerFurnitureShapeDebug(server, level, blockPos, camera, poseStack, bufferSource, regionPos, regionLocalBlockPos);
+                if(server != null && camera.getEntity().isShiftKeyDown()) {
+                    renderServerFurnitureShapeDebug(server, level, blockPos, camera, poseStack, lineConsumer, regionPos, regionLocalBlockPos);
                 }else{
-                    renderClientFurnitureShapeDebug(level, regionPos, regionLocalBlockPos, blockPos, camera, poseStack, bufferSource);
+                    renderClientFurnitureShapeDebug(level, regionPos, regionLocalBlockPos, blockPos, camera, poseStack, lineConsumer);
                 }
             });
         });
     }
 
-    private static void renderServerFurnitureShapeDebug(IntegratedServer server, Level level, BlockPos blockPos, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource, Long regionPos, Integer regionLocalBlockPos) {
+    private static void renderServerFurnitureShapeDebug(IntegratedServer server, Level level, BlockPos blockPos, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, Long regionPos, Integer regionLocalBlockPos) {
         Vec3 pos = Vec3.atLowerCornerOf(blockPos);
         poseStack.pushPose();
         poseStack.translate(pos.x- camera.getPosition().x, pos.y- camera.getPosition().y, pos.z- camera.getPosition().z);
@@ -181,15 +181,14 @@ public class LocalFurnitureData {
             VoxelShape shape = RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).getCachedShape(regionLocalBlockPos);
             if(shape != null) {
                 shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                    VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
-                    LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, 1f, 1f, 1f, 1f);
+                    LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, 0f, 0f, 1f, 1f);
                 });
             }
         }
         poseStack.popPose();
     }
 
-    private static void renderClientFurnitureShapeDebug(Level level, long regionPos, int regionLocalBlockPos, BlockPos blockPos, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
+    private static void renderClientFurnitureShapeDebug(Level level, long regionPos, int regionLocalBlockPos, BlockPos blockPos, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer) {
         Vec3 pos = Vec3.atLowerCornerOf(blockPos);
         poseStack.pushPose();
         poseStack.translate(pos.x- camera.getPosition().x, pos.y- camera.getPosition().y, pos.z- camera.getPosition().z);
@@ -200,7 +199,6 @@ public class LocalFurnitureData {
                 VoxelShape shape = shapeRegionMap.get(regionLocalBlockPos);
                 if(shape != null) {
                     shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                        VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
                         LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, 1f, 1f, 1f, 1f);
                     });
                 }
@@ -209,7 +207,7 @@ public class LocalFurnitureData {
         poseStack.popPose();
     }
 
-    private static void renderFurnitureBlockDebug(BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource, int color) {
+    private static void renderFurnitureBlockDebug(BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int color) {
         Vec3 pos = Vec3.atLowerCornerOf(blockPos);
 
         poseStack.pushPose();
@@ -221,7 +219,6 @@ public class LocalFurnitureData {
         float green = FastColor.ARGB32.green(color)/255f;
         float blue = FastColor.ARGB32.blue(color)/255f;
 
-        VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
         if(data.hasOriginal() || toOriginal != null) {
 
             LevelRenderer.renderLineBox(poseStack, lineConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 1f);
@@ -230,8 +227,7 @@ public class LocalFurnitureData {
                 RenderHelper.renderArrow(poseStack, lineConsumer, new Vec3(0.5, 0.5, 0.5), vector, red, green, blue, 1f);
             }
             if(data.hasOriginal()) {
-                VertexConsumer atlasConsumer = bufferSource.getBuffer(RenderType.entityTranslucent(InventoryMenu.BLOCK_ATLAS));
-                RenderHelper.renderFilledBox(poseStack, atlasConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 0.3f);
+                RenderHelper.renderCrossedCube(poseStack, lineConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 1f);
             }
         }
 
