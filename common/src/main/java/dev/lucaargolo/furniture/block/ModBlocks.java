@@ -30,6 +30,7 @@ public class ModBlocks {
     public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerWoodTable("table", TableBlock::new, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureBlock>> COFFEE_TABLE_MAP = registerForWoodType("coffee_table", WoodFurnitureBlock::new, ModBlockShapes.COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<SmallStoolBlock>> SMALL_STOOL_MAP = registerForWoodType("small_stool", SmallStoolBlock::new, ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<OutdoorBenchBlock>> OUTDOOR_BENCH_MAP = registerForWoodType("outdoor_bench", OutdoorBenchBlock::new, ModBlockShapes.OUTDOOR_BENCH, BlockTags.MINEABLE_WITH_AXE);
 
     public static Supplier<MetalLightFurnitureBlock> LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<MetalLightFurnitureBlock> DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);

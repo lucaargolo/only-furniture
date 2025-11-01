@@ -44,7 +44,7 @@ public class DataHelper {
         }
     }
 
-    private static final Set<String> ADJECTIVES = Set.of("small", "large", "medium");
+    private static final Set<String> ADJECTIVES = Set.of("small", "large", "medium", "outdoor", "indoor");
 
     public static String woodBlockTranslation(WoodType wood, String string) {
         String[] words = string.replace(wood.name()+"_", "").replace("_", " ").split(" ");

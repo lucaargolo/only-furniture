@@ -1,10 +1,7 @@
 package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.block.MetalBlock;
-import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.block.TableBlock;
-import dev.lucaargolo.furniture.block.WoodBlock;
+import dev.lucaargolo.furniture.block.*;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -63,8 +60,13 @@ public class ModModelProvider extends FabricModelProvider {
                 addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R180, null, null, false, false);
                 addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
                 blockModelGenerators.blockStateOutput.accept(tableSupplier);
-
-
+            }else if(block instanceof OutdoorBenchBlock furniture) {
+                ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+entry.path().replace(furniture.getWood().name()+"_", ""))), Optional.empty(), PLANKS, METAL, TextureSlot.PARTICLE);
+                TextureMapping mapping = new TextureMapping();
+                mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));
+                mapping.put(METAL, DataHelper.getMetal(furniture.getMetal(), furniture.getAge()));
+                mapping.put(TextureSlot.PARTICLE, DataHelper.getWoodLog(furniture.getWood()));
+                blockModelGenerators.createTrivialBlock(block, mapping, template);
             }else if(block instanceof WoodBlock furniture) {
                 ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+entry.path().replace(furniture.getWood().name()+"_", ""))), Optional.empty(), LOG, PLANKS, TextureSlot.PARTICLE);
                 TextureMapping mapping = new TextureMapping();

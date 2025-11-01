@@ -16,7 +16,7 @@ public class VoxelShapeUtils {
 
         for (int i = 0; i < times; i++) {
             buffer[0].forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                buffer[1] = Shapes.or(buffer[1], Shapes.create(1 - maxZ, minY, minX, 1 - minZ, maxY, maxX));
+                buffer[1] = Shapes.or(buffer[1], Shapes.create(minZ, minY, 1 - maxX, maxZ, maxY, 1 - minX));
             });
             buffer[0] = buffer[1];
             buffer[1] = Shapes.empty();

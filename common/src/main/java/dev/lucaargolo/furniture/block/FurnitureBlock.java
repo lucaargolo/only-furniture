@@ -294,15 +294,19 @@ public class FurnitureBlock extends Block {
     protected final @NotNull VoxelShape getCollisionShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
         List<FurnitureShape> shapes = this.getAllShapes(pLevel, pPos);
         if(shapes.isEmpty()) {
-            return Shapes.block();
+            return Shapes.empty();
         }else{
             return FurnitureData.cachedShape(pLevel, pPos, () -> {
-                Iterator<FurnitureShape> iterator = shapes.iterator();
-                VoxelShape shape = iterator.next().shape();
-                while (iterator.hasNext()) {
-                    shape = Shapes.joinUnoptimized(shape, iterator.next().shape(), BooleanOp.OR);
+                if(shapes.size() == 1) {
+                    return shapes.getFirst();
+                }else {
+                    Iterator<FurnitureShape> iterator = shapes.iterator();
+                    VoxelShape shape = iterator.next().shape();
+                    while (iterator.hasNext()) {
+                        shape = Shapes.joinUnoptimized(shape, iterator.next().shape(), BooleanOp.OR);
+                    }
+                    return shape;
                 }
-                return shape;
             });
         }
     }
@@ -383,7 +387,7 @@ public class FurnitureBlock extends Block {
                 poseStack.pushPose();
                 poseStack.translate(offsetPos.x - camera.getPosition().x, offsetPos.y - camera.getPosition().y, offsetPos.z - camera.getPosition().z);
                 Direction facing = Direction.fromYRot(data.getRotation() + 180);
-                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
+                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot() - 180));
                 poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
 
                 LevelRendererAccessor.invokeRenderShape(poseStack, consumer, shape, (double) pos.getX() - offsetPos.x, (double) pos.getY() - offsetPos.y, (double) pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);

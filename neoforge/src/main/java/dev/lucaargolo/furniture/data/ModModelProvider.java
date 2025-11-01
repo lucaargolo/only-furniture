@@ -1,10 +1,7 @@
 package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.block.MetalBlock;
-import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.block.TableBlock;
-import dev.lucaargolo.furniture.block.WoodBlock;
+import dev.lucaargolo.furniture.block.*;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -53,7 +50,14 @@ public class ModModelProvider extends BlockStateProvider {
                 addDirectionPart(tableBuilder.part(), this.modLoc(feetPath), 180, null, null, false, false);
                 addDirectionPart(tableBuilder.part(), this.modLoc(feetPath), 270, false, null, null, false);
             }else {
-                if (block instanceof WoodBlock furniture) {
+                if(block instanceof OutdoorBenchBlock furniture) {
+                    ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/" + entry.path().replace(furniture.getWood().name() + "_", "")));
+                    this.models().getBuilder("block/" + entry.path())
+                            .parent(parentModel)
+                            .texture("planks", DataHelper.getWoodPlanks(furniture.getWood()))
+                            .texture("metal", DataHelper.getMetal(furniture.getMetal(), furniture.getAge()))
+                            .texture("particle", DataHelper.getWoodLog(furniture.getWood()));
+                }else if (block instanceof WoodBlock furniture) {
                     ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/" + entry.path().replace(furniture.getWood().name() + "_", "")));
                     this.models().getBuilder("block/" + entry.path())
                             .parent(parentModel)

@@ -59,9 +59,9 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
                 combinedShape = Shapes.join(combinedShape, FEET_NORTH_WEST, BooleanOp.OR);
 
             NORTH_SHAPES.put((byte) i, combinedShape);
-            EAST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.WEST));
+            EAST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.EAST));
             SOUTH_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.SOUTH));
-            WEST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.EAST));
+            WEST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.WEST));
         }
     }
 

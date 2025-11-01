@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.utils;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.lucaargolo.furniture.block.FurnitureSeatBlock;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
@@ -22,6 +23,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -159,7 +162,7 @@ public class LocalFurnitureData {
                 BlockPos blockPos = FurnitureUtils.regionLocalBlockPosToBlockPos(regionPos, regionLocalBlockPos);
                 FurnitureData[] layers = FurnitureUtils.unpackFurnitureDataLayers(packedFurnitureData);
                 for(int layer = 0; layer < layers.length; layer++) {
-                    renderFurnitureBlockDebug(blockPos, layers[layer], camera, poseStack, lineConsumer, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
+                    renderFurnitureBlockDebug(level, blockPos, layers[layer], camera, poseStack, lineConsumer, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
                 }
 
                 IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
@@ -207,7 +210,7 @@ public class LocalFurnitureData {
         poseStack.popPose();
     }
 
-    private static void renderFurnitureBlockDebug(BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int color) {
+    private static void renderFurnitureBlockDebug(Level level, BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int color) {
         Vec3 pos = Vec3.atLowerCornerOf(blockPos);
 
         poseStack.pushPose();
@@ -219,8 +222,19 @@ public class LocalFurnitureData {
         float green = FastColor.ARGB32.green(color)/255f;
         float blue = FastColor.ARGB32.blue(color)/255f;
 
-        if(data.hasOriginal() || toOriginal != null) {
+        if(data.hasOriginal()) {
+            BlockState state = level.getBlockState(blockPos);
+            if(state.getBlock() instanceof FurnitureSeatBlock block) {
+                Vec3[] seats = block.getSeats();
+                for(int i = 0; i < seats.length; i++) {
+                    Vec3 position = block.getPositionForSeat(data, blockPos, i).subtract(pos);
+                    AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
+                    LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);
+                }
+            }
+        }
 
+        if(data.hasOriginal() || toOriginal != null) {
             LevelRenderer.renderLineBox(poseStack, lineConsumer, 0.001f, 0.001f, 0.001f, 0.999f, 0.999f, 0.999f, red, green, blue, 1f);
             if(toOriginal != null) {
                 Vec3 vector = new Vec3(toOriginal.getStepX(), toOriginal.getStepY(), toOriginal.getStepZ()).multiply(0.5, 0.5, 0.5);

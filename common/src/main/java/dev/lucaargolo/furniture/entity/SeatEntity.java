@@ -46,69 +46,63 @@ import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class SeatEntity extends Entity {
+
+    private BlockPos blockPos = null;
 
     public SeatEntity(EntityType<SeatEntity> entityType, Level level) {
         super(entityType, level);
         this.noPhysics = true;
     }
 
-    public SeatEntity(Level level, Vec3 pos) {
+    public SeatEntity(Level level, Vec3 pos, BlockPos blockPos) {
         this(ModEntityTypes.SEAT.get(), level);
+        this.blockPos = blockPos;
         this.setPos(pos);
     }
+
     @Override
     public void tick() {
         if (this.level().isClientSide) return;
-        if (isVehicle()) return;
+        if (this.blockPos != null && this.level().getBlockState(this.blockPos).getBlock() instanceof FurnitureSeatBlock && isVehicle()) return;
 
         this.discard();
-        this.level().updateNeighbourForOutputSignal(this.blockPosition(), this.level().getBlockState(this.blockPosition()).getBlock());
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {}
 
     @Override
-    protected void readAdditionalSaveData(@NotNull CompoundTag compound) {}
-
-    @Override
-    protected void addAdditionalSaveData(@NotNull CompoundTag compound) {}
-
-    @Override
-    public @NotNull Vec3 getPassengerRidingPosition(@NotNull Entity entity) {
-        return this.position().add(new Vec3(0.0, getPassengersRidingOffset(), 0.0));
+    protected void readAdditionalSaveData(@NotNull CompoundTag compound) {
+        if(this.blockPos != null) {
+            compound.putLong("BlockPos", this.blockPos.asLong());
+        }
     }
 
-    public double getPassengersRidingOffset() {
-        List<Entity> passengers = this.getPassengers();
-        if (passengers.isEmpty()) return 0.0;
-        double seatHeight = 0.0;
-        BlockState state = this.level().getBlockState(this.blockPosition());
-        if (state.getBlock() instanceof FurnitureSeatBlock seatBlock) seatHeight = seatBlock.getSeatHeight();
-
-        return seatHeight + getEntitySeatOffset(passengers.getFirst());
-    }
-
-    public static double getEntitySeatOffset(Entity entity) {
-        if (entity instanceof Slime) return 1 / 4f;
-        if (entity instanceof Parrot) return 1 / 16f;
-        if (entity instanceof Skeleton) return 1 / 8f;
-        if (entity instanceof Creeper) return 1 / 4f;
-        if (entity instanceof Cat) return 1 / 8f;
-        if (entity instanceof Wolf) return 1 / 16f;
-        return 0;
+    @Override
+    protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
+        if(compound.contains("BlockPos")) {
+            this.blockPos = BlockPos.of(compound.getLong("BlockPos"));
+        }
     }
 
     @Override
     protected boolean canRide(@NotNull Entity entity) {
         return true;
+    }
+
+    @Override
+    public @NotNull Vec3 getPassengerRidingPosition(@NotNull Entity entity) {
+        return this.position().add(new Vec3(0.0, getEntitySeatOffset(entity), 0.0));
+    }
+
+    @Override
+    protected void removePassenger(@NotNull Entity entity) {
+        super.removePassenger(entity);
+        if (entity instanceof TamableAnimal ta) ta.setInSittingPose(false);
     }
 
     @Override
@@ -131,9 +125,14 @@ public class SeatEntity extends Entity {
         return super.getDismountLocationForPassenger(entity);
     }
 
-    @Override
-    protected void removePassenger(@NotNull Entity entity) {
-        super.removePassenger(entity);
-        if (entity instanceof TamableAnimal ta) ta.setInSittingPose(false);
+    private static double getEntitySeatOffset(Entity entity) {
+        if (entity instanceof Slime) return 1 / 4f;
+        if (entity instanceof Parrot) return 1 / 16f;
+        if (entity instanceof Skeleton) return 1 / 8f;
+        if (entity instanceof Creeper) return 1 / 4f;
+        if (entity instanceof Cat) return 1 / 8f;
+        if (entity instanceof Wolf) return 1 / 16f;
+        return 0;
     }
+
 }
