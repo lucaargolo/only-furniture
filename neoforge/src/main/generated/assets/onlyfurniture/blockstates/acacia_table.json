@@ -1,0 +1,48 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "onlyfurniture:block/acacia_table_center"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/acacia_table_feet"
+      },
+      "when": {
+        "east": "false",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/acacia_table_feet",
+        "y": 90
+      },
+      "when": {
+        "east": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/acacia_table_feet",
+        "y": 180
+      },
+      "when": {
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/acacia_table_feet",
+        "y": 270
+      },
+      "when": {
+        "north": "false",
+        "west": "false"
+      }
+    }
+  ]
+}

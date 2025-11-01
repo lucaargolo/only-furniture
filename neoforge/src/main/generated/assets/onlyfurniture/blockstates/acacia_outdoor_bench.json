@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "layer=0": {
+      "model": "onlyfurniture:block/acacia_outdoor_bench"
+    },
+    "layer=1": {
+      "model": "onlyfurniture:block/acacia_outdoor_bench"
+    },
+    "layer=2": {
+      "model": "onlyfurniture:block/acacia_outdoor_bench"
+    },
+    "layer=3": {
+      "model": "onlyfurniture:block/acacia_outdoor_bench"
+    }
+  }
+}

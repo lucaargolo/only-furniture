@@ -1,8 +1,0 @@
-{
-  "parent": "furniture:block/small_stool",
-  "textures": {
-    "log": "minecraft:block/jungle_log",
-    "particle": "minecraft:block/jungle_log",
-    "planks": "minecraft:block/jungle_planks"
-  }
-}

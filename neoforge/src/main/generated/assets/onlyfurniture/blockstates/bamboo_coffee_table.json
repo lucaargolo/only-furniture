@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "layer=0": {
+      "model": "onlyfurniture:block/bamboo_coffee_table"
+    },
+    "layer=1": {
+      "model": "onlyfurniture:block/bamboo_coffee_table"
+    },
+    "layer=2": {
+      "model": "onlyfurniture:block/bamboo_coffee_table"
+    },
+    "layer=3": {
+      "model": "onlyfurniture:block/bamboo_coffee_table"
+    }
+  }
+}

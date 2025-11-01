@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/table_feet",
+  "textures": {
+    "log": "minecraft:block/jungle_log",
+    "particle": "minecraft:block/jungle_log"
+  }
+}

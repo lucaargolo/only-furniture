@@ -1,0 +1,8 @@
+{
+  "parent": "onlyfurniture:block/chair",
+  "textures": {
+    "log": "minecraft:block/crimson_stem",
+    "particle": "minecraft:block/crimson_stem",
+    "planks": "minecraft:block/crimson_planks"
+  }
+}

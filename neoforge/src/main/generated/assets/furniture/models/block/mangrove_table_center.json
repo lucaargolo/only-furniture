@@ -1,7 +1,0 @@
-{
-  "parent": "furniture:block/table_center",
-  "textures": {
-    "particle": "minecraft:block/mangrove_log",
-    "planks": "minecraft:block/mangrove_planks"
-  }
-}

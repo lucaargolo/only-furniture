@@ -1,7 +1,0 @@
-{
-  "parent": "furniture:block/dual_lamp_post",
-  "textures": {
-    "metal": "minecraft:block/anvil",
-    "particle": "minecraft:block/anvil"
-  }
-}

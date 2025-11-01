@@ -1,8 +1,0 @@
-{
-  "parent": "furniture:block/outdoor_bench",
-  "textures": {
-    "metal": "minecraft:block/anvil",
-    "particle": "minecraft:block/jungle_log",
-    "planks": "minecraft:block/jungle_planks"
-  }
-}

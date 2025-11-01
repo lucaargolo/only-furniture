@@ -1,0 +1,8 @@
+{
+  "parent": "onlyfurniture:block/small_stool",
+  "textures": {
+    "log": "minecraft:block/oak_log",
+    "particle": "minecraft:block/oak_log",
+    "planks": "minecraft:block/oak_planks"
+  }
+}

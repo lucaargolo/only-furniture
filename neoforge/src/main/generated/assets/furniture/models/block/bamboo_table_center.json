@@ -1,7 +1,0 @@
-{
-  "parent": "furniture:block/table_center",
-  "textures": {
-    "particle": "minecraft:block/bamboo_stalk",
-    "planks": "minecraft:block/bamboo_planks"
-  }
-}
