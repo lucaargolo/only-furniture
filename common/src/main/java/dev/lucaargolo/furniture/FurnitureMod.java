@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unchecked")
 public abstract class FurnitureMod {
 
-    public static final String MOD_ID = "furniture";
-    public static final String MOD_NAME = "Furniture Mod";
+    public static final String MOD_ID = "onlyfurniture";
+    public static final String MOD_NAME = "Only Furniture";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
 
     public static FurnitureMod INSTANCE;

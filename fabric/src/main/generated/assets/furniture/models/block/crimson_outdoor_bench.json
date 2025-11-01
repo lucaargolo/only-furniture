@@ -1,8 +1,0 @@
-{
-  "parent": "furniture:block/outdoor_bench",
-  "textures": {
-    "metal": "minecraft:block/anvil",
-    "particle": "minecraft:block/crimson_stem",
-    "planks": "minecraft:block/crimson_planks"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "parent": "furniture:block/coffee_table",
-  "textures": {
-    "log": "minecraft:block/bamboo_stalk",
-    "particle": "minecraft:block/bamboo_stalk",
-    "planks": "minecraft:block/bamboo_planks"
-  }
-}

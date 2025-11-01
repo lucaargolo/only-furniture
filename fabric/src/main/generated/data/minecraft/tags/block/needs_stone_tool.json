@@ -1,7 +1,7 @@
 {
   "values": [
-    "furniture:iron_dual_lamp_post",
-    "furniture:iron_triple_lamp_post",
-    "furniture:iron_lamp_post"
+    "onlyfurniture:iron_dual_lamp_post",
+    "onlyfurniture:iron_triple_lamp_post",
+    "onlyfurniture:iron_lamp_post"
   ]
 }
