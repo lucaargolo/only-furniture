@@ -6,7 +6,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.level.ChunkWatchEvent;
@@ -18,15 +18,12 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
 
     public NeoForgeFurnitureMod(IEventBus modBus) {
         this.modBus = modBus;
-        this.modBus.addListener(this::onClientInit);
+        this.init();
         NeoForge.EVENT_BUS.addListener(this::onChunkWatch);
         NeoForge.EVENT_BUS.addListener(this::onChunkUnwatch);
-        this.init();
-    }
-
-    @SubscribeEvent
-    public void onClientInit(FMLClientSetupEvent event) {
-        this.loadPlatformClass(FurnitureModClient.class);
+        if(FMLEnvironment.dist.isClient()) {
+            this.loadPlatformClass(FurnitureModClient.class);
+        }
     }
 
     @SubscribeEvent
