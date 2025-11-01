@@ -6,6 +6,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ModBlockShapes {
 
+    public static VoxelShape[] CHAIR = new VoxelShape[] {
+        Block.box(3, 7, 12, 13, 24, 13),
+        Block.box(3, 0, 3, 13, 7, 13)
+    };
+
     public static VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
         Shapes.box(0.125,0,0.125,0.875,0.625,0.875),
         Shapes.box(0,0.625,0.125,1,0.75,0.875),

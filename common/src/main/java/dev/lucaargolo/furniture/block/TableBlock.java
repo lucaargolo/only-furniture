@@ -31,9 +31,9 @@ public class TableBlock extends FurnitureBlock implements WoodBlock {
     private static final VoxelShape CENTER = Block.box(0, 12, 0, 16, 16, 16);
 
     private static final VoxelShape FEET_NORTH_EAST = Block.box(11, 0, 2, 14, 12, 5);
-    private static final VoxelShape FEET_SOUTH_EAST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.EAST);
+    private static final VoxelShape FEET_NORTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.EAST);
     private static final VoxelShape FEET_SOUTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.SOUTH);
-    private static final VoxelShape FEET_NORTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.WEST);
+    private static final VoxelShape FEET_SOUTH_EAST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.WEST);
 
     private static final Byte2ObjectMap<VoxelShape> NORTH_SHAPES = new Byte2ObjectOpenHashMap<>();
     private static final Byte2ObjectMap<VoxelShape> EAST_SHAPES = new Byte2ObjectOpenHashMap<>();
