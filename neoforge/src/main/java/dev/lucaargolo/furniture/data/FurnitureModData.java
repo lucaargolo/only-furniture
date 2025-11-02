@@ -22,10 +22,10 @@ public class FurnitureModData {
         ExistingFileHelper exFileHelper = event.getExistingFileHelper();
         DatapackBuiltinEntriesProvider builtinProvider = new DatapackBuiltinEntriesProvider(output, event.getLookupProvider(), bootstrapRegistries(), Set.of(FurnitureMod.MOD_ID));
         generator.addProvider(true, builtinProvider);
-        generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
+        generator.addProvider(event.includeClient(), new NeoForgeModLanguageProvider(output));
         generator.addProvider(event.includeClient(), new ModModelProvider(output, exFileHelper));
-        generator.addProvider(event.includeServer(), ModTagsProvider.item(output, event.getLookupProvider(), exFileHelper));
-        generator.addProvider(event.includeServer(), ModTagsProvider.block(output, event.getLookupProvider(), exFileHelper));
+        generator.addProvider(event.includeServer(), NeoForgeModTagProvider.item(output, event.getLookupProvider(), exFileHelper));
+        generator.addProvider(event.includeServer(), NeoForgeModTagProvider.block(output, event.getLookupProvider(), exFileHelper));
         generator.addProvider(event.includeServer(), new ModLootProvider(output, event.getLookupProvider()));
         generator.addProvider(event.includeServer(), new ModDataMapProvider(output, event.getLookupProvider()));
     }
