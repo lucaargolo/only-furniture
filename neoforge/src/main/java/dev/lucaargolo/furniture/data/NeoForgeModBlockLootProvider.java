@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.data.builder.ModBlockLootBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.world.flag.FeatureFlags;

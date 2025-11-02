@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.ModRegistry;
+import dev.lucaargolo.furniture.data.builder.ModTagBuilder;
 import net.minecraft.tags.TagKey;
 
 import java.util.Arrays;

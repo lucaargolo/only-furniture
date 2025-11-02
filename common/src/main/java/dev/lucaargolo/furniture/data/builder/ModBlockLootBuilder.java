@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.data;
+package dev.lucaargolo.furniture.data.builder;
 
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;

@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.data.builder.ModTagBuilder;
 import dev.lucaargolo.furniture.item.ModItems;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;

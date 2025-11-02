@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.data;
+package dev.lucaargolo.furniture.data.builder;
 
 import net.minecraft.resources.ResourceLocation;
 

@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.data;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.data.builder.ModTagBuilder;
 import dev.lucaargolo.furniture.item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;

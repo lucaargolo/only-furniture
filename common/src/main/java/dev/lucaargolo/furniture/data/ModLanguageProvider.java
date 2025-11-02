@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.data;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.WoodBlock;
+import dev.lucaargolo.furniture.data.builder.ModLanguageBuilder;
 import net.minecraft.world.level.block.Block;
 
 public interface ModLanguageProvider {
