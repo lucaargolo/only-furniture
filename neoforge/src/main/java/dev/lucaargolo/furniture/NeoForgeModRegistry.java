@@ -7,14 +7,14 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
-    private final Map<String, ModEntry<? extends T>> entries = new HashMap<>();
+    private final Map<String, ModEntry<? extends T>> entries = new LinkedHashMap<>();
     private final DeferredRegister<T> registry;
     private int id = 0;
 
@@ -39,7 +39,6 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     public @NotNull Iterator<ModEntry<? extends T>> iterator() {
         return entries.values().iterator();
     }
-
 
     @Override
     @Nullable

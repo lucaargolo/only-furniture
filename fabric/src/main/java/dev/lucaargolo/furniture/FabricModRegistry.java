@@ -7,15 +7,15 @@ import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public class FabricModRegistry<T> extends ModRegistry<T> {
 
-    private final Map<String, ModEntry<? extends T>> entries = new HashMap<>();
+    private final Map<String, ModEntry<? extends T>> entries = new LinkedHashMap<>();
     private final Registry<T> registry;
     private int id = 0;
 

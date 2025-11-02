@@ -54,6 +54,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector4f;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,43 +73,54 @@ public class FurnitureSeatBlock extends FurnitureBlock {
 
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        if(tryAndSit(level, pos, player)) {
+        if(tryAndSit(level, pos, player, hitResult)) {
             return InteractionResult.SUCCESS;
         }else{
             return InteractionResult.PASS;
         }
     }
 
-    public boolean tryAndSit(@NotNull Level level, @NotNull BlockPos pos, @NotNull Player player) {
+    public boolean tryAndSit(@NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         if (FurnitureMod.INSTANCE.isFakePlayer(player)) return false;
         if (!level.mayInteract(player, pos)) return false;
         if (player.isPassenger() || player.isCrouching()) return false;
-
-        Int2ObjectMap<SeatEntity> seats = this.getActiveSeats(level, pos);
-        int seatIndex = -1;
-        for (int i = 0; i < this.seats.length; i++) {
-            if(!seats.containsKey(i)) {
-                seatIndex = i;
-                break;
-            }
-        }
-        if (seatIndex == -1) {
-            for (int i = 0; i < this.seats.length; i++) {
-                if(seats.containsKey(i) && ejectSeatedExceptPlayer(level, seats.get(i))) {
-                    seatIndex = i;
-                    break;
+        FurnitureData[] layers = FurnitureData.get(level, pos);
+        for(FurnitureData data : layers) {
+            if (data.hasOriginal()) {
+                Int2ObjectMap<SeatEntity> activeSeats = this.getActiveSeats(level, pos);
+                Int2ObjectMap<Vec3> freeSeats = new Int2ObjectArrayMap<>();
+                if (freeSeats.isEmpty()) {
+                    for (int i = 0; i < this.seats.length; i++) {
+                        if (!activeSeats.containsKey(i)) {
+                            freeSeats.put(i, getPositionForSeat(data, pos, i));
+                        }
+                    }
                 }
+
+                if (freeSeats.isEmpty()) {
+                    for (int i = 0; i < this.seats.length; i++) {
+                        if (activeSeats.containsKey(i) && ejectSeatedExceptPlayer(level, activeSeats.get(i))) {
+                            freeSeats.put(i, getPositionForSeat(data, pos, i));
+                            break;
+                        }
+                    }
+                }
+
+                if (freeSeats.isEmpty()) {
+                    return false;
+                }
+
+                if (!level.isClientSide) {
+                    int seat = freeSeats.int2ObjectEntrySet().stream()
+                            .min(Comparator.comparingDouble(e -> e.getValue().distanceToSqr(hitResult.getLocation())))
+                            .map(Int2ObjectMap.Entry::getIntKey)
+                            .orElseThrow();
+                    sitDown(level, pos, getLeashed(player).orElse(player), seat);
+                }
+                return true;
             }
         }
-
-        if (seatIndex == -1) {
-            return false;
-        }
-
-        if (!level.isClientSide)  {
-            sitDown(level, pos, getLeashed(player).orElse(player), seatIndex);
-        }
-        return true;
+        return false;
     }
 
     private void sitDown(Level level, BlockPos pos, Entity entity, int index) {

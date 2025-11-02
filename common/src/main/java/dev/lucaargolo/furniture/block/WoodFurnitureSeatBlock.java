@@ -9,9 +9,13 @@ public class WoodFurnitureSeatBlock extends FurnitureSeatBlock implements WoodBl
 
     private final WoodType wood;
 
-    public WoodFurnitureSeatBlock(Block base, WoodType wood, VoxelShape[] shapes) {
-        super(base, shapes, new Vec3(0.0, 0.375, 0.0));
+    public WoodFurnitureSeatBlock(Block base, WoodType wood, VoxelShape[] shapes, Vec3... seats) {
+        super(base, shapes, seats);
         this.wood = wood;
+    }
+
+    public WoodFurnitureSeatBlock(Block base, WoodType wood, VoxelShape[] shapes) {
+        this(base, wood, shapes, new Vec3(0.0, 0.375, 0.0));
     }
 
     @Override

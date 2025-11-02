@@ -38,6 +38,41 @@ public class ModBlockShapes {
         Block.box(-8, 6, 2, 24, 7, 5)
     };
 
+    public static VoxelShape[] PICNIC_BENCH = new VoxelShape[] {
+        Block.box(26, 0, 18, 28, 2, 21),
+        Block.box(-16, 6, -12, 32, 8, -4),
+        Block.box(-16, 6, 20, 32, 8, 28),
+        Block.box(-14, 4, 22, 30, 6, 26),
+        Block.box(-14, 4, -10, 30, 6, -6),
+        Block.box(28, 4, -6, 30, 6, 22),
+        Block.box(-14, 4, -6, -12, 6, 22),
+        Block.box(-16, 14, -4, 32, 16, 20),
+        Block.box(-12, 12, 1, 28, 14, 15),
+        Block.box(-12, 0, -5, -10, 2, -2),
+        Block.box(-12, 2, -4, -10, 4, -1),
+        Block.box(-12, 4, -3, -10, 6, 0),
+        Block.box(-12, 6, -2, -10, 8, 1),
+        Block.box(-12, 10, 0, -10, 12, 3),
+        Block.box(-12, 8, -1, -10, 10, 2),
+        Block.box(26, 8, -1, 28, 10, 2),
+        Block.box(26, 10, 0, 28, 12, 3),
+        Block.box(26, 6, -2, 28, 8, 1),
+        Block.box(26, 4, -3, 28, 6, 0),
+        Block.box(26, 2, -4, 28, 4, -1),
+        Block.box(26, 0, -5, 28, 2, -2),
+        Block.box(-12, 8, 14, -10, 10, 17),
+        Block.box(-12, 10, 13, -10, 12, 16),
+        Block.box(-12, 6, 15, -10, 8, 18),
+        Block.box(-12, 4, 16, -10, 6, 19),
+        Block.box(-12, 2, 17, -10, 4, 20),
+        Block.box(-12, 0, 18, -10, 2, 21),
+        Block.box(26, 8, 14, 28, 10, 17),
+        Block.box(26, 10, 13, 28, 12, 16),
+        Block.box(26, 6, 15, 28, 8, 18),
+        Block.box(26, 4, 16, 28, 6, 19),
+        Block.box(26, 2, 17, 28, 4, 20)
+    };
+
     public static VoxelShape[] LAMP_POST = new VoxelShape[] {
         Shapes.box(0.1875,0,0.1875,0.8125,0.125,0.8125),
         Shapes.box(0.375,0.125,0.375,0.625,0.75,0.625),

@@ -50,7 +50,7 @@ public class ModModelProvider extends BlockStateProvider {
                 addDirectionPart(tableBuilder.part(), this.modLoc(feetPath), 180, null, null, false, false);
                 addDirectionPart(tableBuilder.part(), this.modLoc(feetPath), 270, false, null, null, false);
             }else {
-                if(block instanceof OutdoorBenchBlock furniture) {
+                if(block instanceof MetalWoodFurnitureSeatBlock furniture) {
                     ModelFile parentModel = this.models().getExistingFile(FurnitureMod.id("block/" + entry.path().replace(furniture.getWood().name() + "_", "")));
                     this.models().getBuilder("block/" + entry.path())
                             .parent(parentModel)

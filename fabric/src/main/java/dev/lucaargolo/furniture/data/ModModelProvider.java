@@ -60,7 +60,7 @@ public class ModModelProvider extends FabricModelProvider {
                 addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R180, null, null, false, false);
                 addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
                 blockModelGenerators.blockStateOutput.accept(tableSupplier);
-            }else if(block instanceof OutdoorBenchBlock furniture) {
+            }else if(block instanceof MetalWoodFurnitureSeatBlock furniture) {
                 ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+entry.path().replace(furniture.getWood().name()+"_", ""))), Optional.empty(), PLANKS, METAL, TextureSlot.PARTICLE);
                 TextureMapping mapping = new TextureMapping();
                 mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));

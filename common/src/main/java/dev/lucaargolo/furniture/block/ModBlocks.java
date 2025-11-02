@@ -13,6 +13,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.function.TriFunction;
 
@@ -27,11 +28,19 @@ public class ModBlocks {
     public static final ModRegistry<Block> BLOCKS = FurnitureMod.INSTANCE.registry(Registries.BLOCK);
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
+
     public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerWoodTable("table", TableBlock::new, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
-    public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> CHAIR_MAP = registerForWoodType("chair", WoodFurnitureSeatBlock::new, ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureBlock>> COFFEE_TABLE_MAP = registerForWoodType("coffee_table", WoodFurnitureBlock::new, ModBlockShapes.COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> SMALL_STOOL_MAP = registerForWoodType("small_stool", WoodFurnitureSeatBlock::new, ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
-    public static final Map<WoodType, Supplier<OutdoorBenchBlock>> OUTDOOR_BENCH_MAP = registerForWoodType("outdoor_bench", OutdoorBenchBlock::new, ModBlockShapes.OUTDOOR_BENCH, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> CHAIR_MAP = registerForWoodType("chair", WoodFurnitureSeatBlock::new, ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
+
+    public static final Map<WoodType, Supplier<MetalWoodFurnitureSeatBlock>> OUTDOOR_BENCH_MAP = registerForWoodType("outdoor_bench", (base, wood, shapes) -> {
+        return new MetalWoodFurnitureSeatBlock(base, MetalBlock.MetalType.IRON, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes, new Vec3(-0.5, 0.5, 0.0), new Vec3(0.5, 0.5, 0.0));
+    }, ModBlockShapes.OUTDOOR_BENCH, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> PICNIC_BENCH_MAP = registerForWoodType("picnic_bench", (base, wood, shapes) -> {
+        return new WoodFurnitureSeatBlock(base, wood, shapes, new Vec3(-1.0, 0.5, 1.0), new Vec3(0.0, 0.5, 1.0), new Vec3(1.0, 0.5, 1.0), new Vec3(-1.0, 0.5, -1.0), new Vec3(0.0, 0.5, -1.0), new Vec3(1.0, 0.5, -1.0));
+    }, ModBlockShapes.PICNIC_BENCH, BlockTags.MINEABLE_WITH_AXE);
+
 
     public static Supplier<MetalLightFurnitureBlock> LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<MetalLightFurnitureBlock> DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);

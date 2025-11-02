@@ -15,6 +15,7 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("itemGroup."+FurnitureMod.MOD_ID+".creative_tab", FurnitureMod.MOD_NAME);
         ModBlocks.BLOCKS.forEach((entry) -> {
             Block block = entry.get();
             if(block instanceof WoodBlock furniture) {
