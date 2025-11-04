@@ -1,15 +1,6 @@
 {
   "variants": {
-    "layer=0": {
-      "model": "onlyfurniture:block/dark_oak_small_stool"
-    },
-    "layer=1": {
-      "model": "onlyfurniture:block/dark_oak_small_stool"
-    },
-    "layer=2": {
-      "model": "onlyfurniture:block/dark_oak_small_stool"
-    },
-    "layer=3": {
+    "": {
       "model": "onlyfurniture:block/dark_oak_small_stool"
     }
   }

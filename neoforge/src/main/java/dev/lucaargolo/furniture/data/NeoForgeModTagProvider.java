@@ -3,12 +3,10 @@ package dev.lucaargolo.furniture.data;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.data.builder.ModTagBuilder;
 import dev.lucaargolo.furniture.item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -16,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
-public class NeoForgeModTagProvider<T> extends TagsProvider<T> implements ModTagProvider<T> {
+public class NeoForgeModTagProvider<T> extends TagsProvider<T> {
 
     private final ModRegistry<T> registry;
 
@@ -25,14 +23,10 @@ public class NeoForgeModTagProvider<T> extends TagsProvider<T> implements ModTag
         this.registry = registry;
     }
 
-    @Override
-    public ModTagBuilder<T> getOrCreateModTagBuilder(TagKey<T> tag) {
-        return new NeoForgeModTagBuilder<>(registryKey, this.getOrCreateRawBuilder(tag));
-    }
 
     @Override
     protected void addTags(@NotNull HolderLookup.Provider provider) {
-        this.addTags(registry);
+        ModTagProvider.generate(registry, tag -> new NeoForgeModTagBuilder<>(registryKey, this.getOrCreateRawBuilder(tag)));
     }
 
     public static NeoForgeModTagProvider<Block> block(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider, ExistingFileHelper existingFileHelper) {

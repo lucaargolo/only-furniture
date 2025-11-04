@@ -6,9 +6,9 @@ import dev.lucaargolo.furniture.block.WoodBlock;
 import dev.lucaargolo.furniture.data.builder.ModLanguageBuilder;
 import net.minecraft.world.level.block.Block;
 
-public interface ModLanguageProvider {
+public class ModLanguageProvider {
 
-    static void generate(ModLanguageBuilder builder) {
+    public static void generate(ModLanguageBuilder builder) {
         builder.add("itemGroup."+FurnitureMod.MOD_ID+".creative_tab", FurnitureMod.MOD_NAME);
         ModBlocks.BLOCKS.forEach((entry) -> {
             Block block = entry.get();

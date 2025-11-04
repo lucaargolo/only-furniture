@@ -1,15 +1,6 @@
 {
   "variants": {
-    "layer=0": {
-      "model": "onlyfurniture:block/jungle_chair"
-    },
-    "layer=1": {
-      "model": "onlyfurniture:block/jungle_chair"
-    },
-    "layer=2": {
-      "model": "onlyfurniture:block/jungle_chair"
-    },
-    "layer=3": {
+    "": {
       "model": "onlyfurniture:block/jungle_chair"
     }
   }

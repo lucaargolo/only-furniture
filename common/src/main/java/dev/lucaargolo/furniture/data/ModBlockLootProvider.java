@@ -3,9 +3,9 @@ package dev.lucaargolo.furniture.data;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.data.builder.ModBlockLootBuilder;
 
-public interface ModBlockLootProvider {
+public class ModBlockLootProvider {
 
-    static void generate(ModBlockLootBuilder builder) {
+    public static void generate(ModBlockLootBuilder builder) {
         ModBlocks.BLOCKS.forEach(entry -> {
             builder.dropSelf(entry.get());
         });

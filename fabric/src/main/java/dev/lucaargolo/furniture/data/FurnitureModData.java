@@ -9,7 +9,7 @@ public class FurnitureModData implements DataGeneratorEntrypoint {
     public void onInitializeDataGenerator(FabricDataGenerator dataGenerator) {
         FabricDataGenerator.Pack pack = dataGenerator.createPack();
         pack.addProvider(FabricModLanguageProvider::new);
-        pack.addProvider(ModModelProvider::new);
+        pack.addProvider(FabricModModelProvider::new);
         pack.addProvider(FabricModTagProvider::item);
         pack.addProvider(FabricModTagProvider::block);
         pack.addProvider(FabricModBlockLootProvider::new);
