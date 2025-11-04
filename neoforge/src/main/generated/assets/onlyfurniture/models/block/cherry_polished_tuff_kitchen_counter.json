@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/cherry_doors",
+    "particle": "minecraft:block/polished_tuff",
+    "planks": "minecraft:block/cherry_planks",
+    "stone": "minecraft:block/polished_tuff"
+  }
+}
