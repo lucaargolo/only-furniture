@@ -6,10 +6,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricModelProvider;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.data.models.blockstates.Condition;
-import net.minecraft.data.models.blockstates.MultiPartGenerator;
-import net.minecraft.data.models.blockstates.Variant;
-import net.minecraft.data.models.blockstates.VariantProperties;
+import net.minecraft.data.models.blockstates.*;
 import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
@@ -25,6 +22,8 @@ public class ModModelProvider extends FabricModelProvider {
 
     private static final TextureSlot LOG = TextureSlot.create("log");
     private static final TextureSlot PLANKS = TextureSlot.create("planks");
+    private static final TextureSlot DOORS = TextureSlot.create("doors");
+    private static final TextureSlot STONE = TextureSlot.create("stone");
     private static final TextureSlot METAL = TextureSlot.create("metal");
 
     public ModModelProvider(FabricDataOutput output) {
@@ -60,6 +59,46 @@ public class ModModelProvider extends FabricModelProvider {
                 addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R180, null, null, false, false);
                 addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
                 blockModelGenerators.blockStateOutput.accept(tableSupplier);
+            }else if(block instanceof KitchenCounterBlock furniture) {
+                ResourceLocation path = FurnitureMod.id("block/"+entry.path());
+                ResourceLocation innerPath = FurnitureMod.id("block/"+entry.path()+"_inner");
+                ResourceLocation outerPath = FurnitureMod.id("block/"+entry.path()+"_outer");
+
+                ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id(path.getPath().replace(furniture.getStone().getPath()+"_", "").replace(furniture.getWood().name()+"_", ""))), Optional.empty(), STONE, PLANKS, DOORS, TextureSlot.PARTICLE);
+                ModelTemplate innerTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(innerPath.getPath().replace(furniture.getStone().getPath()+"_", "").replace(furniture.getWood().name()+"_", ""))), Optional.empty(), STONE, PLANKS, TextureSlot.PARTICLE);
+                ModelTemplate outerTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(outerPath.getPath().replace(furniture.getStone().getPath()+"_", "").replace(furniture.getWood().name()+"_", ""))), Optional.empty(), STONE, PLANKS, DOORS, TextureSlot.PARTICLE);
+
+                TextureMapping mapping = new TextureMapping();
+                mapping.put(STONE, DataHelper.getStone(furniture.getStone()));
+                mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));
+                mapping.put(DOORS, DataHelper.getWoodDoors(furniture.getWood()));
+                mapping.put(TextureSlot.PARTICLE, DataHelper.getStone(furniture.getStone()));
+
+                template.create(path, mapping, blockModelGenerators.modelOutput);
+                innerTemplate.create(innerPath, mapping, blockModelGenerators.modelOutput);
+                outerTemplate.create(outerPath, mapping, blockModelGenerators.modelOutput);
+
+                MultiVariantGenerator counterSupplier = MultiVariantGenerator.multiVariant(furniture);
+
+
+
+                PropertyDispatch.C5<Boolean, Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.NORTH, KitchenCounterBlock.EAST, KitchenCounterBlock.SOUTH, KitchenCounterBlock.WEST, KitchenCounterBlock.OUTER);
+                for (int i = 0; i < 1 << 5; i++) {
+                    boolean north = (i & 1) != 0;
+                    boolean east  = (i & (1 << 1)) != 0;
+                    boolean south = (i & (1 << 2)) != 0;
+                    boolean west  = (i & (1 << 3)) != 0;
+                    boolean outer = (i & (1 << 4)) != 0;
+                    int directions = i & 0b1111;
+                    boolean onlyOne = directions != 0 && (directions & (directions - 1)) == 0;
+                    Variant variant = Variant.variant().with(VariantProperties.MODEL, path);
+                    Variant innerVariant = Variant.variant().with(VariantProperties.MODEL, innerPath);
+                    Variant outerVariant = Variant.variant().with(VariantProperties.MODEL, outerPath);
+                    Variant v = onlyOne ? outer ? outerVariant : innerVariant : variant;
+                    dispatch.select(north, east, south, west, outer, v);
+                }
+                counterSupplier.with(dispatch);
+                blockModelGenerators.blockStateOutput.accept(counterSupplier);
             }else if(block instanceof MetalWoodFurnitureSeatBlock furniture) {
                 ModelTemplate template = new ModelTemplate(Optional.of(FurnitureMod.id("block/"+entry.path().replace(furniture.getWood().name()+"_", ""))), Optional.empty(), PLANKS, METAL, TextureSlot.PARTICLE);
                 TextureMapping mapping = new TextureMapping();

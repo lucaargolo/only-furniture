@@ -127,18 +127,23 @@ public class FurnitureBlockItem extends BlockItem {
                 poseStack.pushPose();
                 poseStack.translate(pos.x-camera.getPosition().x-0.5, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z-0.5);
                 poseStack.translate(0.5, 0.5, 0.5);
-                poseStack.mulPose(Axis.YP.rotationDegrees(localRotation));
+                poseStack.mulPose(Axis.YN.rotationDegrees(localRotation));
                 poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
                 poseStack.translate(-0.5, -0.5, -0.5);
 
                 FurnitureBlock block = holding.getFirst().getFurnitureBlock();
-                BlockState state = block.defaultBlockState();
-                BakedModel model = minecraft.getBlockRenderer().getBlockModel(state);
 
+                BlockState state = block.getStateForPlacement(context);
+                boolean validPlacement = state != null;
+                if(state == null) {
+                    state = block.defaultBlockState();
+                }
+
+                BakedModel model = minecraft.getBlockRenderer().getBlockModel(state);
                 RenderType renderType = FurnitureModClient.INSTANCE.getRenderTypeManager().hologramTranslucent(InventoryMenu.BLOCK_ATLAS);
                 VertexConsumer consumer = bufferSource.getBuffer(renderType);
 
-                int color = !level.getBlockState(blockPos).canBeReplaced(context) || block.getStateForPlacement(context) == null ? 0xda3e44 : 0x5865f2;
+                int color = !validPlacement || !level.getBlockState(blockPos).canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
                 int packedLight = LightTexture.FULL_BRIGHT;
                 int packedColor = FastColor.ARGB32.color(120, color);
 

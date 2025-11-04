@@ -6,24 +6,26 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ModBlockShapes {
 
-    public static VoxelShape[] CHAIR = new VoxelShape[] {
+    public static final VoxelShape[] EMPTY = new VoxelShape[0];
+
+    public static final VoxelShape[] CHAIR = new VoxelShape[] {
         Block.box(3, 7, 12, 13, 24, 13),
         Block.box(3, 0, 3, 13, 7, 13)
     };
 
-    public static VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
+    public static final VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
         Shapes.box(0.125,0,0.125,0.875,0.625,0.875),
         Shapes.box(0,0.625,0.125,1,0.75,0.875),
         Shapes.box(0.125,0.625,0,0.875,0.75,1)
     };
 
-    public static VoxelShape[] SMALL_STOOL = new VoxelShape[] {
+    public static final VoxelShape[] SMALL_STOOL = new VoxelShape[] {
         Shapes.box(0.25,0,0.25,0.75,0.25,0.75),
         Shapes.box(0.125,0.25,0.25,0.875,0.375,0.75),
         Shapes.box(0.25,0.25,0.125,0.75,0.375,0.875)
     };
 
-    public static VoxelShape[] OUTDOOR_BENCH = new VoxelShape[] {
+    public static final VoxelShape[] OUTDOOR_BENCH = new VoxelShape[] {
         Block.box(-8, 0, 2, -6, 2, 14),
         Block.box(22, 0, 2, 24, 2, 14),
         Block.box(22, 2, 5, 24, 12, 11),
@@ -38,7 +40,7 @@ public class ModBlockShapes {
         Block.box(-8, 6, 2, 24, 7, 5)
     };
 
-    public static VoxelShape[] PICNIC_BENCH = new VoxelShape[] {
+    public static final VoxelShape[] PICNIC_BENCH = new VoxelShape[] {
         Block.box(26, 0, 18, 28, 2, 21),
         Block.box(-16, 6, -12, 32, 8, -4),
         Block.box(-16, 6, 20, 32, 8, 28),
@@ -73,14 +75,14 @@ public class ModBlockShapes {
         Block.box(26, 2, 17, 28, 4, 20)
     };
 
-    public static VoxelShape[] LAMP_POST = new VoxelShape[] {
+    public static final VoxelShape[] LAMP_POST = new VoxelShape[] {
         Shapes.box(0.1875,0,0.1875,0.8125,0.125,0.8125),
         Shapes.box(0.375,0.125,0.375,0.625,0.75,0.625),
         Shapes.box(0.4375,0.75,0.4375,0.5625,2.4375,0.5625),
         Shapes.box(0.3125,2.4375,0.3125,0.6875,3,0.6875)
     };
 
-    public static VoxelShape[] DUAL_LAMP_POST = new VoxelShape[] {
+    public static final VoxelShape[] DUAL_LAMP_POST = new VoxelShape[] {
         Shapes.box(0.1875,0,0.1875,0.8125,0.125,0.8125),
         Shapes.box(0.375,0.125,0.375,0.625,0.75,0.625),
         Shapes.box(0.4375,0.75,0.4375,0.5625,2,0.5625),
@@ -88,12 +90,19 @@ public class ModBlockShapes {
         Shapes.box(0,2.4375,0.3125,1,3,0.6875)
     };
 
-    public static VoxelShape[] TRIPLE_LAMP_POST = new VoxelShape[] {
+    public static final VoxelShape[] TRIPLE_LAMP_POST = new VoxelShape[] {
         Shapes.box(0.1875,0,0.1875,0.8125,0.125,0.8125),
         Shapes.box(0.375,0.125,0.375,0.625,0.75,0.625),
         Shapes.box(0.4375,0.75,0.4375,0.5625,1.875,0.5625),
         Shapes.box(-0.0625,1.875,0.4375,1.0625,2.375,0.5625),
         Shapes.box(-0.1875,2.3125,0.3125,1.1875,3,0.6875)
+    };
+
+    public static final VoxelShape[] KITCHEN_COUNTER = new VoxelShape[] {
+            Block.box(1, 1, 2, 15, 11, 3),
+            Block.box(0, 14, 14, 16, 16, 16),
+            Block.box(0, 12, 2, 16, 14, 16),
+            Block.box(0, 0, 3, 16, 12, 16)
     };
 
 }

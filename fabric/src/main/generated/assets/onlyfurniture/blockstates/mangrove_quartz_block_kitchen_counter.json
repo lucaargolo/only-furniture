@@ -1,0 +1,100 @@
+{
+  "variants": {
+    "east=false,north=false,outer=false,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=false,outer=false,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_inner"
+    },
+    "east=false,north=false,outer=false,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_inner"
+    },
+    "east=false,north=false,outer=false,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=false,outer=true,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=false,outer=true,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_outer"
+    },
+    "east=false,north=false,outer=true,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_outer"
+    },
+    "east=false,north=false,outer=true,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=true,outer=false,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_inner"
+    },
+    "east=false,north=true,outer=false,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=true,outer=false,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=true,outer=false,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=true,outer=true,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_outer"
+    },
+    "east=false,north=true,outer=true,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=true,outer=true,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=false,north=true,outer=true,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=false,outer=false,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_inner"
+    },
+    "east=true,north=false,outer=false,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=false,outer=false,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=false,outer=false,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=false,outer=true,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter_outer"
+    },
+    "east=true,north=false,outer=true,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=false,outer=true,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=false,outer=true,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=false,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=false,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=false,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=false,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=true,south=false,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=true,south=false,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=true,south=true,west=false": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    },
+    "east=true,north=true,outer=true,south=true,west=true": {
+      "model": "onlyfurniture:block/mangrove_quartz_block_kitchen_counter"
+    }
+  }
+}

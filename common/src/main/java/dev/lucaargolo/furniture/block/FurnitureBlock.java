@@ -76,7 +76,7 @@ public class FurnitureBlock extends Block {
         this.registerDefaultState(this.stateDefinition.any().setValue(LAYER, 0));
     }
 
-    public FurnitureBlock(Block base, VoxelShape... shapes) {
+    public FurnitureBlock(Block base, VoxelShape[] shapes) {
         this(BlockBehaviour.Properties.ofFullCopy(base), shapes);
     }
 
@@ -122,7 +122,7 @@ public class FurnitureBlock extends Block {
         }
 
         FurnitureData data = new FurnitureData(ox, oz, getRotation(player), null, true);
-        VoxelShape shape = this.getShapeForData(this.defaultBlockState(), data);
+        VoxelShape shape = this.getShapeForDataWithOffset(this.defaultBlockState(), data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pos, shape, Vec3.atLowerCornerOf(pos));
         intersectingPositions.add(pos);
 
@@ -163,7 +163,7 @@ public class FurnitureBlock extends Block {
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
         int layer = pState.getValue(LAYER);
         FurnitureData data = FurnitureData.get(pLevel, pPos, layer);
-        VoxelShape shape = this.getShapeForData(pState, data);
+        VoxelShape shape = this.getShapeForDataWithOffset(pState, data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pPos, shape, Vec3.atLowerCornerOf(pPos));
 
         Map<BlockPos, Direction> intersectingDirections = Objects.requireNonNull(calculateIntersectingDirections(pPos, intersectingPositions));
@@ -345,7 +345,7 @@ public class FurnitureBlock extends Block {
                 BlockState originalState = pLevel.getBlockState(originalPos);
                 if(originalState.getBlock() instanceof FurnitureBlock originalBlock) {
                     Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
-                    VoxelShape originalShape = originalBlock.getShapeForData(originalState, toOriginal, originalData);
+                    VoxelShape originalShape = originalBlock.getShapeForDataWithOffset(originalState, originalData, toOriginal);
                     shapes.add(new FurnitureShape(layer, originalData, originalPos, originalState, pair.getSecond(), originalShape));
                 }
             }
@@ -353,18 +353,18 @@ public class FurnitureBlock extends Block {
         return shapes;
     }
 
+    protected VoxelShape getShapeForDataWithOffset(BlockState state, FurnitureData data) {
+        return this.getShapeForDataWithOffset(state, data, Vec3.ZERO);
+    }
+
     @NotNull
-    private VoxelShape getShapeForData(BlockState state, FurnitureData data) {
-        return getShapeForData(state, Vec3.ZERO, data);
-    }
-
-    private @NotNull VoxelShape getShapeForData(BlockState state, Vec3 offset, FurnitureData data) {
+    private VoxelShape getShapeForDataWithOffset(BlockState state, FurnitureData data, Vec3 offset) {
         offset = offset.add(data.getX(), 0.0, data.getZ());
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        return this.getShapes(state, facing).move(offset.x, offset.y, offset.z);
+        return this.getShapeForData(state, data).move(offset.x, offset.y, offset.z);
     }
 
-    protected VoxelShape getShapes(BlockState state, Direction facing) {
+    protected VoxelShape getShapeForData(BlockState state, FurnitureData data) {
+        Direction facing = Direction.fromYRot(data.getRotation() + 180);
         return this.shapes.get(facing);
     }
 
@@ -387,8 +387,8 @@ public class FurnitureBlock extends Block {
                 poseStack.pushPose();
                 poseStack.translate(offsetPos.x - camera.getPosition().x, offsetPos.y - camera.getPosition().y, offsetPos.z - camera.getPosition().z);
                 Direction facing = Direction.fromYRot(data.getRotation() + 180);
-                poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot() - 180));
-                poseStack.mulPose(Axis.YP.rotationDegrees(data.getRotation()));
+                poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() - 180));
+                poseStack.mulPose(Axis.YN.rotationDegrees(data.getRotation()));
 
                 LevelRendererAccessor.invokeRenderShape(poseStack, consumer, shape, (double) pos.getX() - offsetPos.x, (double) pos.getY() - offsetPos.y, (double) pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);
                 poseStack.popPose();

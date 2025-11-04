@@ -143,7 +143,7 @@ public class FurnitureSeatBlock extends FurnitureBlock {
         Vec3 position = Vec3.atBottomCenterOf(pos).add(data.getX(), 0.0, data.getZ());
         Vec3 seatPosition = this.seats[seatIndex];
 
-        Quaternionf rotation = Axis.YP.rotationDegrees(data.getRotation());
+        Quaternionf rotation = Axis.YN.rotationDegrees(data.getRotation());
         Matrix4f transform = new Matrix4f().rotate(rotation);
         Vector4f seatOffset = new Vector4f((float) seatPosition.x, (float) seatPosition.y, (float) seatPosition.z, 1f);
         seatOffset.mul(transform);

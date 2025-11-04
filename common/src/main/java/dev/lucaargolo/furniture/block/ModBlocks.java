@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,8 +27,7 @@ public class ModBlocks {
     public static final ModRegistry<Block> BLOCKS = FurnitureMod.INSTANCE.registry(Registries.BLOCK);
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
-
-    public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerWoodTable("table", TableBlock::new, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerForConnectingWoodType("table", TableBlock::new, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureBlock>> COFFEE_TABLE_MAP = registerForWoodType("coffee_table", WoodFurnitureBlock::new, ModBlockShapes.COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> SMALL_STOOL_MAP = registerForWoodType("small_stool", WoodFurnitureSeatBlock::new, ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> CHAIR_MAP = registerForWoodType("chair", WoodFurnitureSeatBlock::new, ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
@@ -41,13 +39,14 @@ public class ModBlocks {
         return new WoodFurnitureSeatBlock(base, wood, shapes, new Vec3(-1.0, 0.5, 1.0), new Vec3(0.0, 0.5, 1.0), new Vec3(1.0, 0.5, 1.0), new Vec3(-1.0, 0.5, -1.0), new Vec3(0.0, 0.5, -1.0), new Vec3(1.0, 0.5, -1.0));
     }, ModBlockShapes.PICNIC_BENCH, BlockTags.MINEABLE_WITH_AXE);
 
-
     public static Supplier<MetalLightFurnitureBlock> LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<MetalLightFurnitureBlock> DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<MetalLightFurnitureBlock> TRIPLE_LAMP_POST = BLOCKS.register("iron_triple_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    private static <T extends Block> Map<WoodType, Supplier<T>> registerWoodTable(String path, TriFunction<Block, WoodType, TagKey<Block>, T> o, TagKey<?>... tags) {
-        return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, wood, tags[0].cast(Registries.BLOCK).orElseThrow()), new VoxelShape[0], tags);
+    public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForConnectingStoneAndWoodType("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
+
+    private static <T extends Block> Map<WoodType, Supplier<T>> registerForConnectingWoodType(String path, QuadFunction<Block, VoxelShape[], TagKey<Block>, WoodType, T> o, TagKey<?>... tags) {
+        return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), wood), ModBlockShapes.EMPTY, tags);
     }
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodType(String path, TriFunction<Block, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
@@ -58,6 +57,28 @@ public class ModBlocks {
                 String woodType = location.withPath(s -> s.replace("_planks", "")).getPath();
                 WoodType.values().filter(t -> t.name().equals(woodType)).findFirst().ifPresent(type -> {
                     map.put(type, BLOCKS.register(woodType+"_"+path, () -> o.apply(family.getBaseBlock(), type, shapes), tags));
+                });
+            }
+        });
+        return map;
+    }
+
+    private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForConnectingStoneAndWoodType(String path, boolean polished, PentaFunction<Block, VoxelShape[], TagKey<Block>, StoneBlock.StoneType, WoodType, T> o, TagKey<?>... tags) {
+        return registerForStoneAndWoodType(path, polished, (block, stone, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), stone, wood), ModBlockShapes.EMPTY, tags);
+    }
+
+    private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForStoneAndWoodType(String path, boolean polished, QuadFunction<Block, StoneBlock.StoneType, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
+        Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> map = new HashMap<>();
+        BlockFamilies.getAllFamilies().filter(f -> f.getRecipeGroupPrefix().orElse("").equals("wooden")).forEach(family -> {
+            ResourceLocation woodLocation = BuiltInRegistries.BLOCK.getKey(family.getBaseBlock());
+            if(woodLocation.getNamespace().equals("minecraft")) {
+                String woodPath = woodLocation.withPath(s -> s.replace("_planks", "")).getPath();
+                WoodType.values().filter(t -> t.name().equals(woodPath)).findFirst().ifPresent(woodType -> {
+                    for(StoneBlock.StoneType stoneType : StoneBlock.StoneType.values()) {
+                        if(polished == stoneType.isPolished()) {
+                            map.put(Pair.of(stoneType, woodType), BLOCKS.register(woodPath+"_"+stoneType.getPath()+"_"+path, () -> o.apply(stoneType.getBase(), stoneType, woodType, shapes), tags));
+                        }
+                    }
                 });
             }
         });
@@ -85,6 +106,21 @@ public class ModBlocks {
 
         WEATHERING_ENTRIES.add(new WeatheringEntry(unaffected, exposed, weathered, oxidized, waxedUnaffected, waxedExposed, waxedWeathered, waxedOxidized));
         return map;
+    }
+
+    @FunctionalInterface
+    public interface PentaFunction<P1, P2, P3, P4, P5, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
+    }
+
+    @FunctionalInterface
+    public interface QuadFunction<P1, P2, P3, P4, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4);
+    }
+
+    @FunctionalInterface
+    public interface TriFunction<P1, P2, P3, R> {
+        R apply(P1 p1, P2 p2, P3 p3);
     }
 
 

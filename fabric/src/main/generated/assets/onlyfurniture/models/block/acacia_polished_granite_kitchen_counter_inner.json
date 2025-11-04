@@ -1,0 +1,8 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_inner",
+  "textures": {
+    "particle": "minecraft:block/polished_granite",
+    "planks": "minecraft:block/acacia_planks",
+    "stone": "minecraft:block/polished_granite"
+  }
+}

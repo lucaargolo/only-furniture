@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class ModBlockTags {
 
     public static TagKey<Block> CONNECTING_TABLE = create("connecting_table");
+    public static TagKey<Block> CONNECTING_KITCHEN_COUNTER = create("connecting_kitchen_counter");
 
     private static @NotNull TagKey<Block> create(String path) {
         return TagKey.create(Registries.BLOCK, FurnitureMod.id(path));

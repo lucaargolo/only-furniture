@@ -13,6 +13,7 @@
   ],
   "client": [
     "BlockElementMixin",
+    "DebugScreenOverlayMixin",
     "LevelRendererAccessor",
     "RenderChunkRegionAccessor"
   ],

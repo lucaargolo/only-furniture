@@ -62,7 +62,7 @@ public abstract class FurnitureModClient {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if(player != null) {
-            return FurnitureBlockItem.rotateFurniture(player, deltaY);
+            return FurnitureBlockItem.rotateFurniture(player, -deltaY);
         }
         return false;
     }

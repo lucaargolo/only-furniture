@@ -1,6 +1,8 @@
 package dev.lucaargolo.furniture.data;
 
+import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.MetalBlock;
+import dev.lucaargolo.furniture.block.StoneBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -11,6 +13,17 @@ import java.util.Arrays;
 import java.util.Set;
 
 public class DataHelper {
+
+    public static ResourceLocation getStone(StoneBlock.StoneType stone) {
+        String path = switch (stone) {
+            case QUARTZ_BLOCK -> "quartz_block_top";
+            case SMOOTH_QUARTZ -> "quartz_block_bottom";
+            case SMOOTH_SANDSTONE -> "sandstone_top";
+            //case SMOOTH_RED_SANDSTONE -> "red_sandstone_top";
+            default -> stone.getPath();
+        };
+        return ResourceLocation.withDefaultNamespace("block/"+path);
+    }
 
     public static ResourceLocation getWoodPlanks(WoodType type) {
         return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_planks");
@@ -24,6 +37,10 @@ public class DataHelper {
         } else {
             return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_log");
         }
+    }
+
+    public static ResourceLocation getWoodDoors(WoodType type) {
+        return FurnitureMod.id("block/" + type.name() + "_doors");
     }
 
     public static ResourceLocation getMetal(MetalBlock.MetalType metal, WeatheringCopper.WeatherState age) {
@@ -57,5 +74,6 @@ public class DataHelper {
 
         return !first.isBlank() ? first + " " + middle + " " + last : middle + " " + last;
     }
+
 
 }
