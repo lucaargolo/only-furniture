@@ -100,11 +100,20 @@ public class ModBlockShapes {
 
     public static final VoxelShape[] KITCHEN_SINK = new VoxelShape[] {
         Block.box(2, 0, 4, 14, 5, 14),
-        Block.box(6.75, 5, 11.5, 8.75, 9.5, 12.5),
-        Block.box(6.75, 7.5, 7.5, 8.75, 9.5, 8.5),
-        Block.box(6.75, 9.5, 8.5, 8.75, 10.5, 11.5),
-        Block.box(6.75, 9, 11, 8.75, 10, 12),
-        Block.box(6.75, 9, 8, 8.75, 10, 9)
+        Block.box(7.25, 5, 11.5, 8.75, 9.5, 12.5),
+        Block.box(7.25, 7.5, 7.5, 8.75, 9.5, 8.5),
+        Block.box(7.25, 9, 8, 8.75, 10, 9),
+        Block.box(7.25, 9, 11, 8.75, 10, 12),
+        Block.box(7.25, 9.5, 8.5, 8.75, 10.5, 11.5)
+    };
+
+    public static final VoxelShape[] KITCHEN_SINK_DROPPED = new VoxelShape[] {
+        Block.box(2, 0, 4, 14, 1, 14),
+        Block.box(7.25, 1, 11.5, 8.75, 5.5, 12.5),
+        Block.box(7.25, 3.5, 7.5, 8.75, 5.5, 8.5),
+        Block.box(7.25, 5, 8, 8.75, 6, 9),
+        Block.box(7.25, 5, 11, 8.75, 6, 12),
+        Block.box(7.25, 5.5, 8.5, 8.75, 6.5, 11.5)
     };
 
 }

@@ -84,58 +84,55 @@ public class FurnitureSeatBlock extends FurnitureBlock {
         if (FurnitureMod.INSTANCE.isFakePlayer(player)) return false;
         if (!level.mayInteract(player, pos)) return false;
         if (player.isPassenger() || player.isCrouching()) return false;
-        FurnitureData[] layers = FurnitureData.get(level, pos);
-        for(FurnitureData data : layers) {
-            if (data.hasOriginal()) {
-                Int2ObjectMap<SeatEntity> activeSeats = this.getActiveSeats(level, pos);
-                Int2ObjectMap<Vec3> freeSeats = new Int2ObjectArrayMap<>();
-                if (freeSeats.isEmpty()) {
-                    for (int i = 0; i < this.seats.length; i++) {
-                        if (!activeSeats.containsKey(i)) {
-                            freeSeats.put(i, getPositionForSeat(data, pos, i));
-                        }
+        BlockState state = level.getBlockState(pos);
+        FurnitureData data = FurnitureData.get(level, pos, state.getValue(LAYER));
+        if (data.hasOriginal()) {
+            Int2ObjectMap<SeatEntity> activeSeats = this.getActiveSeats(level, pos);
+            Int2ObjectMap<Vec3> freeSeats = new Int2ObjectArrayMap<>();
+            if (freeSeats.isEmpty()) {
+                for (int i = 0; i < this.seats.length; i++) {
+                    if (!activeSeats.containsKey(i)) {
+                        freeSeats.put(i, getPositionForSeat(data, pos, i));
                     }
                 }
-
-                if (freeSeats.isEmpty()) {
-                    for (int i = 0; i < this.seats.length; i++) {
-                        if (activeSeats.containsKey(i) && ejectSeatedExceptPlayer(level, activeSeats.get(i))) {
-                            freeSeats.put(i, getPositionForSeat(data, pos, i));
-                            break;
-                        }
-                    }
-                }
-
-                if (freeSeats.isEmpty()) {
-                    return false;
-                }
-
-                if (!level.isClientSide) {
-                    int seat = freeSeats.int2ObjectEntrySet().stream()
-                            .min(Comparator.comparingDouble(e -> e.getValue().distanceToSqr(hitResult.getLocation())))
-                            .map(Int2ObjectMap.Entry::getIntKey)
-                            .orElseThrow();
-                    sitDown(level, pos, getLeashed(player).orElse(player), seat);
-                }
-                return true;
             }
+
+            if (freeSeats.isEmpty()) {
+                for (int i = 0; i < this.seats.length; i++) {
+                    if (activeSeats.containsKey(i) && ejectSeatedExceptPlayer(level, activeSeats.get(i))) {
+                        freeSeats.put(i, getPositionForSeat(data, pos, i));
+                        break;
+                    }
+                }
+            }
+
+            if (freeSeats.isEmpty()) {
+                return false;
+            }
+
+            if (!level.isClientSide) {
+                int seat = freeSeats.int2ObjectEntrySet().stream()
+                        .min(Comparator.comparingDouble(e -> e.getValue().distanceToSqr(hitResult.getLocation())))
+                        .map(Int2ObjectMap.Entry::getIntKey)
+                        .orElseThrow();
+                sitDown(level, pos, getLeashed(player).orElse(player), seat);
+            }
+            return true;
         }
         return false;
     }
 
     private void sitDown(Level level, BlockPos pos, Entity entity, int index) {
-        FurnitureData[] layers = FurnitureData.get(level, pos);
-        for(FurnitureData data : layers) {
-            if(data.hasOriginal()) {
-                SeatEntity seat = new SeatEntity(level, this.getPositionForSeat(data, pos, index), pos);
-                level.addFreshEntity(seat);
-                entity.startRiding(seat);
+        BlockState state = level.getBlockState(pos);
+        FurnitureData data = FurnitureData.get(level, pos, state.getValue(LAYER));
+        if(data.hasOriginal()) {
+            SeatEntity seat = new SeatEntity(level, this.getPositionForSeat(data, pos, index), pos);
+            level.addFreshEntity(seat);
+            entity.startRiding(seat);
 
-                level.updateNeighbourForOutputSignal(pos, level.getBlockState(pos).getBlock());
+            level.updateNeighbourForOutputSignal(pos, level.getBlockState(pos).getBlock());
 
-                if (entity instanceof TamableAnimal ta) ta.setInSittingPose(true);
-                break;
-            }
+            if (entity instanceof TamableAnimal ta) ta.setInSittingPose(true);
         }
     }
 
@@ -153,18 +150,16 @@ public class FurnitureSeatBlock extends FurnitureBlock {
 
     private Int2ObjectMap<SeatEntity> getActiveSeats(Level level, BlockPos pos) {
         Int2ObjectMap<SeatEntity> seats = new Int2ObjectArrayMap<>();
-        FurnitureData[] layers = FurnitureData.get(level, pos);
-        for(FurnitureData data : layers) {
-            if (data.hasOriginal()) {
-                for(int i = 0; i < this.seats.length; i++) {
-                    Vec3 position = this.getPositionForSeat(data, pos, i);
-                    AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
-                    List<SeatEntity> entities = level.getEntitiesOfClass(SeatEntity.class, bounds);
-                    if(!entities.isEmpty()) {
-                        seats.put(i, entities.getFirst());
-                    }
+        BlockState state = level.getBlockState(pos);
+        FurnitureData data = FurnitureData.get(level, pos, state.getValue(LAYER));
+        if (data.hasOriginal()) {
+            for(int i = 0; i < this.seats.length; i++) {
+                Vec3 position = this.getPositionForSeat(data, pos, i);
+                AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
+                List<SeatEntity> entities = level.getEntitiesOfClass(SeatEntity.class, bounds);
+                if(!entities.isEmpty()) {
+                    seats.put(i, entities.getFirst());
                 }
-                break;
             }
         }
         return seats;

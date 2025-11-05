@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "dropped=false": {
       "model": "onlyfurniture:block/waxed_copper_kitchen_sink"
+    },
+    "dropped=true": {
+      "model": "onlyfurniture:block/waxed_copper_kitchen_sink_dropped"
     }
   }
 }

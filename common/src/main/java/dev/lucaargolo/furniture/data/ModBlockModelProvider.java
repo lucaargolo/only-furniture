@@ -8,6 +8,7 @@ import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.block.impl.KitchenCounterBlock;
+import dev.lucaargolo.furniture.block.impl.KitchenSinkBlock;
 import dev.lucaargolo.furniture.block.impl.TableBlock;
 import dev.lucaargolo.furniture.mixin.BlockModelGeneratorsAccessor;
 import dev.lucaargolo.furniture.mixin.TextureSlotAccessor;
@@ -40,133 +41,147 @@ public class ModBlockModelProvider {
     private static final TextureSlot METAL = TextureSlotAccessor.invokeCreate("metal");
 
     public static void generate(BlockModelGenerators generators) {
-        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
-        BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput = ((BlockModelGeneratorsAccessor) generators).getModelOutput();
         ModBlocks.BLOCKS.forEach((entry) -> {
-            Block block = entry.get();
-            switch (block) {
-                case TableBlock furniture -> createTableBlock(entry, furniture, modelOutput, blockStateOutput);
-                case KitchenCounterBlock furniture -> createCounterBlock(entry, furniture, modelOutput, blockStateOutput);
-                default -> {
-                    String path = entry.path();
-
-                    TextureMapping mapping = new TextureMapping();
-                    List<TextureSlot> slots = new ArrayList<>();
-                    slots.add(PARTICLE);
-
-                    if (block instanceof WoodBlock woodBlock) {
-                        WoodType wood = woodBlock.getWood();
-                        path = path.replace(wood.name() + "_", "");
-                        slots.add(LOG);
-                        mapping.put(LOG, DataHelper.getWoodLog(wood));
-                        slots.add(PLANKS);
-                        mapping.put(PLANKS, DataHelper.getWoodPlanks(wood));
-                        mapping.put(PARTICLE, DataHelper.getWoodLog(wood));
-                    }
-
-                    if (block instanceof StoneBlock stoneBlock) {
-                        StoneBlock.StoneType stone = stoneBlock.getStone();
-                        path = path.replace(stone.getPath() + "_", "");
-                        slots.add(STONE);
-                        mapping.put(STONE, DataHelper.getStone(stone));
-                        mapping.put(PARTICLE, DataHelper.getStone(stone));
-                    }
-
-                    if(block instanceof MetalBlock metalBlock) {
-                        MetalBlock.MetalType metal = metalBlock.getMetal();
-                        WeatheringCopper.WeatherState age = metalBlock.getAge();
-                        path = path.replace(metal.name().toLowerCase(Locale.US) + "_", "");
-                        path = path.replace(age.getSerializedName() + "_", "");
-                        path = path.replace("waxed_", "");
-                        slots.add(METAL);
-                        mapping.put(METAL, DataHelper.getMetal(metal, age));
-                        mapping.put(PARTICLE, DataHelper.getMetal(metal, age));
-                    }
-
-                    ResourceLocation id = FurnitureMod.id("block/"+path);
-                    TextureSlot[] s = slots.toArray(new TextureSlot[0]);
-                    ModelTemplate template = new ModelTemplate(Optional.of(id), Optional.empty(), s);
-
-                    createBaseBlock(generators, block, mapping, template);
-                }
+            switch (entry.get()) {
+                case TableBlock ignored -> createTableBlockState(generators, entry);
+                case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);
+                case KitchenSinkBlock ignored ->createSinkBlockState(generators, entry);
+                default -> createBaseBlockState(generators, entry);
             }
         });
     }
 
-    private static void createBaseBlock(BlockModelGenerators generators, Block block, TextureMapping mapping, ModelTemplate template) {
-        ((BlockModelGeneratorsAccessor) generators).invokeCreateTrivialBlock(block, mapping, template);
+    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix) {
+        return createModelFile(generators, entry, prefix, "", new ArrayList<>());
     }
 
-    private static void createChildBlock(BlockModelGenerators generators, Block block) {
-        ((BlockModelGeneratorsAccessor) generators).invokeCreateNonTemplateModelBlock(block);
+    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix) {
+        return createModelFile(generators, entry, prefix, suffix, new ArrayList<>());
     }
 
-    private static void createTableBlock(ModRegistry.ModEntry<? extends Block> entry, TableBlock furniture, BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput, Consumer<BlockStateGenerator> blockStateOutput) {
-        ResourceLocation basePath = FurnitureMod.id("block/" + entry.path() + "_center");
-        ResourceLocation feetPath = FurnitureMod.id("block/" + entry.path() + "_feet");
-        ResourceLocation itemPath = FurnitureMod.id("item/" + entry.path());
+    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, TextureSlot... slots) {
+        return createModelFile(generators, entry, prefix, suffix, List.of(slots));
+    }
 
-        ModelTemplate baseTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(basePath.getPath().replace(furniture.getWood().name() + "_", ""))), Optional.empty(), PLANKS, TextureSlot.PARTICLE);
-        ModelTemplate feetTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(feetPath.getPath().replace(furniture.getWood().name() + "_", ""))), Optional.empty(), LOG, TextureSlot.PARTICLE);
-        ModelTemplate itemTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(itemPath.getPath().replace(furniture.getWood().name() + "_", ""))), Optional.empty(), LOG, PLANKS, TextureSlot.PARTICLE);
+    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, List<TextureSlot> slots) {
+        BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput = ((BlockModelGeneratorsAccessor) generators).getModelOutput();
+
+        Block block = entry.get();
+        String path = entry.path();
 
         TextureMapping mapping = new TextureMapping();
-        mapping.put(LOG, DataHelper.getWoodLog(furniture.getWood()));
-        mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));
-        mapping.put(PARTICLE, DataHelper.getWoodLog(furniture.getWood()));
+        tryAddSlot(slots, PARTICLE);
 
-        baseTemplate.create(basePath, mapping, modelOutput);
-        feetTemplate.create(feetPath, mapping, modelOutput);
-        itemTemplate.create(itemPath, mapping, modelOutput);
+        if (block instanceof WoodBlock woodBlock) {
+            WoodType wood = woodBlock.getWood();
+            path = path.replace(wood.name() + "_", "");
+            tryAddSlot(slots, LOG);
+            tryAddSlot(slots, PLANKS);
+            if(slots.contains(DOORS))
+                mapping.put(DOORS, DataHelper.getWoodDoors(wood));
+            mapping.put(LOG, DataHelper.getWoodLog(wood));
+            mapping.put(PLANKS, DataHelper.getWoodPlanks(wood));
+            mapping.put(PARTICLE, DataHelper.getWoodLog(wood));
+        }
 
-        MultiPartGenerator tableSupplier = MultiPartGenerator.multiPart(furniture);
-        addDirectionPart(tableSupplier, basePath, VariantProperties.Rotation.R0, null, null, null, null);
-        addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R0, false, false, null, null);
-        addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R90, null, false, false, null);
-        addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R180, null, null, false, false);
-        addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
-        blockStateOutput.accept(tableSupplier);
+        if (block instanceof StoneBlock stoneBlock) {
+            StoneBlock.StoneType stone = stoneBlock.getStone();
+            path = path.replace(stone.getPath() + "_", "");
+            tryAddSlot(slots, STONE);
+            mapping.put(STONE, DataHelper.getStone(stone));
+            mapping.put(PARTICLE, DataHelper.getStone(stone));
+        }
+
+        if(block instanceof MetalBlock metalBlock) {
+            MetalBlock.MetalType metal = metalBlock.getMetal();
+            WeatheringCopper.WeatherState age = metalBlock.getAge();
+            path = path.replace(metal.name().toLowerCase(Locale.US) + "_", "");
+            path = path.replace(age.getSerializedName() + "_", "");
+            path = path.replace("waxed_", "");
+            tryAddSlot(slots, METAL);
+            mapping.put(METAL, DataHelper.getMetal(metal, age));
+            mapping.put(PARTICLE, DataHelper.getMetal(metal, age));
+        }
+
+        ResourceLocation parent = FurnitureMod.id(prefix+path+suffix);
+        ResourceLocation child = FurnitureMod.id(prefix+entry.path()+suffix);
+
+        ModelTemplate template = new ModelTemplate(Optional.of(parent), Optional.empty(), slots.toArray(new TextureSlot[0]));
+        template.create(child, mapping, modelOutput);
+
+        return child;
     }
 
-    private static void createCounterBlock(ModRegistry.ModEntry<? extends Block> entry, KitchenCounterBlock furniture, BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput, Consumer<BlockStateGenerator> blockStateOutput) {
-        ResourceLocation defaultPath = FurnitureMod.id("block/" + entry.path());
-        ResourceLocation innerPath = FurnitureMod.id("block/" + entry.path() + "_inner");
-        ResourceLocation outerPath = FurnitureMod.id("block/" + entry.path() + "_outer");
+    private static void createBaseBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
+        ResourceLocation path = createModelFile(generators, entry, "block/");
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get(), Variant.variant().with(VariantProperties.MODEL, path));
+        blockStateOutput.accept(generator);
+    }
 
-        ModelTemplate defaultTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(defaultPath.getPath().replace(furniture.getStone().getPath() + "_", "").replace(furniture.getWood().name() + "_", ""))), Optional.empty(), STONE, PLANKS, DOORS, TextureSlot.PARTICLE);
-        ModelTemplate innerTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(innerPath.getPath().replace(furniture.getStone().getPath() + "_", "").replace(furniture.getWood().name() + "_", ""))), Optional.empty(), STONE, PLANKS, TextureSlot.PARTICLE);
-        ModelTemplate outerTemplate = new ModelTemplate(Optional.of(FurnitureMod.id(outerPath.getPath().replace(furniture.getStone().getPath() + "_", "").replace(furniture.getWood().name() + "_", ""))), Optional.empty(), STONE, PLANKS, DOORS, TextureSlot.PARTICLE);
+    private static void createSinkBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
-        TextureMapping mapping = new TextureMapping();
-        mapping.put(STONE, DataHelper.getStone(furniture.getStone()));
-        mapping.put(PLANKS, DataHelper.getWoodPlanks(furniture.getWood()));
-        mapping.put(DOORS, DataHelper.getWoodDoors(furniture.getWood()));
-        mapping.put(PARTICLE, DataHelper.getStone(furniture.getStone()));
+        ResourceLocation defaultPath = createModelFile(generators, entry, "block/");
+        ResourceLocation droppedPath = createModelFile(generators, entry, "block/", "_dropped");
 
-        defaultTemplate.create(defaultPath, mapping, modelOutput);
-        innerTemplate.create(innerPath, mapping, modelOutput);
-        outerTemplate.create(outerPath, mapping, modelOutput);
+        Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
+        Variant droppedVariant = Variant.variant().with(VariantProperties.MODEL, droppedPath);
 
-        MultiVariantGenerator counterSupplier = MultiVariantGenerator.multiVariant(furniture);
-        PropertyDispatch.C3<Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.EAST, KitchenCounterBlock.WEST, KitchenCounterBlock.OUTER);
-        for (int i = 0; i < 1 << 3; i++) {
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
+        PropertyDispatch.C1<Boolean> dispatch = PropertyDispatch.property(KitchenSinkBlock.DROPPED);
+        dispatch.select(false, defaultVariant);
+        dispatch.select(true, droppedVariant);
+        generator.with(dispatch);
+        blockStateOutput.accept(generator);
+    }
+
+    private static void createTableBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
+
+        ResourceLocation basePath = createModelFile(generators, entry, "block/", "_center", PARTICLE, PLANKS);
+        ResourceLocation feetPath = createModelFile(generators, entry, "block/", "_feet", PARTICLE, LOG);
+        createModelFile(generators, entry, "item/");
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(entry.get());
+        addDirectionPart(generator, basePath, VariantProperties.Rotation.R0, null, null, null, null);
+        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R0, false, false, null, null);
+        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R90, null, false, false, null);
+        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R180, null, null, false, false);
+        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
+        blockStateOutput.accept(generator);
+    }
+
+    private static void createCounterBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
+
+        ResourceLocation defaultPath = createModelFile(generators, entry, "block/", "", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation hollowPath = createModelFile(generators, entry, "block/", "_hollow", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation innerPath = createModelFile(generators, entry, "block/", "_inner", PARTICLE, PLANKS, STONE);
+        ResourceLocation outerPath = createModelFile(generators, entry, "block/", "_outer", PARTICLE, PLANKS, DOORS, STONE);
+
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
+        PropertyDispatch.C4<Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.EAST, KitchenCounterBlock.WEST, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW);
+        for (int i = 0; i < 1 << 4; i++) {
             boolean east = (i & (1)) != 0;
             boolean west = (i & (1 << 1)) != 0;
             boolean outer = (i & (1 << 2)) != 0;
+            boolean hollow = (i & (1 << 3)) != 0;
 
-            Variant defaulVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
+            Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
+            Variant hollowVariant = Variant.variant().with(VariantProperties.MODEL, hollowPath);
             Variant innerVariant = Variant.variant().with(VariantProperties.MODEL, innerPath);
             Variant outerVariant = Variant.variant().with(VariantProperties.MODEL, outerPath);
 
-            Variant variant = (east && !west) || (!east && west) ? outer ? outerVariant : innerVariant : defaulVariant;
+            Variant variant = (east && !west) || (!east && west) ? outer ? outerVariant : innerVariant : hollow ? hollowVariant : defaultVariant;
             if ((east && !west && outer) || (!east && west && !outer)) {
                 variant = variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
             }
 
-            dispatch.select(east, west, outer, variant);
+            dispatch.select(east, west, outer, hollow, variant);
         }
-        counterSupplier.with(dispatch);
-        blockStateOutput.accept(counterSupplier);
+        generator.with(dispatch);
+        blockStateOutput.accept(generator);
     }
 
     private static void addDirectionPart(MultiPartGenerator generator, ResourceLocation modelPath, VariantProperties.Rotation rotationY, Boolean north, Boolean east, Boolean south, Boolean west) {
@@ -186,6 +201,12 @@ public class ModBlockModelProvider {
         }else{
             generator.with(condition, variant);
         }
+    }
+
+    private static void tryAddSlot(List<TextureSlot> slots, TextureSlot slot) {
+        try {
+            slots.add(slot);
+        }catch (UnsupportedOperationException ignored) { }
     }
 
 }

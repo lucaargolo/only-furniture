@@ -64,16 +64,7 @@ public class FurnitureBlock extends Block {
 
     public FurnitureBlock(Block base, VoxelShape[] shapes) {
         super(furnitureProperties(base));
-        VoxelShape shape = Shapes.empty();
-        for (VoxelShape s : shapes) {
-            shape = Shapes.join(shape, s, BooleanOp.OR);
-        }
-        ImmutableMap.Builder<Direction, VoxelShape> builder = ImmutableMap.builder();
-        builder.put(Direction.NORTH, shape);
-        builder.put(Direction.EAST, VoxelShapeUtils.rotate(shape, Direction.EAST));
-        builder.put(Direction.SOUTH, VoxelShapeUtils.rotate(shape, Direction.SOUTH));
-        builder.put(Direction.WEST, VoxelShapeUtils.rotate(shape, Direction.WEST));
-        this.shapes = builder.build();
+        this.shapes = computeVoxelShapes(shapes);
         this.registerDefaultState(this.stateDefinition.any().setValue(LAYER, 0));
     }
 
@@ -161,7 +152,9 @@ public class FurnitureBlock extends Block {
     }
 
     public BlockState getStateForPlacement(BlockPlaceContext context, FurnitureData data, int layer) {
-        return this.defaultBlockState();
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        return computeStateForData(level, pos, this.defaultBlockState(), data);
     }
 
     @Override
@@ -279,7 +272,13 @@ public class FurnitureBlock extends Block {
             FurnitureData[] layers = FurnitureData.get(level, pos);
             FurnitureData.set((Level) level, pos, layers);
         }
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        int layer = state.getValue(LAYER);
+        FurnitureData data = FurnitureData.get(level, pos, layer);
+        return computeStateForData(level, pos, state, data);
+    }
+
+    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data) {
+        return state;
     }
 
     @Override
@@ -444,6 +443,19 @@ public class FurnitureBlock extends Block {
 
     public static void setRotation(ServerPlayer player, float rotation) {
         rotations.put(player.getUUID(), rotation);
+    }
+
+    public static Map<Direction, VoxelShape> computeVoxelShapes(VoxelShape[] shapes) {
+        VoxelShape shape = Shapes.empty();
+        for (VoxelShape s : shapes) {
+            shape = Shapes.join(shape, s, BooleanOp.OR);
+        }
+        ImmutableMap.Builder<Direction, VoxelShape> builder = ImmutableMap.builder();
+        builder.put(Direction.NORTH, shape);
+        builder.put(Direction.EAST, VoxelShapeUtils.rotate(shape, Direction.EAST));
+        builder.put(Direction.SOUTH, VoxelShapeUtils.rotate(shape, Direction.SOUTH));
+        builder.put(Direction.WEST, VoxelShapeUtils.rotate(shape, Direction.WEST));
+        return builder.build();
     }
 
     private static List<BlockPos> calculateIntersectingPositionsInLevel(Level level, BlockPos originalPos, int layer) {

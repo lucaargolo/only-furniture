@@ -1,30 +1,56 @@
 {
   "variants": {
-    "east=false,outer=false,west=false": {
+    "east=false,hollow=false,outer=false,west=false": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter"
     },
-    "east=false,outer=false,west=true": {
+    "east=false,hollow=false,outer=false,west=true": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_inner",
       "y": 270
     },
-    "east=false,outer=true,west=false": {
+    "east=false,hollow=false,outer=true,west=false": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter"
     },
-    "east=false,outer=true,west=true": {
+    "east=false,hollow=false,outer=true,west=true": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_outer"
     },
-    "east=true,outer=false,west=false": {
+    "east=false,hollow=true,outer=false,west=false": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_hollow"
+    },
+    "east=false,hollow=true,outer=false,west=true": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_inner",
+      "y": 270
+    },
+    "east=false,hollow=true,outer=true,west=false": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_hollow"
+    },
+    "east=false,hollow=true,outer=true,west=true": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_outer"
+    },
+    "east=true,hollow=false,outer=false,west=false": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_inner"
     },
-    "east=true,outer=false,west=true": {
+    "east=true,hollow=false,outer=false,west=true": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter"
     },
-    "east=true,outer=true,west=false": {
+    "east=true,hollow=false,outer=true,west=false": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_outer",
       "y": 270
     },
-    "east=true,outer=true,west=true": {
+    "east=true,hollow=false,outer=true,west=true": {
       "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter"
+    },
+    "east=true,hollow=true,outer=false,west=false": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_inner"
+    },
+    "east=true,hollow=true,outer=false,west=true": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_hollow"
+    },
+    "east=true,hollow=true,outer=true,west=false": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_outer",
+      "y": 270
+    },
+    "east=true,hollow=true,outer=true,west=true": {
+      "model": "onlyfurniture:block/warped_polished_granite_kitchen_counter_hollow"
     }
   }
 }

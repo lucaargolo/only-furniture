@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "dropped=false": {
       "model": "onlyfurniture:block/iron_kitchen_sink"
+    },
+    "dropped=true": {
+      "model": "onlyfurniture:block/iron_kitchen_sink_dropped"
     }
   }
 }

@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/kitchen_sink_dropped",
+  "textures": {
+    "metal": "minecraft:block/anvil",
+    "particle": "minecraft:block/anvil"
+  }
+}

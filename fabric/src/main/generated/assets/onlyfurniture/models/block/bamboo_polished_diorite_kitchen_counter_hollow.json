@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_hollow",
+  "textures": {
+    "doors": "onlyfurniture:block/bamboo_doors",
+    "particle": "minecraft:block/polished_diorite",
+    "planks": "minecraft:block/bamboo_planks",
+    "stone": "minecraft:block/polished_diorite"
+  }
+}

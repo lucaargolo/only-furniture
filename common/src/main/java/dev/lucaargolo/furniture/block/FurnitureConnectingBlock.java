@@ -5,8 +5,6 @@ import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -55,20 +53,6 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context, FurnitureData data, int layer) {
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        return computeStateForData(level, pos, this.defaultBlockState(), data);
-    }
-
-    @Override
-    protected @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
-        super.updateShape(state, direction, neighborState, level, pos, neighborPos);
-        int layer = state.getValue(LAYER);
-        FurnitureData data = FurnitureData.get(level, pos, layer);
-        return computeStateForData(level, pos, state, data);
-    }
-
     protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data) {
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
         if (data.getRotation() % 90f == 0f) {
@@ -79,17 +63,12 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                 BlockState neighborState = level.getBlockState(neighborPos);
 
                 if (neighborState.is(this.connecting)) {
-                    FurnitureData[] neighborLayers = FurnitureData.get(level, neighborPos);
-                    for (FurnitureData neighborData : neighborLayers) {
-                        if(data.equalsIgnoreRotation(neighborData) && neighborData.getRotation() % 90f == 0f) {
-                            neighbors.put(neighborDirection, neighborData);
-                            break;
-                        }
+                    FurnitureData neighborData = FurnitureData.get(level, neighborPos, neighborState.getValue(LAYER));
+                    if(data.equalsIgnoreRotation(neighborData) && neighborData.getRotation() % 90f == 0f) {
+                        neighbors.put(neighborDirection, neighborData);
                     }
                 }
             }
-
-
 
             Pair<Boolean, Boolean> north = computeNeighbor(pos, facing, data, neighbors, Direction.NORTH);
             Pair<Boolean, Boolean> east = computeNeighbor(pos, facing, data, neighbors, Direction.EAST);

@@ -1,15 +1,15 @@
 {
   "values": [
-    "onlyfurniture:birch_table",
     "onlyfurniture:acacia_table",
-    "onlyfurniture:oak_table",
-    "onlyfurniture:mangrove_table",
+    "onlyfurniture:bamboo_table",
+    "onlyfurniture:birch_table",
+    "onlyfurniture:cherry_table",
+    "onlyfurniture:crimson_table",
     "onlyfurniture:dark_oak_table",
     "onlyfurniture:jungle_table",
-    "onlyfurniture:warped_table",
-    "onlyfurniture:bamboo_table",
-    "onlyfurniture:cherry_table",
+    "onlyfurniture:mangrove_table",
+    "onlyfurniture:oak_table",
     "onlyfurniture:spruce_table",
-    "onlyfurniture:crimson_table"
+    "onlyfurniture:warped_table"
   ]
 }

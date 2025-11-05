@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_hollow",
+  "textures": {
+    "doors": "onlyfurniture:block/acacia_doors",
+    "particle": "minecraft:block/polished_blackstone",
+    "planks": "minecraft:block/acacia_planks",
+    "stone": "minecraft:block/polished_blackstone"
+  }
+}

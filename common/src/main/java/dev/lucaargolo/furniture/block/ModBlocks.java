@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class ModBlocks {
 
@@ -49,8 +50,8 @@ public class ModBlocks {
 
     public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForConnectingStoneAndWoodType("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static Supplier<KitchenSinkBlock> IRON_KITCHEN_SINK = BLOCKS.register("iron_kitchen_sink", () -> new KitchenSinkBlock(MetalBlock.MetalType.IRON, ModBlockShapes.KITCHEN_SINK), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<KitchenSinkBlock>, Supplier<KitchenSinkBlock>>> COPPER_KITCHEN_SINK_MAP = registerWeatheringCopper("copper_kitchen_sink", KitchenSinkBlock.Weathering::new, KitchenSinkBlock::new, ModBlockShapes.KITCHEN_SINK, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<KitchenSinkBlock> IRON_KITCHEN_SINK = BLOCKS.register("iron_kitchen_sink", () -> new KitchenSinkBlock(MetalBlock.MetalType.IRON), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<KitchenSinkBlock>, Supplier<KitchenSinkBlock>>> COPPER_KITCHEN_SINK_MAP = registerWeatheringCopper("copper_kitchen_sink", KitchenSinkBlock.Weathering::new, KitchenSinkBlock::new, ModBlockShapes.KITCHEN_SINK, ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForConnectingWoodType(String path, QuadFunction<Block, VoxelShape[], TagKey<Block>, WoodType, T> o, TagKey<?>... tags) {
         return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), wood), ModBlockShapes.EMPTY, tags);
@@ -58,14 +59,11 @@ public class ModBlocks {
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodType(String path, TriFunction<Block, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
         Map<WoodType, Supplier<T>> map = new HashMap<>();
-        BlockFamilies.getAllFamilies().filter(f -> f.getRecipeGroupPrefix().orElse("").equals("wooden")).forEach(family -> {
-            ResourceLocation location = BuiltInRegistries.BLOCK.getKey(family.getBaseBlock());
-            if(location.getNamespace().equals("minecraft")) {
-                String woodType = location.withPath(s -> s.replace("_planks", "")).getPath();
-                WoodType.values().filter(t -> t.name().equals(woodType)).findFirst().ifPresent(type -> {
-                    map.put(type, BLOCKS.register(woodType+"_"+path, () -> o.apply(family.getBaseBlock(), type, shapes), tags));
-                });
-            }
+        getAllBaseWoodBlocks().forEach(location -> {
+            String woodPath = location.withPath(s -> s.replace("_planks", "")).getPath();
+            WoodType.values().filter(t -> t.name().equals(woodPath)).findFirst().ifPresent(woodType -> {
+                map.put(woodType, BLOCKS.register(woodPath+"_"+path, () -> o.apply(BuiltInRegistries.BLOCK.get(location), woodType, shapes), tags));
+            });
         });
         return map;
     }
@@ -76,18 +74,15 @@ public class ModBlocks {
 
     private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForStoneAndWoodType(String path, boolean polished, QuadFunction<Block, StoneBlock.StoneType, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
         Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> map = new HashMap<>();
-        BlockFamilies.getAllFamilies().filter(f -> f.getRecipeGroupPrefix().orElse("").equals("wooden")).forEach(family -> {
-            ResourceLocation woodLocation = BuiltInRegistries.BLOCK.getKey(family.getBaseBlock());
-            if(woodLocation.getNamespace().equals("minecraft")) {
-                String woodPath = woodLocation.withPath(s -> s.replace("_planks", "")).getPath();
-                WoodType.values().filter(t -> t.name().equals(woodPath)).findFirst().ifPresent(woodType -> {
-                    for(StoneBlock.StoneType stoneType : StoneBlock.StoneType.values()) {
-                        if(polished == stoneType.isPolished()) {
-                            map.put(Pair.of(stoneType, woodType), BLOCKS.register(woodPath+"_"+stoneType.getPath()+"_"+path, () -> o.apply(stoneType.getBase(), stoneType, woodType, shapes), tags));
-                        }
+        getAllBaseWoodBlocks().forEach(location -> {
+            String woodPath = location.withPath(s -> s.replace("_planks", "")).getPath();
+            WoodType.values().filter(t -> t.name().equals(woodPath)).findFirst().ifPresent(woodType -> {
+                for(StoneBlock.StoneType stoneType : StoneBlock.StoneType.values()) {
+                    if(polished == stoneType.isPolished()) {
+                        map.put(Pair.of(stoneType, woodType), BLOCKS.register(woodPath+"_"+stoneType.getPath()+"_"+path, () -> o.apply(stoneType.getBase(), stoneType, woodType, shapes), tags));
                     }
-                });
-            }
+                }
+            });
         });
         return map;
     }
@@ -116,20 +111,26 @@ public class ModBlocks {
     }
 
     @FunctionalInterface
-    public interface PentaFunction<P1, P2, P3, P4, P5, R> {
+    private interface PentaFunction<P1, P2, P3, P4, P5, R> {
         R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
     }
 
     @FunctionalInterface
-    public interface QuadFunction<P1, P2, P3, P4, R> {
+    private interface QuadFunction<P1, P2, P3, P4, R> {
         R apply(P1 p1, P2 p2, P3 p3, P4 p4);
     }
 
     @FunctionalInterface
-    public interface TriFunction<P1, P2, P3, R> {
+    private interface TriFunction<P1, P2, P3, R> {
         R apply(P1 p1, P2 p2, P3 p3);
     }
 
-
+    private static Stream<ResourceLocation> getAllBaseWoodBlocks() {
+        return BlockFamilies.getAllFamilies()
+                .filter(f -> f.getRecipeGroupPrefix().orElse("").equals("wooden"))
+                .map(f -> BuiltInRegistries.BLOCK.getKey(f.getBaseBlock()))
+                .filter(f -> f.getNamespace().equals("minecraft"))
+                .sorted();
+    }
 
 }
