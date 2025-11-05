@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.block.base.impl;
+package dev.lucaargolo.furniture.block.impl;
 
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import net.minecraft.world.level.block.Block;
@@ -7,12 +7,12 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class MetalWoodFurnitureSeatBlock extends WoodFurnitureSeatBlock implements MetalBlock {
+public class OutdoorBenchBlock extends WoodFurnitureSeatBlock implements MetalBlock {
 
     private final MetalType metal;
     private final WeatheringCopper.WeatherState state;
 
-    public MetalWoodFurnitureSeatBlock(Block base, MetalType metal, WeatheringCopper.WeatherState state, WoodType wood, VoxelShape[] shapes, Vec3... seats) {
+    public OutdoorBenchBlock(Block base, MetalType metal, WeatheringCopper.WeatherState state, WoodType wood, VoxelShape[] shapes, Vec3... seats) {
         super(base, wood, shapes, seats);
         this.metal = metal;
         this.state = state;

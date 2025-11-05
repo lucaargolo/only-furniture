@@ -19,4 +19,5 @@ public class WoodFurnitureBlock extends FurnitureBlock implements WoodBlock {
     public WoodType getWood() {
         return wood;
     }
+
 }

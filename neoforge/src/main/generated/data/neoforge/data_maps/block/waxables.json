@@ -1,0 +1,16 @@
+{
+  "values": {
+    "onlyfurniture:copper_kitchen_sink": {
+      "waxed": "onlyfurniture:waxed_copper_kitchen_sink"
+    },
+    "onlyfurniture:exposed_copper_kitchen_sink": {
+      "waxed": "onlyfurniture:waxed_exposed_copper_kitchen_sink"
+    },
+    "onlyfurniture:oxidized_copper_kitchen_sink": {
+      "waxed": "onlyfurniture:waxed_oxidized_copper_kitchen_sink"
+    },
+    "onlyfurniture:weathered_copper_kitchen_sink": {
+      "waxed": "onlyfurniture:waxed_weathered_copper_kitchen_sink"
+    }
+  }
+}

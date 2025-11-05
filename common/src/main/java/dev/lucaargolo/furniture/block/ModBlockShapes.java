@@ -98,11 +98,13 @@ public class ModBlockShapes {
         Shapes.box(-0.1875,2.3125,0.3125,1.1875,3,0.6875)
     };
 
-    public static final VoxelShape[] KITCHEN_COUNTER = new VoxelShape[] {
-            Block.box(1, 1, 2, 15, 11, 3),
-            Block.box(0, 14, 14, 16, 16, 16),
-            Block.box(0, 12, 2, 16, 14, 16),
-            Block.box(0, 0, 3, 16, 12, 16)
+    public static final VoxelShape[] KITCHEN_SINK = new VoxelShape[] {
+        Block.box(2, 0, 4, 14, 5, 14),
+        Block.box(6.75, 5, 11.5, 8.75, 9.5, 12.5),
+        Block.box(6.75, 7.5, 7.5, 8.75, 9.5, 8.5),
+        Block.box(6.75, 9.5, 8.5, 8.75, 10.5, 11.5),
+        Block.box(6.75, 9, 11, 8.75, 10, 12),
+        Block.box(6.75, 9, 8, 8.75, 10, 9)
     };
 
 }

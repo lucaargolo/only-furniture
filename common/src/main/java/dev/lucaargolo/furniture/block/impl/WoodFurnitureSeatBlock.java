@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.block.base.impl;
+package dev.lucaargolo.furniture.block.impl;
 
 import dev.lucaargolo.furniture.block.FurnitureSeatBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;

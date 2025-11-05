@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.block.base.LightBlock;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
@@ -61,8 +62,8 @@ public class FurnitureBlock extends Block {
 
     protected final Map<Direction, VoxelShape> shapes;
 
-    public FurnitureBlock(Block.Properties properties, VoxelShape[] shapes) {
-        super(properties.dynamicShape().pushReaction(PushReaction.BLOCK).noOcclusion().noTerrainParticles());
+    public FurnitureBlock(Block base, VoxelShape[] shapes) {
+        super(furnitureProperties(base));
         VoxelShape shape = Shapes.empty();
         for (VoxelShape s : shapes) {
             shape = Shapes.join(shape, s, BooleanOp.OR);
@@ -76,8 +77,12 @@ public class FurnitureBlock extends Block {
         this.registerDefaultState(this.stateDefinition.any().setValue(LAYER, 0));
     }
 
-    public FurnitureBlock(Block base, VoxelShape[] shapes) {
-        this(BlockBehaviour.Properties.ofFullCopy(base), shapes);
+    private static BlockBehaviour.Properties furnitureProperties(Block base) {
+        return BlockBehaviour.Properties.ofFullCopy(base)
+                .lightLevel(state -> state.getBlock() instanceof LightBlock lightBlock ? lightBlock.getLight(state) : 0)
+                .pushReaction(PushReaction.BLOCK)
+                .noTerrainParticles()
+                .randomTicks();
     }
 
     @Override

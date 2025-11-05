@@ -1,8 +1,9 @@
 {
   "parent": "onlyfurniture:block/outdoor_bench",
   "textures": {
+    "log": "minecraft:block/dark_oak_log",
     "metal": "minecraft:block/anvil",
-    "particle": "minecraft:block/dark_oak_log",
+    "particle": "minecraft:block/anvil",
     "planks": "minecraft:block/dark_oak_planks"
   }
 }

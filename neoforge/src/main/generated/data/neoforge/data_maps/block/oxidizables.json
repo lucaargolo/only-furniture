@@ -1,0 +1,13 @@
+{
+  "values": {
+    "onlyfurniture:copper_kitchen_sink": {
+      "next_oxidation_stage": "onlyfurniture:exposed_copper_kitchen_sink"
+    },
+    "onlyfurniture:exposed_copper_kitchen_sink": {
+      "next_oxidation_stage": "onlyfurniture:weathered_copper_kitchen_sink"
+    },
+    "onlyfurniture:weathered_copper_kitchen_sink": {
+      "next_oxidation_stage": "onlyfurniture:oxidized_copper_kitchen_sink"
+    }
+  }
+}

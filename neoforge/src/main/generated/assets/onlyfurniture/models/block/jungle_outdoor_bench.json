@@ -1,8 +1,9 @@
 {
   "parent": "onlyfurniture:block/outdoor_bench",
   "textures": {
+    "log": "minecraft:block/jungle_log",
     "metal": "minecraft:block/anvil",
-    "particle": "minecraft:block/jungle_log",
+    "particle": "minecraft:block/anvil",
     "planks": "minecraft:block/jungle_planks"
   }
 }
