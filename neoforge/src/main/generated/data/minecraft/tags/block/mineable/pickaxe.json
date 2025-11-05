@@ -1,8 +1,8 @@
 {
   "values": [
-    "onlyfurniture:iron_lamp_post",
-    "onlyfurniture:iron_dual_lamp_post",
-    "onlyfurniture:iron_triple_lamp_post",
+    "onlyfurniture:cast_iron_lamp_post",
+    "onlyfurniture:cast_iron_dual_lamp_post",
+    "onlyfurniture:cast_iron_triple_lamp_post",
     "onlyfurniture:acacia_smooth_stone_kitchen_counter",
     "onlyfurniture:acacia_polished_granite_kitchen_counter",
     "onlyfurniture:acacia_polished_diorite_kitchen_counter",
@@ -103,6 +103,7 @@
     "onlyfurniture:warped_polished_blackstone_kitchen_counter",
     "onlyfurniture:warped_quartz_block_kitchen_counter",
     "onlyfurniture:iron_kitchen_sink",
+    "onlyfurniture:cast_iron_kitchen_sink",
     "onlyfurniture:copper_kitchen_sink",
     "onlyfurniture:waxed_copper_kitchen_sink",
     "onlyfurniture:exposed_copper_kitchen_sink",
@@ -110,6 +111,7 @@
     "onlyfurniture:weathered_copper_kitchen_sink",
     "onlyfurniture:waxed_weathered_copper_kitchen_sink",
     "onlyfurniture:oxidized_copper_kitchen_sink",
-    "onlyfurniture:waxed_oxidized_copper_kitchen_sink"
+    "onlyfurniture:waxed_oxidized_copper_kitchen_sink",
+    "onlyfurniture:quartz_block_kitchen_sink"
   ]
 }

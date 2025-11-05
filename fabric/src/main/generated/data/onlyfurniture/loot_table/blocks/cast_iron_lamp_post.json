@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "onlyfurniture:iron_lamp_post"
+          "name": "onlyfurniture:cast_iron_lamp_post"
         }
       ],
       "rolls": 1.0

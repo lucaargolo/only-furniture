@@ -1,6 +1,7 @@
 {
   "values": [
     "onlyfurniture:iron_kitchen_sink",
+    "onlyfurniture:cast_iron_kitchen_sink",
     "onlyfurniture:copper_kitchen_sink",
     "onlyfurniture:waxed_copper_kitchen_sink",
     "onlyfurniture:exposed_copper_kitchen_sink",
@@ -8,6 +9,7 @@
     "onlyfurniture:weathered_copper_kitchen_sink",
     "onlyfurniture:waxed_weathered_copper_kitchen_sink",
     "onlyfurniture:oxidized_copper_kitchen_sink",
-    "onlyfurniture:waxed_oxidized_copper_kitchen_sink"
+    "onlyfurniture:waxed_oxidized_copper_kitchen_sink",
+    "onlyfurniture:quartz_block_kitchen_sink"
   ]
 }

@@ -11,10 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "onlyfurniture:iron_dual_lamp_post"
+          "name": "onlyfurniture:cast_iron_lamp_post"
         }
       ],
       "rolls": 1.0
     }
-  ]
+  ],
+  "random_sequence": "onlyfurniture:blocks/cast_iron_lamp_post"
 }

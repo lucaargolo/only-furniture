@@ -1,9 +1,10 @@
 {
   "values": [
-    "onlyfurniture:iron_lamp_post",
-    "onlyfurniture:iron_dual_lamp_post",
-    "onlyfurniture:iron_triple_lamp_post",
+    "onlyfurniture:cast_iron_lamp_post",
+    "onlyfurniture:cast_iron_dual_lamp_post",
+    "onlyfurniture:cast_iron_triple_lamp_post",
     "onlyfurniture:iron_kitchen_sink",
+    "onlyfurniture:cast_iron_kitchen_sink",
     "onlyfurniture:copper_kitchen_sink",
     "onlyfurniture:waxed_copper_kitchen_sink",
     "onlyfurniture:exposed_copper_kitchen_sink",

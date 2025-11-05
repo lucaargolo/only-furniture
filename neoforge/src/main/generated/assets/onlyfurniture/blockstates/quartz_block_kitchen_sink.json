@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "dropped=false": {
+      "model": "onlyfurniture:block/quartz_block_kitchen_sink"
+    },
+    "dropped=true": {
+      "model": "onlyfurniture:block/quartz_block_kitchen_sink_dropped"
+    }
+  }
+}

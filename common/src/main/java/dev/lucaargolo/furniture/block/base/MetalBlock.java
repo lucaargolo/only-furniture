@@ -12,6 +12,7 @@ public interface MetalBlock {
 
     enum MetalType {
         IRON(Blocks.IRON_BLOCK),
+        CAST_IRON(Blocks.IRON_BLOCK),
         GOLD(Blocks.GOLD_BLOCK),
         COPPER(Blocks.COPPER_BLOCK, Blocks.EXPOSED_COPPER, Blocks.WEATHERED_COPPER, Blocks.OXIDIZED_COPPER);
 
@@ -38,7 +39,7 @@ public interface MetalBlock {
 
         public Block getTexture(WeatheringCopper.WeatherState state) {
             Block block = this.get(state);
-            return block == Blocks.IRON_BLOCK ? Blocks.ANVIL : block;
+            return this == CAST_IRON && block == Blocks.IRON_BLOCK ? Blocks.ANVIL : block;
         }
 
         public Block get(WeatheringCopper.WeatherState state) {

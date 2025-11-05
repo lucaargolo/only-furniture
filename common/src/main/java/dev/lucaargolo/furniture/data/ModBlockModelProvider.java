@@ -39,6 +39,7 @@ public class ModBlockModelProvider {
     private static final TextureSlot DOORS = TextureSlotAccessor.invokeCreate("doors");
     private static final TextureSlot STONE = TextureSlotAccessor.invokeCreate("stone");
     private static final TextureSlot METAL = TextureSlotAccessor.invokeCreate("metal");
+    private static final TextureSlot BASE = TextureSlotAccessor.invokeCreate("base");
 
     public static void generate(BlockModelGenerators generators) {
         ModBlocks.BLOCKS.forEach((entry) -> {
@@ -51,19 +52,19 @@ public class ModBlockModelProvider {
         });
     }
 
-    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix) {
-        return createModelFile(generators, entry, prefix, "", new ArrayList<>());
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix) {
+        return computeModel(generators, entry, prefix, "", new ArrayList<>());
     }
 
-    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix) {
-        return createModelFile(generators, entry, prefix, suffix, new ArrayList<>());
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix) {
+        return computeModel(generators, entry, prefix, suffix, new ArrayList<>());
     }
 
-    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, TextureSlot... slots) {
-        return createModelFile(generators, entry, prefix, suffix, List.of(slots));
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, TextureSlot... slots) {
+        return computeModel(generators, entry, prefix, suffix, List.of(slots));
     }
 
-    private static ResourceLocation createModelFile(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, List<TextureSlot> slots) {
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, List<TextureSlot> slots) {
         BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput = ((BlockModelGeneratorsAccessor) generators).getModelOutput();
 
         Block block = entry.get();
@@ -80,7 +81,7 @@ public class ModBlockModelProvider {
             if(slots.contains(DOORS))
                 mapping.put(DOORS, DataHelper.getWoodDoors(wood));
             mapping.put(LOG, DataHelper.getWoodLog(wood));
-            mapping.put(PLANKS, DataHelper.getWoodPlanks(wood));
+            mapping.put(slots.contains(BASE) ? BASE : PLANKS, DataHelper.getWoodPlanks(wood));
             mapping.put(PARTICLE, DataHelper.getWoodLog(wood));
         }
 
@@ -88,7 +89,7 @@ public class ModBlockModelProvider {
             StoneBlock.StoneType stone = stoneBlock.getStone();
             path = path.replace(stone.getPath() + "_", "");
             tryAddSlot(slots, STONE);
-            mapping.put(STONE, DataHelper.getStone(stone));
+            mapping.put(slots.contains(BASE) ? BASE : STONE, DataHelper.getStone(stone));
             mapping.put(PARTICLE, DataHelper.getStone(stone));
         }
 
@@ -99,22 +100,26 @@ public class ModBlockModelProvider {
             path = path.replace(age.getSerializedName() + "_", "");
             path = path.replace("waxed_", "");
             tryAddSlot(slots, METAL);
-            mapping.put(METAL, DataHelper.getMetal(metal, age));
+            mapping.put(slots.contains(BASE) ? BASE : METAL, DataHelper.getMetal(metal, age));
             mapping.put(PARTICLE, DataHelper.getMetal(metal, age));
         }
 
         ResourceLocation parent = FurnitureMod.id(prefix+path+suffix);
         ResourceLocation child = FurnitureMod.id(prefix+entry.path()+suffix);
 
-        ModelTemplate template = new ModelTemplate(Optional.of(parent), Optional.empty(), slots.toArray(new TextureSlot[0]));
-        template.create(child, mapping, modelOutput);
+        if(slots.isEmpty() || (slots.size() == 1 && slots.contains(PARTICLE))) {
+            return parent;
+        }else{
+            ModelTemplate template = new ModelTemplate(Optional.of(parent), Optional.empty(), slots.toArray(new TextureSlot[0]));
+            template.create(child, mapping, modelOutput);
+            return child;
+        }
 
-        return child;
     }
 
     private static void createBaseBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
-        ResourceLocation path = createModelFile(generators, entry, "block/");
+        ResourceLocation path = computeModel(generators, entry, "block/");
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get(), Variant.variant().with(VariantProperties.MODEL, path));
         blockStateOutput.accept(generator);
     }
@@ -122,8 +127,8 @@ public class ModBlockModelProvider {
     private static void createSinkBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
-        ResourceLocation defaultPath = createModelFile(generators, entry, "block/");
-        ResourceLocation droppedPath = createModelFile(generators, entry, "block/", "_dropped");
+        ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PARTICLE, BASE);
+        ResourceLocation droppedPath = computeModel(generators, entry, "block/", "_dropped", PARTICLE, BASE);
 
         Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
         Variant droppedVariant = Variant.variant().with(VariantProperties.MODEL, droppedPath);
@@ -139,9 +144,9 @@ public class ModBlockModelProvider {
     private static void createTableBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
-        ResourceLocation basePath = createModelFile(generators, entry, "block/", "_center", PARTICLE, PLANKS);
-        ResourceLocation feetPath = createModelFile(generators, entry, "block/", "_feet", PARTICLE, LOG);
-        createModelFile(generators, entry, "item/");
+        ResourceLocation basePath = computeModel(generators, entry, "block/", "_center", PARTICLE, PLANKS);
+        ResourceLocation feetPath = computeModel(generators, entry, "block/", "_feet", PARTICLE, LOG);
+        computeModel(generators, entry, "item/");
 
         MultiPartGenerator generator = MultiPartGenerator.multiPart(entry.get());
         addDirectionPart(generator, basePath, VariantProperties.Rotation.R0, null, null, null, null);
@@ -155,10 +160,10 @@ public class ModBlockModelProvider {
     private static void createCounterBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
-        ResourceLocation defaultPath = createModelFile(generators, entry, "block/", "", PARTICLE, PLANKS, DOORS, STONE);
-        ResourceLocation hollowPath = createModelFile(generators, entry, "block/", "_hollow", PARTICLE, PLANKS, DOORS, STONE);
-        ResourceLocation innerPath = createModelFile(generators, entry, "block/", "_inner", PARTICLE, PLANKS, STONE);
-        ResourceLocation outerPath = createModelFile(generators, entry, "block/", "_outer", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation hollowPath = computeModel(generators, entry, "block/", "_hollow", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation innerPath = computeModel(generators, entry, "block/", "_inner", PARTICLE, PLANKS, STONE);
+        ResourceLocation outerPath = computeModel(generators, entry, "block/", "_outer", PARTICLE, PLANKS, DOORS, STONE);
 
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
         PropertyDispatch.C4<Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.EAST, KitchenCounterBlock.WEST, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW);

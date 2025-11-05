@@ -11,11 +11,10 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "onlyfurniture:iron_triple_lamp_post"
+          "name": "onlyfurniture:quartz_block_kitchen_sink"
         }
       ],
       "rolls": 1.0
     }
-  ],
-  "random_sequence": "onlyfurniture:blocks/iron_triple_lamp_post"
+  ]
 }

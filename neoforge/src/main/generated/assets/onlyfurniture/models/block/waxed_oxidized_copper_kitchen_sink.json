@@ -1,7 +1,7 @@
 {
   "parent": "onlyfurniture:block/kitchen_sink",
   "textures": {
-    "metal": "minecraft:block/oxidized_copper",
+    "base": "minecraft:block/oxidized_copper",
     "particle": "minecraft:block/oxidized_copper"
   }
 }

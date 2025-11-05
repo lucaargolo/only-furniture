@@ -38,20 +38,22 @@ public class ModBlocks {
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> CHAIR_MAP = registerForWoodType("chair", WoodFurnitureSeatBlock::new, ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
 
     public static final Map<WoodType, Supplier<OutdoorBenchBlock>> OUTDOOR_BENCH_MAP = registerForWoodType("outdoor_bench", (base, wood, shapes) -> {
-        return new OutdoorBenchBlock(base, MetalBlock.MetalType.IRON, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes, new Vec3(-0.5, 0.5, 0.0), new Vec3(0.5, 0.5, 0.0));
+        return new OutdoorBenchBlock(base, MetalBlock.MetalType.CAST_IRON, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes, new Vec3(-0.5, 0.5, 0.0), new Vec3(0.5, 0.5, 0.0));
     }, ModBlockShapes.OUTDOOR_BENCH, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> PICNIC_BENCH_MAP = registerForWoodType("picnic_bench", (base, wood, shapes) -> {
         return new WoodFurnitureSeatBlock(base, wood, shapes, new Vec3(-1.0, 0.5, 1.0), new Vec3(0.0, 0.5, 1.0), new Vec3(1.0, 0.5, 1.0), new Vec3(-1.0, 0.5, -1.0), new Vec3(0.0, 0.5, -1.0), new Vec3(1.0, 0.5, -1.0));
     }, ModBlockShapes.PICNIC_BENCH, BlockTags.MINEABLE_WITH_AXE);
 
-    public static Supplier<LampPostBlock> IRON_LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Supplier<LampPostBlock> IRON_DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Supplier<LampPostBlock> IRON_TRIPLE_LAMP_POST = BLOCKS.register("iron_triple_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<LampPostBlock> LAMP_POST = BLOCKS.register("cast_iron_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<LampPostBlock> DUAL_LAMP_POST = BLOCKS.register("cast_iron_dual_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<LampPostBlock> TRIPLE_LAMP_POST = BLOCKS.register("cast_iron_triple_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
     public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForConnectingStoneAndWoodType("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static Supplier<KitchenSinkBlock> IRON_KITCHEN_SINK = BLOCKS.register("iron_kitchen_sink", () -> new KitchenSinkBlock(MetalBlock.MetalType.IRON), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<KitchenSinkBlock>, Supplier<KitchenSinkBlock>>> COPPER_KITCHEN_SINK_MAP = registerWeatheringCopper("copper_kitchen_sink", KitchenSinkBlock.Weathering::new, KitchenSinkBlock::new, ModBlockShapes.KITCHEN_SINK, ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<KitchenSinkBlock> IRON_KITCHEN_SINK = BLOCKS.register("iron_kitchen_sink", () -> new KitchenSinkBlock.Metal(MetalBlock.MetalType.IRON), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<KitchenSinkBlock> CAST_IRON_KITCHEN_SINK = BLOCKS.register("cast_iron_kitchen_sink", () -> new KitchenSinkBlock.Metal(MetalBlock.MetalType.CAST_IRON), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Map<WeatheringCopper.WeatherState, Pair<Supplier<KitchenSinkBlock>, Supplier<KitchenSinkBlock>>> COPPER_KITCHEN_SINK_MAP = registerWeatheringCopper("copper_kitchen_sink", KitchenSinkBlock.Weathering::new, KitchenSinkBlock.Metal::new, ModBlockShapes.KITCHEN_SINK, ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<KitchenSinkBlock> QUARTZ_KITCHEN_SINK = BLOCKS.register("quartz_block_kitchen_sink", () -> new KitchenSinkBlock.Stone(StoneBlock.StoneType.QUARTZ_BLOCK), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForConnectingWoodType(String path, QuadFunction<Block, VoxelShape[], TagKey<Block>, WoodType, T> o, TagKey<?>... tags) {
         return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), wood), ModBlockShapes.EMPTY, tags);

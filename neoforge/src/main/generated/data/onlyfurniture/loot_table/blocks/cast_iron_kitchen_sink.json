@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "onlyfurniture:iron_lamp_post"
+          "name": "onlyfurniture:cast_iron_kitchen_sink"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "onlyfurniture:blocks/iron_lamp_post"
+  "random_sequence": "onlyfurniture:blocks/cast_iron_kitchen_sink"
 }
