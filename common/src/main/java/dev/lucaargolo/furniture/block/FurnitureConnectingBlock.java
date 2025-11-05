@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ConnectingFurnitureBlock extends FurnitureBlock {
+public abstract class FurnitureConnectingBlock extends FurnitureBlock {
 
     public static final BooleanProperty NORTH = BlockStateProperties.NORTH;
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
@@ -29,7 +29,7 @@ public abstract class ConnectingFurnitureBlock extends FurnitureBlock {
 
     private final TagKey<Block> connecting;
 
-    public ConnectingFurnitureBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting) {
+    public FurnitureConnectingBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting) {
         super(base, shapes);
         BlockState defaultState = this.defaultBlockState()
                 .setValue(NORTH, false)

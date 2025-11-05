@@ -1,5 +1,7 @@
-package dev.lucaargolo.furniture.block;
+package dev.lucaargolo.furniture.block.impl;
 
+import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
+import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
@@ -13,7 +15,7 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class TableBlock extends ConnectingFurnitureBlock implements WoodBlock {
+public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
 
     private static final VoxelShape CENTER = Block.box(0, 12, 0, 16, 16, 16);
 

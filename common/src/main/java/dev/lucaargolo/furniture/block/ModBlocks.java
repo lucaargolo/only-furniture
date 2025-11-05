@@ -3,6 +3,14 @@ package dev.lucaargolo.furniture.block;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.ModRegistry;
+import dev.lucaargolo.furniture.block.base.MetalBlock;
+import dev.lucaargolo.furniture.block.base.StoneBlock;
+import dev.lucaargolo.furniture.block.base.impl.MetalFurnitureLightBlock;
+import dev.lucaargolo.furniture.block.base.impl.MetalWoodFurnitureSeatBlock;
+import dev.lucaargolo.furniture.block.base.impl.WoodFurnitureBlock;
+import dev.lucaargolo.furniture.block.base.impl.WoodFurnitureSeatBlock;
+import dev.lucaargolo.furniture.block.impl.CounterBlock;
+import dev.lucaargolo.furniture.block.impl.TableBlock;
 import dev.lucaargolo.furniture.utils.WeatheringEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -39,11 +47,11 @@ public class ModBlocks {
         return new WoodFurnitureSeatBlock(base, wood, shapes, new Vec3(-1.0, 0.5, 1.0), new Vec3(0.0, 0.5, 1.0), new Vec3(1.0, 0.5, 1.0), new Vec3(-1.0, 0.5, -1.0), new Vec3(0.0, 0.5, -1.0), new Vec3(1.0, 0.5, -1.0));
     }, ModBlockShapes.PICNIC_BENCH, BlockTags.MINEABLE_WITH_AXE);
 
-    public static Supplier<MetalLightFurnitureBlock> LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Supplier<MetalLightFurnitureBlock> DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Supplier<MetalLightFurnitureBlock> TRIPLE_LAMP_POST = BLOCKS.register("iron_triple_lamp_post", () -> new MetalLightFurnitureBlock(MetalBlock.MetalType.IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<MetalFurnitureLightBlock> LAMP_POST = BLOCKS.register("iron_lamp_post", () -> new MetalFurnitureLightBlock(MetalBlock.MetalType.IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<MetalFurnitureLightBlock> DUAL_LAMP_POST = BLOCKS.register("iron_dual_lamp_post", () -> new MetalFurnitureLightBlock(MetalBlock.MetalType.IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<MetalFurnitureLightBlock> TRIPLE_LAMP_POST = BLOCKS.register("iron_triple_lamp_post", () -> new MetalFurnitureLightBlock(MetalBlock.MetalType.IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForConnectingStoneAndWoodType("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<CounterBlock>> KITCHEN_COUNTER_MAP = registerForConnectingStoneAndWoodType("kitchen_counter", true, CounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForConnectingWoodType(String path, QuadFunction<Block, VoxelShape[], TagKey<Block>, WoodType, T> o, TagKey<?>... tags) {
         return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), wood), ModBlockShapes.EMPTY, tags);

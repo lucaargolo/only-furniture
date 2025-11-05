@@ -1,8 +1,8 @@
 package dev.lucaargolo.furniture.data;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.block.MetalBlock;
-import dev.lucaargolo.furniture.block.StoneBlock;
+import dev.lucaargolo.furniture.block.base.MetalBlock;
+import dev.lucaargolo.furniture.block.base.StoneBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;

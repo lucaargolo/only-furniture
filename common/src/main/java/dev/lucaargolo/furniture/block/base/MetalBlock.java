@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.block;
+package dev.lucaargolo.furniture.block.base;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;

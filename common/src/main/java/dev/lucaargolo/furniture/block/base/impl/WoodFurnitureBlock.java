@@ -1,5 +1,7 @@
-package dev.lucaargolo.furniture.block;
+package dev.lucaargolo.furniture.block.base.impl;
 
+import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.base.WoodBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.shapes.VoxelShape;

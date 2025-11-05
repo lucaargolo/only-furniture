@@ -1,5 +1,6 @@
-package dev.lucaargolo.furniture.block;
+package dev.lucaargolo.furniture.block.base.impl;
 
+import dev.lucaargolo.furniture.block.base.MetalBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.WoodType;

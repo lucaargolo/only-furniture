@@ -2,7 +2,12 @@ package dev.lucaargolo.furniture.data;
 
 import com.google.gson.JsonElement;
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.block.*;
+import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.base.MetalBlock;
+import dev.lucaargolo.furniture.block.base.WoodBlock;
+import dev.lucaargolo.furniture.block.base.impl.MetalWoodFurnitureSeatBlock;
+import dev.lucaargolo.furniture.block.impl.CounterBlock;
+import dev.lucaargolo.furniture.block.impl.TableBlock;
 import dev.lucaargolo.furniture.mixin.BlockModelGeneratorsAccessor;
 import dev.lucaargolo.furniture.mixin.TextureSlotAccessor;
 import net.minecraft.data.models.BlockModelGenerators;
@@ -60,7 +65,7 @@ public class ModBlockModelProvider {
                     addDirectionPart(tableSupplier, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
                     blockStateOutput.accept(tableSupplier);
                 }
-                case KitchenCounterBlock furniture -> {
+                case CounterBlock furniture -> {
                     ResourceLocation defaultPath = FurnitureMod.id("block/" + entry.path());
                     ResourceLocation innerPath = FurnitureMod.id("block/" + entry.path() + "_inner");
                     ResourceLocation outerPath = FurnitureMod.id("block/" + entry.path() + "_outer");
@@ -80,7 +85,7 @@ public class ModBlockModelProvider {
                     outerTemplate.create(outerPath, mapping, modelOutput);
 
                     MultiVariantGenerator counterSupplier = MultiVariantGenerator.multiVariant(furniture);
-                    PropertyDispatch.C3<Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.EAST, KitchenCounterBlock.WEST, KitchenCounterBlock.OUTER);
+                    PropertyDispatch.C3<Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(CounterBlock.EAST, CounterBlock.WEST, CounterBlock.OUTER);
                     for (int i = 0; i < 1 << 3; i++) {
                         boolean east = (i & (1)) != 0;
                         boolean west = (i & (1 << 1)) != 0;
