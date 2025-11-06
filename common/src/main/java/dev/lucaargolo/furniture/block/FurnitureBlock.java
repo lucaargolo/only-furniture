@@ -501,28 +501,31 @@ public class FurnitureBlock extends Block {
     @Nullable
     private static Map<BlockPos, Direction> calculateIntersectingDirections(BlockPos originalPos, List<BlockPos> intersectingPositions) {
         Map<BlockPos, Direction> result = new HashMap<>();
+        result.put(originalPos, null);
 
         for (BlockPos pos : intersectingPositions) {
             if (pos.equals(originalPos)) {
-                result.put(pos, null);
                 continue;
             }
 
-            int dx = originalPos.getX() - pos.getX();
-            int dz = originalPos.getZ() - pos.getZ();
-            int dy = originalPos.getY() - pos.getY();
+            BlockPos nearestToOriginal = null;
+            double minDistance = Double.MAX_VALUE;
 
-            Direction directionToOriginal = null;
-            if (dx > 0) directionToOriginal = Direction.EAST;
-            else if (dx < 0) directionToOriginal = Direction.WEST;
-            else if (dz > 0) directionToOriginal = Direction.SOUTH;
-            else if (dz < 0) directionToOriginal = Direction.NORTH;
-            else if (dy > 0) directionToOriginal = Direction.UP;
-            else if (dy < 0) directionToOriginal = Direction.DOWN;
-
-            if(directionToOriginal != null) {
-                result.put(pos, directionToOriginal);
+            for (BlockPos known : result.keySet()) {
+                double dist = pos.distSqr(known);
+                if (Math.abs(dist) <= 1 && dist != 0) {
+                    if (dist < minDistance) {
+                        nearestToOriginal = known;
+                    }
+                }
             }
+
+            if (nearestToOriginal == null) {
+                return null;
+            }
+
+            Vec3i v = nearestToOriginal.subtract(pos);
+            result.put(pos, Direction.getNearest(v.getX(), v.getY(), v.getZ()));
         }
 
         for (BlockPos p : intersectingPositions) {
@@ -531,6 +534,7 @@ public class FurnitureBlock extends Block {
 
         return result;
     }
+
 
     private static int findAvailableLayer(Level level, BlockPos pos, List<BlockPos> intersectingPositions) {
         List<BlockPos> allPositions = new ArrayList<>(intersectingPositions);
