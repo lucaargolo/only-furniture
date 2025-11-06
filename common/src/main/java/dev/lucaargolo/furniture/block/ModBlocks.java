@@ -58,6 +58,9 @@ public class ModBlocks {
     public static Supplier<FurnitureBlock> FRIDGE = BLOCKS.register("fridge", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.FRIDGE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<FurnitureBlock> BIG_FRIDGE = BLOCKS.register("big_fridge", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.BIG_FRIDGE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
+    public static Supplier<FurnitureBlock> STOVE = BLOCKS.register("stove", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.STOVE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+
+
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], Boolean, T> o, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple, TagKey<?>... tags) {
         return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, shapes, footShapes, simple), centerShapes, tags);
     }

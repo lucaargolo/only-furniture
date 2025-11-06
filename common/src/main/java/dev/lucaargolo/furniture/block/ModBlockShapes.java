@@ -143,4 +143,10 @@ public class ModBlockShapes {
         Block.box(-4, 0, 3, 20, 32, 16)
     };
 
+    public static final VoxelShape[] STOVE = new VoxelShape[] {
+        Block.box(0, 0, 3, 16, 14, 16),
+        Block.box(0, 1, 2, 16, 14, 3),
+        Block.box(3, 8, 0, 13, 9, 2),
+    };
+
 }
