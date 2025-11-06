@@ -1,5 +1,6 @@
-package dev.lucaargolo.furniture;
+package dev.lucaargolo.furniture.registry;
 
+import dev.lucaargolo.furniture.utils.MinecraftEntry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -8,17 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
-@SuppressWarnings("unchecked")
 public class FabricModRegistry<T> extends ModRegistry<T> {
 
-    private final Map<String, ModEntry<? extends T>> entries = new LinkedHashMap<>();
     private final Registry<T> registry;
-    private int id = 0;
 
+    @SuppressWarnings("unchecked")
     public FabricModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
         this.registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(registryKey.location());
@@ -29,25 +26,25 @@ public class FabricModRegistry<T> extends ModRegistry<T> {
         entries.forEach(this::registerEntry);
     }
 
-    private <E extends T> void registerEntry(String path, ModEntry<E> entry) {
+    private <E extends T> void registerEntry(String path, MinecraftEntry<E> entry) {
         entry.set(Registry.register(registry, entry.key(), entry.get()));
     }
 
     @Override
-    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
-        ModEntry<E> entry = new ModEntry<>(id++, path, supplier, tags);
+    public <E extends T> MinecraftEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
+        MinecraftEntry<E> entry = this.entry(path, supplier, tags);
         entries.put(path, entry);
         return entry;
     }
 
     @Override
-    public @NotNull Iterator<ModEntry<? extends T>> iterator() {
+    public @NotNull Iterator<MinecraftEntry<? extends T>> iterator() {
         return entries.values().iterator();
     }
 
     @Override
     @Nullable
-    public ModEntry<? extends T> get(String path) {
+    public MinecraftEntry<? extends T> get(String path) {
         return entries.get(path);
     }
 

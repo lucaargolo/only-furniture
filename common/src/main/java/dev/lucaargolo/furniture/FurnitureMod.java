@@ -5,6 +5,9 @@ import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
+import dev.lucaargolo.furniture.registry.ModBlockRegistry;
+import dev.lucaargolo.furniture.registry.ModItemRegistry;
+import dev.lucaargolo.furniture.registry.ModRegistry;
 import dev.lucaargolo.furniture.utils.RegionFurnitureData;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -29,10 +32,10 @@ public abstract class FurnitureMod {
 
     public final void init() {
         INSTANCE = this;
-        ModBlocks.BLOCKS.init();
-        ModItems.ITEMS.init();
-        ModCreativeTabs.CREATIVE_TABS.init();
-        ModEntityTypes.ENTITY_TYPES.init();
+        ModBlocks.REGISTRY.init();
+        ModItems.REGISTRY.init();
+        ModCreativeTabs.REGISTRY.init();
+        ModEntityTypes.REGISTRY.init();
         packetManager.init();
     }
 
@@ -54,6 +57,14 @@ public abstract class FurnitureMod {
 
     public final <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
         return loadPlatformClass(ModRegistry.class, registryKey);
+    }
+
+    public final ModBlockRegistry blockRegistry() {
+        return loadPlatformClass(ModBlockRegistry.class);
+    }
+
+    public final ModItemRegistry itemRegistry() {
+        return loadPlatformClass(ModItemRegistry.class);
     }
 
     public final <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {

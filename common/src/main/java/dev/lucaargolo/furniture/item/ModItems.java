@@ -1,21 +1,20 @@
 package dev.lucaargolo.furniture.item;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import net.minecraft.core.registries.Registries;
+import dev.lucaargolo.furniture.registry.ModItemRegistry;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 
 public class ModItems {
 
-    public static final ModRegistry<Item> ITEMS = FurnitureMod.INSTANCE.registry(Registries.ITEM);
+    public static final ModItemRegistry REGISTRY = FurnitureMod.INSTANCE.itemRegistry();
 
     static {
-        ModBlocks.BLOCKS.forEach((entry) -> {
-            ITEMS.register(entry.path(), () -> getBlockItem(entry.get(), new Item.Properties()), entry.getTags());
+        ModBlocks.REGISTRY.forEach((entry) -> {
+            REGISTRY.register(entry.path(), () -> getBlockItem(entry.get(), new Item.Properties()), entry.getTags()).withTintColor(entry.getTintColor());
         });
     }
 

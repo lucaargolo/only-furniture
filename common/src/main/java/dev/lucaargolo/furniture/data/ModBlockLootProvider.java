@@ -6,7 +6,7 @@ import dev.lucaargolo.furniture.data.builder.ModBlockLootBuilder;
 public class ModBlockLootProvider {
 
     public static void generate(ModBlockLootBuilder builder) {
-        ModBlocks.BLOCKS.forEach(entry -> {
+        ModBlocks.REGISTRY.forEach(entry -> {
             builder.dropSelf(entry.get());
         });
     }

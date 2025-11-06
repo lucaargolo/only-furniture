@@ -2,7 +2,6 @@ package dev.lucaargolo.furniture.data;
 
 import com.google.gson.JsonElement;
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
@@ -12,6 +11,7 @@ import dev.lucaargolo.furniture.block.impl.KitchenSinkBlock;
 import dev.lucaargolo.furniture.block.impl.TableBlock;
 import dev.lucaargolo.furniture.mixin.BlockModelGeneratorsAccessor;
 import dev.lucaargolo.furniture.mixin.TextureSlotAccessor;
+import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.blockstates.*;
 import net.minecraft.data.models.model.ModelTemplate;
@@ -40,9 +40,10 @@ public class ModBlockModelProvider {
     private static final TextureSlot STONE = TextureSlotAccessor.invokeCreate("stone");
     private static final TextureSlot METAL = TextureSlotAccessor.invokeCreate("metal");
     private static final TextureSlot BASE = TextureSlotAccessor.invokeCreate("base");
+    private static final TextureSlot LEAVES = TextureSlotAccessor.invokeCreate("leaves");
 
     public static void generate(BlockModelGenerators generators) {
-        ModBlocks.BLOCKS.forEach((entry) -> {
+        ModBlocks.REGISTRY.forEach((entry) -> {
             switch (entry.get()) {
                 case TableBlock table -> createTableBlockState(generators, entry, table.isSimple());
                 case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);
@@ -52,19 +53,19 @@ public class ModBlockModelProvider {
         });
     }
 
-    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix) {
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix) {
         return computeModel(generators, entry, prefix, "", new ArrayList<>());
     }
 
-    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix) {
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, String suffix) {
         return computeModel(generators, entry, prefix, suffix, new ArrayList<>());
     }
 
-    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, TextureSlot... slots) {
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, String suffix, TextureSlot... slots) {
         return computeModel(generators, entry, prefix, suffix, List.of(slots));
     }
 
-    private static ResourceLocation computeModel(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, String prefix, String suffix, List<TextureSlot> slots) {
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, String suffix, List<TextureSlot> slots) {
         BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput = ((BlockModelGeneratorsAccessor) generators).getModelOutput();
 
         Block block = entry.get();
@@ -83,6 +84,11 @@ public class ModBlockModelProvider {
             mapping.put(LOG, DataHelper.getWoodLog(wood));
             mapping.put(slots.contains(BASE) ? BASE : PLANKS, DataHelper.getWoodPlanks(wood));
             mapping.put(PARTICLE, DataHelper.getWoodLog(wood));
+            if(block instanceof WoodBlock.LeafBlock) {
+                tryAddSlot(slots, LEAVES);
+                mapping.put(slots.contains(BASE) ? BASE : LEAVES, DataHelper.getWoodLeaves(wood));
+                mapping.put(PARTICLE, DataHelper.getWoodLeaves(wood));
+            }
         }
 
         if (block instanceof StoneBlock stoneBlock) {
@@ -117,14 +123,14 @@ public class ModBlockModelProvider {
 
     }
 
-    private static void createBaseBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+    private static void createBaseBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
         ResourceLocation path = computeModel(generators, entry, "block/");
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get(), Variant.variant().with(VariantProperties.MODEL, path));
         blockStateOutput.accept(generator);
     }
 
-    private static void createSinkBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+    private static void createSinkBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
         ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PARTICLE, BASE);
@@ -141,7 +147,7 @@ public class ModBlockModelProvider {
         blockStateOutput.accept(generator);
     }
 
-    private static void createTableBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, boolean simple) {
+    private static void createTableBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, boolean simple) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
         MultiPartGenerator generator = MultiPartGenerator.multiPart(entry.get());
@@ -185,7 +191,7 @@ public class ModBlockModelProvider {
         blockStateOutput.accept(generator);
     }
 
-    private static void createCounterBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+    private static void createCounterBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
         ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PARTICLE, PLANKS, DOORS, STONE);

@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/hedge",
+  "textures": {
+    "leaves": "minecraft:block/dark_oak_leaves",
+    "log": "minecraft:block/dark_oak_log",
+    "particle": "minecraft:block/dark_oak_leaves",
+    "planks": "minecraft:block/dark_oak_planks"
+  }
+}

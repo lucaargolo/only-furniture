@@ -27,7 +27,7 @@ public class NeoForgeModBlockLootProvider extends BlockLootSubProvider implement
 
     @Override
     protected @NotNull Iterable<Block> getKnownBlocks() {
-        return Streams.of(ModBlocks.BLOCKS).map(entry -> (Block) entry.get()).toList();
+        return Streams.of(ModBlocks.REGISTRY).map(entry -> (Block) entry.get()).toList();
     }
 
     @Override

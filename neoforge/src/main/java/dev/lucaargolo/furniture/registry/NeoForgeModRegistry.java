@@ -1,5 +1,8 @@
-package dev.lucaargolo.furniture;
+package dev.lucaargolo.furniture.registry;
 
+import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
+import dev.lucaargolo.furniture.utils.MinecraftEntry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
@@ -8,15 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class NeoForgeModRegistry<T> extends ModRegistry<T> {
 
-    private final Map<String, ModEntry<? extends T>> entries = new LinkedHashMap<>();
     private final DeferredRegister<T> registry;
-    private int id = 0;
 
     public NeoForgeModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
@@ -29,21 +28,21 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     }
 
     @Override
-    public <E extends T> ModEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
-        ModEntry<E> entry = new ModEntry<>(id++, path, this.registry.register(path, supplier), tags);
+    @Nullable
+    public MinecraftEntry<? extends T> get(String path) {
+        return entries.get(path);
+    }
+
+    @Override
+    public <E extends T> MinecraftEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
+        MinecraftEntry<E> entry = this.entry(path, this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
     }
 
     @Override
-    public @NotNull Iterator<ModEntry<? extends T>> iterator() {
+    public @NotNull Iterator<MinecraftEntry<? extends T>> iterator() {
         return entries.values().iterator();
-    }
-
-    @Override
-    @Nullable
-    public ModEntry<? extends T> get(String path) {
-        return entries.get(path);
     }
 
 }

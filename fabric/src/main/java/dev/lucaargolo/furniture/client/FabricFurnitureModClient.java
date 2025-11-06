@@ -1,15 +1,17 @@
 package dev.lucaargolo.furniture.client;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
+import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -19,7 +21,6 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 public class FabricFurnitureModClient extends FurnitureModClient implements ClientModInitializer {
@@ -34,6 +35,14 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         WorldRenderEvents.BLOCK_OUTLINE.register(this::onBlockOutline);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(this::onAfterTranslucent);
+        ModBlocks.REGISTRY.forEach(entry -> {
+            if (entry.getTintColor() != null)
+                ColorProviderRegistry.BLOCK.register(entry.getTintColor()::getColor, entry.get());
+        });
+        ModItems.REGISTRY.forEach(entry -> {
+            if (entry.getTintColor() != null)
+                ColorProviderRegistry.ITEM.register(entry.getTintColor()::getColor, entry.get());
+        });
     }
 
     private void registerModelPlugins() {
@@ -45,7 +54,7 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                     String path = location.id().getPath();
                     String variant = location.variant();
                     if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
-                        ModRegistry.ModEntry<? extends Block> entry = ModBlocks.BLOCKS.get(path);
+                        ModBlockRegistry.BlockEntry<?> entry = ModBlocks.REGISTRY.get(path);
                         if(entry != null && entry.get() instanceof FurnitureBlock) {
                             return new FurnitureBakedModel(model);
                         }

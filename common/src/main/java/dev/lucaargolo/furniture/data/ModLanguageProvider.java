@@ -10,7 +10,7 @@ public class ModLanguageProvider {
 
     public static void generate(ModLanguageBuilder builder) {
         builder.add("itemGroup."+FurnitureMod.MOD_ID+".creative_tab", FurnitureMod.MOD_NAME);
-        ModBlocks.BLOCKS.forEach((entry) -> {
+        ModBlocks.REGISTRY.forEach((entry) -> {
             Block block = entry.get();
             if(block instanceof WoodBlock furniture) {
                 builder.add(block, DataHelper.woodBlockTranslation(furniture.getWood(), entry.path()));

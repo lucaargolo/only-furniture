@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/hedge",
+  "textures": {
+    "leaves": "minecraft:block/mangrove_leaves",
+    "log": "minecraft:block/mangrove_log",
+    "particle": "minecraft:block/mangrove_leaves",
+    "planks": "minecraft:block/mangrove_planks"
+  }
+}

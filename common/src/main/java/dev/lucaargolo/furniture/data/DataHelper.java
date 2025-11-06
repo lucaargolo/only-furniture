@@ -25,22 +25,26 @@ public class DataHelper {
         return ResourceLocation.withDefaultNamespace("block/"+path);
     }
 
-    public static ResourceLocation getWoodPlanks(WoodType type) {
-        return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_planks");
+    public static ResourceLocation getWoodLeaves(WoodType wood) {
+        return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_leaves");
     }
 
-    public static ResourceLocation getWoodLog(WoodType type) {
-        if (type == WoodType.BAMBOO) {
-            return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_stalk");
-        } else if (type == WoodType.CRIMSON || type == WoodType.WARPED) {
-            return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_stem");
+    public static ResourceLocation getWoodPlanks(WoodType wood) {
+        return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_planks");
+    }
+
+    public static ResourceLocation getWoodLog(WoodType wood) {
+        if (wood == WoodType.BAMBOO) {
+            return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_stalk");
+        } else if (wood == WoodType.CRIMSON || wood == WoodType.WARPED) {
+            return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_stem");
         } else {
-            return ResourceLocation.withDefaultNamespace("block/" + type.name() + "_log");
+            return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_log");
         }
     }
 
-    public static ResourceLocation getWoodDoors(WoodType type) {
-        return FurnitureMod.id("block/" + type.name() + "_doors");
+    public static ResourceLocation getWoodDoors(WoodType wood) {
+        return FurnitureMod.id("block/" + wood.name() + "_doors");
     }
 
     public static ResourceLocation getMetal(MetalBlock.MetalType metal, WeatheringCopper.WeatherState age) {

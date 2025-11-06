@@ -65,6 +65,14 @@
     "onlyfurniture:mangrove_picnic_bench",
     "onlyfurniture:oak_picnic_bench",
     "onlyfurniture:spruce_picnic_bench",
-    "onlyfurniture:warped_picnic_bench"
+    "onlyfurniture:warped_picnic_bench",
+    "onlyfurniture:acacia_hedge",
+    "onlyfurniture:birch_hedge",
+    "onlyfurniture:cherry_hedge",
+    "onlyfurniture:dark_oak_hedge",
+    "onlyfurniture:jungle_hedge",
+    "onlyfurniture:mangrove_hedge",
+    "onlyfurniture:oak_hedge",
+    "onlyfurniture:spruce_hedge"
   ]
 }

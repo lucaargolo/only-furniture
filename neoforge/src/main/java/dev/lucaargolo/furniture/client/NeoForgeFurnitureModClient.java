@@ -1,18 +1,18 @@
 package dev.lucaargolo.furniture.client;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
+import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.common.NeoForge;
@@ -24,6 +24,8 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
     public NeoForgeFurnitureModClient() {
         this.init();
+        NeoForgeFurnitureMod.getModBus().addListener(this::onBlockColorsRegister);
+        NeoForgeFurnitureMod.getModBus().addListener(this::onItemColorsRegister);
         NeoForgeFurnitureMod.getModBus().addListener(this::onModelRegister);
         NeoForgeFurnitureMod.getModBus().addListener(this::onRenderersRegister);
         NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
@@ -35,6 +37,22 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @SubscribeEvent
+    public void onBlockColorsRegister(RegisterColorHandlersEvent.Block event) {
+        ModBlocks.REGISTRY.forEach(entry -> {
+            if (entry.getTintColor() != null)
+                event.register(entry.getTintColor()::getColor, entry.get());
+        });
+    }
+
+    @SubscribeEvent
+    public void onItemColorsRegister(RegisterColorHandlersEvent.Item event) {
+        ModItems.REGISTRY.forEach(entry -> {
+            if (entry.getTintColor() != null)
+                event.register(entry.getTintColor()::getColor, entry.get());
+        });
+    }
+
+    @SubscribeEvent
     public void onModelRegister(ModelEvent.ModifyBakingResult event) {
         for (Map.Entry<ModelResourceLocation, BakedModel> mapEntry : event.getModels().entrySet()) {
             ModelResourceLocation location = mapEntry.getKey();
@@ -42,7 +60,7 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
             String path = location.id().getPath();
             String variant = location.variant();
             if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
-                ModRegistry.ModEntry<? extends Block> entry = ModBlocks.BLOCKS.get(path);
+                ModBlockRegistry.BlockEntry<?> entry = ModBlocks.REGISTRY.get(path);
                 if(entry != null && entry.get() instanceof FurnitureBlock) {
                     mapEntry.setValue(new FurnitureBakedModel(mapEntry.getValue()));
                 }
