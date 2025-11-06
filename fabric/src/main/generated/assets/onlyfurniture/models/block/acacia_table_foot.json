@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/table_foot",
+  "textures": {
+    "log": "minecraft:block/acacia_log",
+    "particle": "minecraft:block/acacia_log"
+  }
+}

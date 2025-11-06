@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/coffee_table_top_corner",
+  "textures": {
+    "particle": "minecraft:block/bamboo_stalk",
+    "planks": "minecraft:block/bamboo_planks"
+  }
+}

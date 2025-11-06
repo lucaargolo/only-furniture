@@ -44,7 +44,7 @@ public class ModBlockModelProvider {
     public static void generate(BlockModelGenerators generators) {
         ModBlocks.BLOCKS.forEach((entry) -> {
             switch (entry.get()) {
-                case TableBlock ignored -> createTableBlockState(generators, entry);
+                case TableBlock table -> createTableBlockState(generators, entry, table.isSimple());
                 case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);
                 case KitchenSinkBlock ignored ->createSinkBlockState(generators, entry);
                 default -> createBaseBlockState(generators, entry);
@@ -141,19 +141,47 @@ public class ModBlockModelProvider {
         blockStateOutput.accept(generator);
     }
 
-    private static void createTableBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry) {
+    private static void createTableBlockState(BlockModelGenerators generators, ModRegistry.ModEntry<? extends Block> entry, boolean simple) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
-        ResourceLocation basePath = computeModel(generators, entry, "block/", "_center", PARTICLE, PLANKS);
-        ResourceLocation feetPath = computeModel(generators, entry, "block/", "_feet", PARTICLE, LOG);
-        computeModel(generators, entry, "item/");
-
         MultiPartGenerator generator = MultiPartGenerator.multiPart(entry.get());
-        addDirectionPart(generator, basePath, VariantProperties.Rotation.R0, null, null, null, null);
-        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R0, false, false, null, null);
-        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R90, null, false, false, null);
-        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R180, null, null, false, false);
-        addDirectionPart(generator, feetPath, VariantProperties.Rotation.R270, false, null, null, false);
+
+        ResourceLocation topPath = computeModel(generators, entry, "block/", "_top", PARTICLE, PLANKS);
+        if(simple) {
+            addDirectionPart(generator, topPath, false, VariantProperties.Rotation.R0, null, null, null, null);
+        }else{
+            addDirectionPart(generator, topPath, true, VariantProperties.Rotation.R0, false, false, false, false);
+
+            ResourceLocation centerPath = computeModel(generators, entry, "block/", "_top_center", PARTICLE, PLANKS);
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, true, true, true, true);
+
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, true, true, true, false);
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, false, true, true, true);
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, true, false, true, true);
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, true, true, false, true);
+
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, true, false, true, false);
+            addDirectionPart(generator, centerPath, true, VariantProperties.Rotation.R0, false, true, false, true);
+
+            ResourceLocation cornerPath = computeModel(generators, entry, "block/", "_top_corner", PARTICLE, PLANKS);
+            addDirectionPart(generator, cornerPath, true, VariantProperties.Rotation.R0, false, true, true, false);
+            addDirectionPart(generator, cornerPath, true, VariantProperties.Rotation.R90, false, false, true, true);
+            addDirectionPart(generator, cornerPath, true, VariantProperties.Rotation.R180, true, false, false, true);
+            addDirectionPart(generator, cornerPath, true, VariantProperties.Rotation.R270, true, true, false, false);
+
+            ResourceLocation sidePath = computeModel(generators, entry, "block/", "_top_side", PARTICLE, PLANKS);
+            addDirectionPart(generator, sidePath, true, VariantProperties.Rotation.R0, false, true, false, false);
+            addDirectionPart(generator, sidePath, true, VariantProperties.Rotation.R90, false, false, true, false);
+            addDirectionPart(generator, sidePath, true, VariantProperties.Rotation.R180, false, false, false, true);
+            addDirectionPart(generator, sidePath, true, VariantProperties.Rotation.R270, true, false, false, false);
+        }
+        ResourceLocation footPath = computeModel(generators, entry, "block/", "_foot", PARTICLE, LOG);
+        addDirectionPart(generator, footPath, true, VariantProperties.Rotation.R0, false, false, null, null);
+        addDirectionPart(generator, footPath, true, VariantProperties.Rotation.R90, null, false, false, null);
+        addDirectionPart(generator, footPath, true, VariantProperties.Rotation.R180, null, null, false, false);
+        addDirectionPart(generator, footPath, true, VariantProperties.Rotation.R270, false, null, null, false);
+
+        computeModel(generators, entry, "item/");
         blockStateOutput.accept(generator);
     }
 
@@ -189,8 +217,11 @@ public class ModBlockModelProvider {
         blockStateOutput.accept(generator);
     }
 
-    private static void addDirectionPart(MultiPartGenerator generator, ResourceLocation modelPath, VariantProperties.Rotation rotationY, Boolean north, Boolean east, Boolean south, Boolean west) {
+    private static void addDirectionPart(MultiPartGenerator generator, ResourceLocation modelPath, boolean uvLock, VariantProperties.Rotation rotationY, Boolean north, Boolean east, Boolean south, Boolean west) {
         Variant variant = Variant.variant().with(VariantProperties.MODEL, modelPath);
+        if(uvLock) {
+            variant.with(VariantProperties.UV_LOCK, true);
+        }
         if(rotationY != VariantProperties.Rotation.R0) {
             variant.with(VariantProperties.Y_ROT, rotationY);
         }

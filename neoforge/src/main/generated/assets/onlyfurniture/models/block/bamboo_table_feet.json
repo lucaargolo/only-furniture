@@ -1,7 +1,0 @@
-{
-  "parent": "onlyfurniture:block/table_feet",
-  "textures": {
-    "log": "minecraft:block/bamboo_stalk",
-    "particle": "minecraft:block/bamboo_stalk"
-  }
-}

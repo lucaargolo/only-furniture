@@ -2,12 +2,13 @@
   "multipart": [
     {
       "apply": {
-        "model": "onlyfurniture:block/crimson_table_center"
+        "model": "onlyfurniture:block/crimson_table_top"
       }
     },
     {
       "apply": {
-        "model": "onlyfurniture:block/crimson_table_feet"
+        "model": "onlyfurniture:block/crimson_table_foot",
+        "uvlock": true
       },
       "when": {
         "east": "false",
@@ -16,7 +17,8 @@
     },
     {
       "apply": {
-        "model": "onlyfurniture:block/crimson_table_feet",
+        "model": "onlyfurniture:block/crimson_table_foot",
+        "uvlock": true,
         "y": 90
       },
       "when": {
@@ -26,7 +28,8 @@
     },
     {
       "apply": {
-        "model": "onlyfurniture:block/crimson_table_feet",
+        "model": "onlyfurniture:block/crimson_table_foot",
+        "uvlock": true,
         "y": 180
       },
       "when": {
@@ -36,7 +39,8 @@
     },
     {
       "apply": {
-        "model": "onlyfurniture:block/crimson_table_feet",
+        "model": "onlyfurniture:block/crimson_table_foot",
+        "uvlock": true,
         "y": 270
       },
       "when": {

@@ -1,7 +1,245 @@
 {
-  "variants": {
-    "": {
-      "model": "onlyfurniture:block/cherry_coffee_table"
+  "multipart": [
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top",
+        "uvlock": true
+      },
+      "when": {
+        "east": "false",
+        "north": "false",
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "true",
+        "south": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "true",
+        "south": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "false",
+        "south": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "false",
+        "north": "true",
+        "south": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "true",
+        "south": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "false",
+        "north": "true",
+        "south": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_center",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "false",
+        "south": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_corner",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "false",
+        "south": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_corner",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "false",
+        "north": "false",
+        "south": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_corner",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "east": "false",
+        "north": "true",
+        "south": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_corner",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "east": "true",
+        "north": "true",
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_side",
+        "uvlock": true
+      },
+      "when": {
+        "east": "true",
+        "north": "false",
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_side",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "false",
+        "north": "false",
+        "south": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_side",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "east": "false",
+        "north": "false",
+        "south": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_top_side",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "east": "false",
+        "north": "true",
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_foot",
+        "uvlock": true
+      },
+      "when": {
+        "east": "false",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_foot",
+        "uvlock": true,
+        "y": 90
+      },
+      "when": {
+        "east": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_foot",
+        "uvlock": true,
+        "y": 180
+      },
+      "when": {
+        "south": "false",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/cherry_coffee_table_foot",
+        "uvlock": true,
+        "y": 270
+      },
+      "when": {
+        "north": "false",
+        "west": "false"
+      }
     }
-  }
+  ]
 }

@@ -1,8 +1,0 @@
-{
-  "parent": "onlyfurniture:block/coffee_table",
-  "textures": {
-    "log": "minecraft:block/jungle_log",
-    "particle": "minecraft:block/jungle_log",
-    "planks": "minecraft:block/jungle_planks"
-  }
-}

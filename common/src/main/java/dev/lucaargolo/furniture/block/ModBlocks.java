@@ -5,7 +5,6 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.ModRegistry;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
-import dev.lucaargolo.furniture.block.base.impl.WoodFurnitureBlock;
 import dev.lucaargolo.furniture.block.impl.*;
 import dev.lucaargolo.furniture.utils.WeatheringEntry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,8 +31,8 @@ public class ModBlocks {
     public static final ModRegistry<Block> BLOCKS = FurnitureMod.INSTANCE.registry(Registries.BLOCK);
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
-    public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerForConnectingWoodType("table", TableBlock::new, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
-    public static final Map<WoodType, Supplier<WoodFurnitureBlock>> COFFEE_TABLE_MAP = registerForWoodType("coffee_table", WoodFurnitureBlock::new, ModBlockShapes.COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerForTable("table", TableBlock::new, ModBlockShapes.TABLE, ModBlockShapes.TABLE_FOOT, true, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<TableBlock>> COFFEE_TABLE_MAP = registerForTable("coffee_table", TableBlock::new, ModBlockShapes.COFFEE_TABLE, ModBlockShapes.COFFEE_TABLE_FOOT, false, ModBlockTags.CONNECTING_COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> SMALL_STOOL_MAP = registerForWoodType("small_stool", WoodFurnitureSeatBlock::new, ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, Supplier<WoodFurnitureSeatBlock>> CHAIR_MAP = registerForWoodType("chair", WoodFurnitureSeatBlock::new, ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
 
@@ -48,15 +47,19 @@ public class ModBlocks {
     public static Supplier<LampPostBlock> DUAL_LAMP_POST = BLOCKS.register("cast_iron_dual_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<LampPostBlock> TRIPLE_LAMP_POST = BLOCKS.register("cast_iron_triple_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForConnectingStoneAndWoodType("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForCounter("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
     public static Supplier<KitchenSinkBlock> IRON_KITCHEN_SINK = BLOCKS.register("iron_kitchen_sink", () -> new KitchenSinkBlock.Metal(MetalBlock.MetalType.IRON), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<KitchenSinkBlock> CAST_IRON_KITCHEN_SINK = BLOCKS.register("cast_iron_kitchen_sink", () -> new KitchenSinkBlock.Metal(MetalBlock.MetalType.CAST_IRON), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Map<WeatheringCopper.WeatherState, Pair<Supplier<KitchenSinkBlock>, Supplier<KitchenSinkBlock>>> COPPER_KITCHEN_SINK_MAP = registerWeatheringCopper("copper_kitchen_sink", KitchenSinkBlock.Weathering::new, KitchenSinkBlock.Metal::new, ModBlockShapes.KITCHEN_SINK, ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static Supplier<KitchenSinkBlock> QUARTZ_KITCHEN_SINK = BLOCKS.register("quartz_block_kitchen_sink", () -> new KitchenSinkBlock.Stone(StoneBlock.StoneType.QUARTZ_BLOCK), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    private static <T extends Block> Map<WoodType, Supplier<T>> registerForConnectingWoodType(String path, QuadFunction<Block, VoxelShape[], TagKey<Block>, WoodType, T> o, TagKey<?>... tags) {
-        return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), wood), ModBlockShapes.EMPTY, tags);
+    private static <T extends Block> Map<WoodType, Supplier<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], Boolean, T> o, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple, TagKey<?>... tags) {
+        return registerForWoodType(path, (block, wood, shapes) -> o.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, shapes, footShapes, simple), centerShapes, tags);
+    }
+
+    private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForCounter(String path, boolean polished, QuadFunction<Block, TagKey<Block>, StoneBlock.StoneType, WoodType, T> o, TagKey<?>... tags) {
+        return registerForStoneAndWoodType(path, polished, (block, stone, wood, shapes) -> o.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), stone, wood), ModBlockShapes.EMPTY, tags);
     }
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodType(String path, TriFunction<Block, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
@@ -70,9 +73,6 @@ public class ModBlocks {
         return map;
     }
 
-    private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForConnectingStoneAndWoodType(String path, boolean polished, PentaFunction<Block, VoxelShape[], TagKey<Block>, StoneBlock.StoneType, WoodType, T> o, TagKey<?>... tags) {
-        return registerForStoneAndWoodType(path, polished, (block, stone, wood, shapes) -> o.apply(block, shapes, tags[0].cast(Registries.BLOCK).orElseThrow(), stone, wood), ModBlockShapes.EMPTY, tags);
-    }
 
     private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForStoneAndWoodType(String path, boolean polished, QuadFunction<Block, StoneBlock.StoneType, WoodType, VoxelShape[], T> o, VoxelShape[] shapes, TagKey<?>... tags) {
         Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> map = new HashMap<>();
@@ -110,6 +110,11 @@ public class ModBlocks {
 
         WEATHERING_ENTRIES.add(new WeatheringEntry(unaffected, exposed, weathered, oxidized, waxedUnaffected, waxedExposed, waxedWeathered, waxedOxidized));
         return map;
+    }
+
+    @FunctionalInterface
+    private interface HexaFunction<P1, P2, P3, P4, P5, P6, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
     }
 
     @FunctionalInterface

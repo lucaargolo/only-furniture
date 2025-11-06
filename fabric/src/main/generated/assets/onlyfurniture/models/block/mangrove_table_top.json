@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/table_top",
+  "textures": {
+    "particle": "minecraft:block/mangrove_log",
+    "planks": "minecraft:block/mangrove_planks"
+  }
+}

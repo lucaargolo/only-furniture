@@ -24,8 +24,8 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
     private final StoneType stone;
     private final WoodType wood;
 
-    public KitchenCounterBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting, StoneType stone, WoodType wood) {
-        super(base, shapes, connecting);
+    public KitchenCounterBlock(Block base, TagKey<Block> connecting, StoneType stone, WoodType wood) {
+        super(base, connecting);
         this.registerDefaultState(this.defaultBlockState().setValue(HOLLOW, false));
         this.stone = stone;
         this.wood = wood;

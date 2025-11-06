@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/coffee_table_foot",
+  "textures": {
+    "log": "minecraft:block/dark_oak_log",
+    "particle": "minecraft:block/dark_oak_log"
+  }
+}

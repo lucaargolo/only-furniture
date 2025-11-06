@@ -1,5 +1,7 @@
 package dev.lucaargolo.furniture.block.impl;
 
+import com.google.common.collect.ImmutableMap;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
@@ -15,50 +17,23 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.Map;
+
 public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
 
-    private static final VoxelShape CENTER = Block.box(0, 12, 0, 16, 16, 16);
+    private final Map<Direction, Byte2ObjectMap<VoxelShape>> shapes;
+    private final WoodType wood;
+    private final boolean simple;
 
-    private static final VoxelShape FEET_NORTH_EAST = Block.box(11, 0, 2, 14, 12, 5);
-    private static final VoxelShape FEET_SOUTH_EAST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.EAST);
-    private static final VoxelShape FEET_SOUTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.SOUTH);
-    private static final VoxelShape FEET_NORTH_WEST = VoxelShapeUtils.rotate(FEET_NORTH_EAST, Direction.WEST);
-
-    private static final Byte2ObjectMap<VoxelShape> NORTH_SHAPES = new Byte2ObjectOpenHashMap<>();
-    private static final Byte2ObjectMap<VoxelShape> EAST_SHAPES = new Byte2ObjectOpenHashMap<>();
-    private static final Byte2ObjectMap<VoxelShape> SOUTH_SHAPES = new Byte2ObjectOpenHashMap<>();
-    private static final Byte2ObjectMap<VoxelShape> WEST_SHAPES = new Byte2ObjectOpenHashMap<>();
-
-    static {
-        for (int i = 0; i < 16; i++) {
-            boolean north = (i & 1) != 0;
-            boolean east  = (i & 2) != 0;
-            boolean south = (i & 4) != 0;
-            boolean west  = (i & 8) != 0;
-
-            VoxelShape combinedShape = CENTER;
-
-            if (!north && !east)
-                combinedShape = Shapes.join(combinedShape, FEET_NORTH_EAST, BooleanOp.OR);
-            if (!south && !east)
-                combinedShape = Shapes.join(combinedShape, FEET_SOUTH_EAST, BooleanOp.OR);
-            if (!south && !west)
-                combinedShape = Shapes.join(combinedShape, FEET_SOUTH_WEST, BooleanOp.OR);
-            if (!north && !west)
-                combinedShape = Shapes.join(combinedShape, FEET_NORTH_WEST, BooleanOp.OR);
-
-            NORTH_SHAPES.put((byte) i, combinedShape);
-            EAST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.EAST));
-            SOUTH_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.SOUTH));
-            WEST_SHAPES.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.WEST));
-        }
+    public TableBlock(Block base, TagKey<Block> connecting, WoodType wood, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple) {
+        super(base, connecting);
+        this.shapes = computeVoxelShapes(centerShapes, footShapes);
+        this.wood = wood;
+        this.simple = simple;
     }
 
-    private final WoodType wood;
-
-    public TableBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting, WoodType wood) {
-        super(base, shapes, connecting);
-        this.wood = wood;
+    public boolean isSimple() {
+        return simple;
     }
 
     @Override
@@ -74,18 +49,50 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
         if (state.getValue(EAST)) key |= 2;
         if (state.getValue(SOUTH)) key |= 4;
         if (state.getValue(WEST)) key |= 8;
-        return switch (facing) {
-            case NORTH -> NORTH_SHAPES.get((byte) key);
-            case EAST -> EAST_SHAPES.get((byte) key);
-            case SOUTH -> SOUTH_SHAPES.get((byte) key);
-            case WEST -> WEST_SHAPES.get((byte) key);
-            default -> throw new IllegalStateException("Unexpected value: " + facing);
-        };
+        return this.shapes.get(facing).get((byte) key);
     }
 
     @Override
     public WoodType getWood() {
         return wood;
+    }
+
+    public static Map<Direction, Byte2ObjectMap<VoxelShape>> computeVoxelShapes(VoxelShape[] centerShapes, VoxelShape[] footShapes) {
+        Map<Direction, VoxelShape> centerShapeMap = FurnitureBlock.computeVoxelShapes(centerShapes);
+        Map<Direction, VoxelShape> footShapeMap = FurnitureBlock.computeVoxelShapes(footShapes);
+
+        Byte2ObjectMap<VoxelShape> northShapes = new Byte2ObjectOpenHashMap<>();
+        Byte2ObjectMap<VoxelShape> eastShapes = new Byte2ObjectOpenHashMap<>();
+        Byte2ObjectMap<VoxelShape> southShapes = new Byte2ObjectOpenHashMap<>();
+        Byte2ObjectMap<VoxelShape> westShapes = new Byte2ObjectOpenHashMap<>();
+        for (int i = 0; i < 16; i++) {
+            boolean north = (i & 1) != 0;
+            boolean east  = (i & 2) != 0;
+            boolean south = (i & 4) != 0;
+            boolean west  = (i & 8) != 0;
+
+            VoxelShape combinedShape = centerShapeMap.get(Direction.NORTH);
+            if (!north && !east)
+                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.NORTH), BooleanOp.OR);
+            if (!east && !south)
+                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.EAST), BooleanOp.OR);
+            if (!south && !west)
+                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.SOUTH), BooleanOp.OR);
+            if (!west && !north)
+                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.WEST), BooleanOp.OR);
+
+            northShapes.put((byte) i, combinedShape);
+            eastShapes.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.EAST));
+            southShapes.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.SOUTH));
+            westShapes.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.WEST));
+        }
+
+        ImmutableMap.Builder<Direction, Byte2ObjectMap<VoxelShape>> builder = ImmutableMap.builder();
+        builder.put(Direction.NORTH, northShapes);
+        builder.put(Direction.EAST, eastShapes);
+        builder.put(Direction.SOUTH, southShapes);
+        builder.put(Direction.WEST, westShapes);
+        return builder.build();
     }
 
 }

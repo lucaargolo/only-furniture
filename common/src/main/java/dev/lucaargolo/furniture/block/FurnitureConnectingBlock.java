@@ -11,7 +11,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -27,8 +26,8 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
 
     private final TagKey<Block> connecting;
 
-    public FurnitureConnectingBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting) {
-        super(base, shapes);
+    public FurnitureConnectingBlock(Block base, TagKey<Block> connecting) {
+        super(base, ModBlockShapes.EMPTY);
         BlockState defaultState = this.defaultBlockState()
                 .setValue(NORTH, false)
                 .setValue(EAST, false)

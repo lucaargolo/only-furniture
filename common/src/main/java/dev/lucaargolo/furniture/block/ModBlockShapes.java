@@ -8,16 +8,28 @@ public class ModBlockShapes {
 
     public static final VoxelShape[] EMPTY = new VoxelShape[0];
 
+    public static final VoxelShape[] TABLE = new VoxelShape[] {
+        Block.box(0, 12, 0, 16, 16, 16)
+    };
+
+    public static final VoxelShape[] TABLE_FOOT = new VoxelShape[] {
+        Block.box(11, 0, 2, 14, 12, 5)
+    };
+
+    public static final VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
+        Block.box(0, 10, 0, 16, 12, 16)
+    };
+
+    public static final VoxelShape[] COFFEE_TABLE_FOOT = new VoxelShape[] {
+        Block.box(12, 0, 2, 14, 10, 4)
+    };
+
     public static final VoxelShape[] CHAIR = new VoxelShape[] {
         Block.box(3, 7, 12, 13, 24, 13),
         Block.box(3, 0, 3, 13, 7, 13)
     };
 
-    public static final VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
-        Shapes.box(0.125,0,0.125,0.875,0.625,0.875),
-        Shapes.box(0,0.625,0.125,1,0.75,0.875),
-        Shapes.box(0.125,0.625,0,0.875,0.75,1)
-    };
+
 
     public static final VoxelShape[] SMALL_STOOL = new VoxelShape[] {
         Shapes.box(0.25,0,0.25,0.75,0.25,0.75),
