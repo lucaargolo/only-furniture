@@ -29,8 +29,6 @@ public class ModBlockShapes {
         Block.box(3, 0, 3, 13, 7, 13)
     };
 
-
-
     public static final VoxelShape[] SMALL_STOOL = new VoxelShape[] {
         Shapes.box(0.25,0,0.25,0.75,0.25,0.75),
         Shapes.box(0.125,0.25,0.25,0.875,0.375,0.75),
@@ -126,6 +124,23 @@ public class ModBlockShapes {
         Block.box(7.25, 5, 8, 8.75, 6, 9),
         Block.box(7.25, 5, 11, 8.75, 6, 12),
         Block.box(7.25, 5.5, 8.5, 8.75, 6.5, 11.5)
+    };
+
+    public static final VoxelShape[] FRIDGE = new VoxelShape[] {
+        Block.box(0, 0, 3, 16, 32, 16),
+        Block.box(0, 1, 2, 16, 19, 3),
+        Block.box(0, 20, 2, 16, 32, 3),
+        Block.box(13, 11, 0, 15, 18, 2),
+        Block.box(13, 21, 0, 15, 28, 2)
+    };
+
+    public static final VoxelShape[] BIG_FRIDGE = new VoxelShape[] {
+        Block.box(4, 10, 0, 12, 12, 2),
+        Block.box(4, 16, 0, 6, 30, 2),
+        Block.box(10, 16, 0, 12, 30, 2),
+        Block.box(-4, 14, 2, 20, 32, 3),
+        Block.box(-4, 1, 2, 20, 13, 3),
+        Block.box(-4, 0, 3, 20, 32, 16)
     };
 
 }
