@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -38,18 +39,23 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class FurnitureBlockItem extends BlockItem {
 
     private static final RandomSource random = RandomSource.create();
+
+    private static final Map<UUID, Float> rotations = new HashMap<>();
     private static float localRotation = 0f;
 
     private final FurnitureBlock furnitureBlock;
 
-    public FurnitureBlockItem(FurnitureBlock pBlock, Properties pProperties) {
-        super(pBlock, pProperties);
-        this.furnitureBlock = pBlock;
+    public FurnitureBlockItem(FurnitureBlock block, Properties properties) {
+        super(block, properties);
+        this.furnitureBlock = block;
     }
 
     @Override
@@ -68,7 +74,7 @@ public class FurnitureBlockItem extends BlockItem {
             oz = (float) (location.z - pos.getZ());
         }
 
-        FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData(ox, oz, FurnitureBlock.getRotation(player), null, true));
+        FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData(ox, oz, getRotation(player), null, true));
         boolean placed = super.placeBlock(pContext, pState);
         if(!placed) {
             FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), FurnitureData.DEFAULT);
@@ -80,8 +86,12 @@ public class FurnitureBlockItem extends BlockItem {
         return furnitureBlock;
     }
 
-    public static float getLocalRotation() {
-        return localRotation;
+    public static float getRotation(@Nullable Player player) {
+        return player != null ? player.level().isClientSide ? localRotation : rotations.getOrDefault(player.getUUID(), 0f) : 0f;
+    }
+
+    public static void setRotation(ServerPlayer player, float rotation) {
+        rotations.put(player.getUUID(), rotation);
     }
 
     public static boolean rotateFurniture(LocalPlayer player, double delta) {
@@ -124,14 +134,14 @@ public class FurnitureBlockItem extends BlockItem {
 
                 Vec3 pos = new Vec3(blockPos.getX()+ox, blockPos.getY(), blockPos.getZ()+oz);
 
+                FurnitureBlock block = holding.getFirst().getFurnitureBlock();
+
                 poseStack.pushPose();
                 poseStack.translate(pos.x-camera.getPosition().x-0.5, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z-0.5);
                 poseStack.translate(0.5, 0.5, 0.5);
                 poseStack.mulPose(Axis.YN.rotationDegrees(localRotation));
                 poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
                 poseStack.translate(-0.5, -0.5, -0.5);
-
-                FurnitureBlock block = holding.getFirst().getFurnitureBlock();
 
                 BlockState state = block.getStateForPlacement(context);
                 boolean validPlacement = state != null;
@@ -144,15 +154,14 @@ public class FurnitureBlockItem extends BlockItem {
                 VertexConsumer consumer = bufferSource.getBuffer(renderType);
 
                 int color = !validPlacement || !level.getBlockState(blockPos).canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
-                int packedLight = LightTexture.FULL_BRIGHT;
                 int packedColor = FastColor.ARGB32.color(120, color);
 
                 for (Direction direction : Direction.values()) {
                     random.setSeed(42L);
-                    renderQuadList(poseStack, consumer, model.getQuads(state, direction, random), packedLight, packedColor);
+                    renderQuadList(poseStack, consumer, model.getQuads(state, direction, random), LightTexture.FULL_BRIGHT, packedColor);
                 }
                 random.setSeed(42L);
-                renderQuadList(poseStack, consumer, model.getQuads(state, null, random), packedLight, packedColor);
+                renderQuadList(poseStack, consumer, model.getQuads(state, null, random), LightTexture.FULL_BRIGHT, packedColor);
 
                 poseStack.popPose();
 

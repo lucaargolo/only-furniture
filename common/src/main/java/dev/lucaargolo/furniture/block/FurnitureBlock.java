@@ -27,7 +27,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -57,8 +56,6 @@ import java.util.*;
 public class FurnitureBlock extends Block {
 
     public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 3);
-
-    private static final Map<UUID, Float> rotations = new HashMap<>();
 
     protected final Map<Direction, VoxelShape> shapes;
 
@@ -117,7 +114,7 @@ public class FurnitureBlock extends Block {
             oz = (float) (location.z - pos.getZ());
         }
 
-        FurnitureData data = new FurnitureData(ox, oz, getRotation(player), null, true);
+        FurnitureData data = new FurnitureData(ox, oz, FurnitureBlockItem.getRotation(player), null, true);
         VoxelShape shape = this.getShapeForDataWithOffset(this.defaultBlockState(), data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pos, shape, Vec3.atLowerCornerOf(pos));
         intersectingPositions.add(pos);
@@ -435,14 +432,6 @@ public class FurnitureBlock extends Block {
                 }
             });
         }
-    }
-
-    public static float getRotation(@Nullable Player player) {
-        return player != null ? player.level().isClientSide ? FurnitureBlockItem.getLocalRotation() : rotations.getOrDefault(player.getUUID(), 0f) : 0f;
-    }
-
-    public static void setRotation(ServerPlayer player, float rotation) {
-        rotations.put(player.getUUID(), rotation);
     }
 
     public static Map<Direction, VoxelShape> computeVoxelShapes(VoxelShape[] shapes) {

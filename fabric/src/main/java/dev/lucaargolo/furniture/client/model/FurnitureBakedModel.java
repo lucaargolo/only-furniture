@@ -42,14 +42,7 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             }
         }
         if(data != null) {
-            float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
-            Quaternionf rotation = Axis.YN.rotationDegrees(data.getRotation());
-            Matrix4f transform = new Matrix4f()
-                    .translate(data.getX(), 0f, data.getZ())
-                    .translate(0.5f, 0.5f, 0.5f)
-                    .rotate(rotation)
-                    .scale(1f + offset, 1f + offset, 1f + offset)
-                    .translate(-0.5f, -0.5f, -0.5f);
+            Matrix4f transform = this.getDataTransform(pos, data);
 
             context.pushTransform((quad) -> {
                 for (int i = 0; i < 4; i++) {
@@ -66,6 +59,17 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
         }else if(!hasData){
             super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
         }
+    }
+
+    protected Matrix4f getDataTransform(BlockPos pos, FurnitureData data) {
+        float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
+        Quaternionf rotation = Axis.YN.rotationDegrees(data.getRotation());
+        return new Matrix4f()
+                .translate(data.getX(), 0f, data.getZ())
+                .translate(0.5f, 0.5f, 0.5f)
+                .rotate(rotation)
+                .scale(1f + offset, 1f + offset, 1f + offset)
+                .translate(-0.5f, -0.5f, -0.5f);
     }
 
 }

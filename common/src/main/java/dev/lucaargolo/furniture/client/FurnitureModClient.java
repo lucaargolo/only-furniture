@@ -7,6 +7,7 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
+import dev.lucaargolo.furniture.item.FancyFenceBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.utils.LocalFurnitureData;
@@ -77,6 +78,7 @@ public abstract class FurnitureModClient {
 
     public final void onFinishTranslucentLayer(LevelRendererAccessor levelRenderer, Camera camera, PoseStack poseStack) {
         FurnitureBlockItem.renderFurniturePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
+        FancyFenceBlockItem.renderFancyFencePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         LocalFurnitureData.renderFurnitureDataDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         bufferSource.endBatch();
     }

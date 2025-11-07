@@ -61,7 +61,7 @@ public class ModBlocks {
 
     public static Supplier<FurnitureBlock> STOVE = REGISTRY.register("stove", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.STOVE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static final Map<WoodType, Supplier<FancyFenceBlock.Hedge>> HEDGE_MAP = registerForWoodType("hedge", WoodBlock::getLeaves, WoodBlock::getLeavesColor, FancyFenceBlock.Hedge::new, ModBlockShapes.EMPTY, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<FancyFenceBlock.Hedge>> HEDGE_MAP = registerForHedge("hedge", WoodBlock::getLeaves, WoodBlock::getLeavesColor, FancyFenceBlock.Hedge::new, 4f, BlockTags.MINEABLE_WITH_AXE);
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], Boolean, T> furnitureConstructor, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple, TagKey<?>... tags) {
         return registerForWoodType(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, shapes, footShapes, simple), centerShapes, tags);
@@ -73,6 +73,10 @@ public class ModBlocks {
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodType(String path, Function<WoodType, Optional<Block>> baseGetter, TriFunction<Block, WoodType, VoxelShape[], T> furnitureConstructor, VoxelShape[] shapes, TagKey<?>... tags) {
         return registerForWoodType(path, baseGetter, wood -> null, furnitureConstructor, shapes, tags);
+    }
+
+    private static <T extends Block> Map<WoodType, Supplier<T>> registerForHedge(String path, Function<WoodType, Optional<Block>> baseGetter, Function<WoodType, TintColor.Block> blockColorGetter, TriFunction<Block, WoodType, Float, T> furnitureConstructor, float size, TagKey<?>... tags) {
+        return registerForWoodType(path, baseGetter, blockColorGetter, (block, wood, shapes) -> furnitureConstructor.apply(block, wood, size), ModBlockShapes.EMPTY, tags);
     }
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodType(String path, Function<WoodType, Optional<Block>> baseGetter, Function<WoodType, TintColor.Block> blockColorGetter, TriFunction<Block, WoodType, VoxelShape[], T> furnitureConstructor, VoxelShape[] shapes, TagKey<?>... tags) {

@@ -9,7 +9,11 @@
     "ChunkMapMixin"
   ],
   "client": [
-    "MouseHandlerMixin"
+    "BlockModelDeserializerMixin",
+    "BlockModelMixin",
+    "ItemBlockRenderTypesMixin",
+    "MouseHandlerMixin",
+    "SimpleBakedModelMixin"
   ],
   "server": [],
   "injectors": {

@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.item;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.block.FancyFenceBlock;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.registry.ModItemRegistry;
@@ -19,7 +20,9 @@ public class ModItems {
     }
 
     private static BlockItem getBlockItem(Block block, Item.Properties properties) {
-        if(block instanceof FurnitureBlock furnitureBlock) {
+        if(block instanceof FancyFenceBlock furnitureBlock) {
+            return new FancyFenceBlockItem(furnitureBlock, properties);
+        }else if(block instanceof FurnitureBlock furnitureBlock) {
             return new FurnitureBlockItem(furnitureBlock, properties);
         }else{
             return new BlockItem(block, properties);

@@ -16,72 +16,60 @@ in vec2 texCoord1;
 
 out vec4 fragColor;
 
-vec3 toLinear(vec3 c) { return pow(c, vec3(2.2)); }
-vec3 toSRGB(vec3 c) { return pow(c, vec3(1.0 / 2.2)); }
+vec3 rgb2hsl(vec3 color) {
+    float maxC = max(max(color.r, color.g), color.b);
+    float minC = min(min(color.r, color.g), color.b);
+    float delta = maxC - minC;
 
-vec3 linearToOklab(vec3 c) {
-    const mat3 lmsMat = mat3(
-    0.4122214708, 0.2119034982, 0.0883024619,
-    0.5363325363, 0.6806995451, 0.2817188376,
-    0.0514459929, 0.1073969566, 0.6299787005
-    );
-    vec3 lms = lmsMat * c;
-    lms = pow(lms, vec3(1.0 / 3.0));
-    const mat3 oklabMat = mat3(
-    0.2104542553, 1.9779984951, 0.0259040371,
-    0.7936177850, -2.4285922050, 0.7827717662,
-    -0.0040720468, 0.4505937099, -0.8086757660
-    );
-    return oklabMat * lms;
+    float h = 0.0;
+    if (delta > 0.0) {
+        if (maxC == color.r) {
+            h = mod(((color.g - color.b) / delta), 6.0);
+        } else if (maxC == color.g) {
+            h = ((color.b - color.r) / delta) + 2.0;
+        } else {
+            h = ((color.r - color.g) / delta) + 4.0;
+        }
+        h /= 6.0;
+        if (h < 0.0) h += 1.0;
+    }
+
+    float l = (maxC + minC) * 0.5;
+    float s = (delta == 0.0) ? 0.0 : delta / (1.0 - abs(2.0 * l - 1.0));
+
+    return vec3(h, s, l);
 }
 
-vec3 oklabToLinear(vec3 c) {
-    const mat3 oklabToLMS = mat3(
-    1.0, 1.0, 1.0,
-    0.3963377774, -0.1055613458, -0.0894841775,
-    0.2158037573, -0.0638541728, -1.2914855480
-    );
-    vec3 lms = oklabToLMS * c;
-    lms = lms * lms * lms;
-    const mat3 lmsToRGB = mat3(
-    4.0767416621, -1.2684380046, -0.0041960863,
-    -3.3077115913, 2.6097574011, -0.7034186147,
-    0.2309699292, -0.3413193965, 1.7076147010
-    );
-    return lmsToRGB * lms;
+vec3 hsl2rgb(vec3 hsl) {
+    float h = hsl.x;
+    float s = hsl.y;
+    float l = hsl.z;
+
+    float c = (1.0 - abs(2.0 * l - 1.0)) * s;
+    float x = c * (1.0 - abs(mod(h * 6.0, 2.0) - 1.0));
+    float m = l - 0.5 * c;
+
+    vec3 rgb;
+    if (h < 1.0/6.0) rgb = vec3(c, x, 0.0);
+    else if (h < 2.0/6.0) rgb = vec3(x, c, 0.0);
+    else if (h < 3.0/6.0) rgb = vec3(0.0, c, x);
+    else if (h < 4.0/6.0) rgb = vec3(0.0, x, c);
+    else if (h < 5.0/6.0) rgb = vec3(x, 0.0, c);
+    else rgb = vec3(c, 0.0, x);
+
+    return rgb + vec3(m);
 }
 
-vec3 tintOklab(vec3 texRGB, vec3 vertexRGB, float tintStrength) {
-    // Convert only the texture to linear (vertex color is already linear in many pipelines)
-    vec3 texLab = linearToOklab(toLinear(texRGB));
-    vec3 vertLab = linearToOklab(vertexRGB);
+vec4 hologram(vec4 inputColor, vec4 targetColor) {
+    vec3 hslInput = rgb2hsl(inputColor.rgb);
+    hslInput.y = 0.0;
+    vec3 rgbOutput = hsl2rgb(hslInput);
 
-    // Keep texture lightness
-    float L = texLab.x;
-
-    // Blend chroma (a,b)
-    vec2 texAB = texLab.yz;
-    vec2 vertAB = vertLab.yz;
-
-    // Optional: normalize chroma length to avoid hue distortion
-    float texLen = length(texAB);
-    float vertLen = length(vertAB);
-    if (vertLen > 1e-5) vertAB *= texLen / vertLen;
-
-    vec2 mixedAB = mix(texAB, vertAB, tintStrength);
-
-    // Blend lightness instead of multiply
-    float vertexLuma = dot(vertexRGB, vec3(0.299, 0.587, 0.114));
-    L = mix(L, vertexLuma, tintStrength * 0.3);
-
-    vec3 outLab = vec3(L, mixedAB);
-    return toSRGB(oklabToLinear(outLab));
+    return vec4(mix(rgbOutput, targetColor.rgb, 0.5f), inputColor.a * targetColor.a);
 }
 
 void main() {
-    vec3 tex = texture(Sampler0, texCoord0).rgb;
-    vec3 vcol = vertexColor.rgb;
-    vec4 color = vec4(tintOklab(tex, vcol, 1.0), vertexColor.a) * ColorModulator;
+    vec4 color = hologram(texture(Sampler0, texCoord0), vertexColor);
 
     if (color.a < 0.1) discard;
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
