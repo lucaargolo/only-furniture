@@ -57,7 +57,7 @@ public class FancyFenceBakedModel extends FurnitureBakedModel{
                         float distance = origin.distance(destination);
                         float size = ((FancyFenceBlock) state.getBlock()).getSize()/16f;
 
-                        Matrix4f fenceTransform = new Matrix4f()
+                        Matrix4f transform = new Matrix4f()
                                 .translate(data.getX(), 0f, data.getZ())
                                 .translate(0.5f, 0.5f, 0.5f)
                                 .rotate(Axis.YP.rotation(-angle))
@@ -66,7 +66,7 @@ public class FancyFenceBakedModel extends FurnitureBakedModel{
                         context.pushTransform((quad) -> {
                             for (int i = 0; i < 4; i++) {
                                 Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-                                vector.mul(fenceTransform);
+                                vector.mul(transform);
                                 quad.pos(i, vector.x, vector.y, vector.z);
                             }
                             return true;

@@ -25,9 +25,9 @@ import java.util.List;
 
 public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
-    private static final ModelProperty<BlockPos> POS_PROPERTY = new ModelProperty<>();
-    private static final ModelProperty<FurnitureData> FURNITURE_DATA_PROPERTY = new ModelProperty<>();
-    private static final ModelProperty<Boolean> HAS_DATA_PROPERTY = new ModelProperty<>();
+    protected static final ModelProperty<BlockPos> POS_PROPERTY = new ModelProperty<>();
+    protected static final ModelProperty<FurnitureData> DATA_PROPERTY = new ModelProperty<>();
+    protected static final ModelProperty<Boolean> HAS_DATA_PROPERTY = new ModelProperty<>();
 
     public FurnitureBakedModel(BakedModel originalModel) {
         super(originalModel);
@@ -36,12 +36,9 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
     @Override
     public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData modelData, @Nullable RenderType renderType) {
         BlockPos pos = modelData.get(POS_PROPERTY);
-        if(pos == null) {
-            pos = BlockPos.ZERO;
-        }
-        FurnitureData data = modelData.get(FURNITURE_DATA_PROPERTY);
+        FurnitureData data = modelData.get(DATA_PROPERTY);
         Boolean hasData = modelData.get(HAS_DATA_PROPERTY);
-        if(data != null) {
+        if(pos != null && data != null) {
             float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
             Quaternionf rotation = Axis.YN.rotationDegrees(data.getRotation());
             Matrix4f transform = new Matrix4f()
@@ -62,6 +59,7 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
+        modelData = super.getModelData(level, pos, state, modelData);
         FurnitureData[] layers = FurnitureData.get(level, pos);
         FurnitureData data = null;
         boolean hasData = false;
@@ -76,7 +74,7 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
             }
         }
         if(data != null) {
-            return modelData.derive().with(POS_PROPERTY, pos).with(FURNITURE_DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
+            return modelData.derive().with(POS_PROPERTY, pos).with(DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
         }else{
             return modelData.derive().with(POS_PROPERTY, pos).with(HAS_DATA_PROPERTY, hasData).build();
         }
