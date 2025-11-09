@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture.block;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import dev.lucaargolo.furniture.utils.FurnitureData;
@@ -9,6 +10,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +21,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,25 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
         if(this.getType().isOuterProvider()) {
             builder.add(OUTER);
         }
+    }
+
+    @Override
+    protected @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
+        if(level instanceof Level)
+            clearNeighborsShapeCache((Level) level, pos);
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    }
+
+    @Override
+    public void onPlace(@NotNull BlockState pState, @NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pNewState, boolean pMovedByPiston) {
+        super.onPlace(pState, pLevel, pPos, pNewState, pMovedByPiston);
+        clearNeighborsShapeCache(pLevel, pPos);
+    }
+
+    @Override
+    public void onRemove(@NotNull BlockState pState, @NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pNewState, boolean pMovedByPiston) {
+        super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
+        clearNeighborsShapeCache(pLevel, pPos);
     }
 
     @Override
@@ -262,6 +282,13 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
         return false;
     }
 
+    private void clearNeighborsShapeCache(@NotNull Level pLevel, @NotNull BlockPos pPos) {
+        List<Vec3i> offsets = this.getType().getOffsets();
+        for(Vec3i offset : offsets) {
+            FurnitureData.clearShapeCache(pLevel, pPos.offset(offset));
+        }
+    }
+
     public enum ConnectionType {
         HORIZONTAL(false, false, false),
         HORIZONTAL_WITH_SAME_DATA(false, false, false),
@@ -274,11 +301,24 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
         private final boolean diagonalProvider;
         private final boolean outerProvider;
         private final boolean dependentOnLastPosition;
+        private final List<Vec3i> offsets;
 
         ConnectionType(boolean diagonalProvider, boolean outerProvider, boolean dependentOnLastPosition) {
             this.diagonalProvider = diagonalProvider;
             this.outerProvider = outerProvider;
             this.dependentOnLastPosition = dependentOnLastPosition;
+            ImmutableList.Builder<Vec3i> builder = ImmutableList.builder();
+            builder.add(Direction.NORTH.getNormal());
+            builder.add(Direction.EAST.getNormal());
+            builder.add(Direction.SOUTH.getNormal());
+            builder.add(Direction.WEST.getNormal());
+            if(this.isDiagonalProvider()) {
+                builder.add(Direction.NORTH.getNormal().relative(Direction.EAST));
+                builder.add(Direction.SOUTH.getNormal().relative(Direction.EAST));
+                builder.add(Direction.SOUTH.getNormal().relative(Direction.WEST));
+                builder.add(Direction.NORTH.getNormal().relative(Direction.WEST));
+            }
+            this.offsets = builder.build();
         }
 
         public boolean isDiagonalProvider() {
@@ -294,19 +334,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
         }
 
         public List<Vec3i> getOffsets() {
-            List<Vec3i> offsets = new ArrayList<>();
-            offsets.add(Direction.NORTH.getNormal());
-            offsets.add(Direction.EAST.getNormal());
-            offsets.add(Direction.SOUTH.getNormal());
-            offsets.add(Direction.WEST.getNormal());
-
-            if(this.isDiagonalProvider()) {
-                offsets.add(Direction.NORTH.getNormal().relative(Direction.EAST));
-                offsets.add(Direction.SOUTH.getNormal().relative(Direction.EAST));
-                offsets.add(Direction.SOUTH.getNormal().relative(Direction.WEST));
-                offsets.add(Direction.NORTH.getNormal().relative(Direction.WEST));
-            }
-            return offsets;
+            return this.offsets;
         }
 
         @Nullable

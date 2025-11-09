@@ -12,6 +12,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
@@ -55,9 +56,9 @@ public class KitchenSinkBlock extends FurnitureBlock {
     }
 
     @Override
-    protected VoxelShape getShapeForData(BlockState state, FurnitureData data) {
+    protected VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        return state.getValue(DROPPED) ? this.droppedShapes.get(facing) : super.getShapeForData(state, data);
+        return state.getValue(DROPPED) ? this.droppedShapes.get(facing) : super.getShapeForData(level, pos, state, data);
     }
 
     public static class Stone extends KitchenSinkBlock implements StoneBlock {

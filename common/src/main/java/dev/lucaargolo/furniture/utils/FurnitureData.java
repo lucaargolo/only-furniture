@@ -157,6 +157,10 @@ public class FurnitureData {
         }
     }
 
+    public static void clearShapeCache(Level level, BlockPos pos) {
+        FurnitureData[] layers = FurnitureData.get(level, pos);
+        FurnitureData.set(level, pos, layers);
+    }
 
 
 }

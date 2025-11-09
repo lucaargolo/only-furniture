@@ -124,7 +124,7 @@ public class FurnitureBlock extends Block {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
 
-        VoxelShape shape = this.getShapeForDataWithOffset(this.defaultBlockState(), data);
+        VoxelShape shape = this.getShapeForDataWithOffset(level, pos, this.defaultBlockState(), data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pos, shape, Vec3.atLowerCornerOf(pos));
         intersectingPositions.add(pos);
 
@@ -161,7 +161,7 @@ public class FurnitureBlock extends Block {
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
         int layer = pState.getValue(LAYER);
         FurnitureData data = FurnitureData.get(pLevel, pPos, layer);
-        VoxelShape shape = this.getShapeForDataWithOffset(pState, data);
+        VoxelShape shape = this.getShapeForDataWithOffset(pLevel, pPos, pState, data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pPos, shape, Vec3.atLowerCornerOf(pPos));
 
         Map<BlockPos, Direction> intersectingDirections = Objects.requireNonNull(calculateIntersectingDirections(pPos, intersectingPositions));
@@ -269,8 +269,7 @@ public class FurnitureBlock extends Block {
     @Override
     protected @NotNull BlockState updateShape(@NotNull BlockState state, @NotNull Direction direction, @NotNull BlockState neighborState, @NotNull LevelAccessor level, @NotNull BlockPos pos, @NotNull BlockPos neighborPos) {
         if(level instanceof Level) {
-            FurnitureData[] layers = FurnitureData.get(level, pos);
-            FurnitureData.set((Level) level, pos, layers);
+            FurnitureData.clearShapeCache((Level) level, pos);
         }
         int layer = state.getValue(LAYER);
         FurnitureData data = FurnitureData.get(level, pos, layer);
@@ -296,23 +295,21 @@ public class FurnitureBlock extends Block {
 
     @Override
     protected final @NotNull VoxelShape getCollisionShape(@NotNull BlockState pState, @NotNull BlockGetter pLevel, @NotNull BlockPos pPos, @NotNull CollisionContext pContext) {
-        List<FurnitureShape> shapes = this.getAllShapes(pLevel, pPos);
-        if(shapes.isEmpty()) {
-            return Shapes.empty();
-        }else{
-            return FurnitureData.cachedShape(pLevel, pPos, () -> {
-                if(shapes.size() == 1) {
-                    return shapes.getFirst();
-                }else {
-                    Iterator<FurnitureShape> iterator = shapes.iterator();
-                    VoxelShape shape = iterator.next().shape();
-                    while (iterator.hasNext()) {
-                        shape = Shapes.joinUnoptimized(shape, iterator.next().shape(), BooleanOp.OR);
-                    }
-                    return shape;
+        return FurnitureData.cachedShape(pLevel, pPos, () -> {
+            List<FurnitureShape> shapes = this.getAllShapes(pLevel, pPos);
+            if(shapes.isEmpty()) {
+                return Shapes.empty();
+            }else if(shapes.size() == 1) {
+                return shapes.getFirst();
+            }else {
+                Iterator<FurnitureShape> iterator = shapes.iterator();
+                VoxelShape shape = iterator.next().shape();
+                while (iterator.hasNext()) {
+                    shape = Shapes.joinUnoptimized(shape, iterator.next().shape(), BooleanOp.OR);
                 }
-            });
-        }
+                return shape;
+            }
+        });
     }
 
     public final FurnitureShape getOriginalShape(BlockGetter level, BlockPos pos, ClipContext context) {
@@ -349,7 +346,7 @@ public class FurnitureBlock extends Block {
                 BlockState originalState = pLevel.getBlockState(originalPos);
                 if(originalState.getBlock() instanceof FurnitureBlock originalBlock) {
                     Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
-                    VoxelShape originalShape = originalBlock.getShapeForDataWithOffset(originalState, originalData, toOriginal);
+                    VoxelShape originalShape = originalBlock.getShapeForDataWithOffset(pLevel, originalPos, originalState, originalData, toOriginal);
                     shapes.add(new FurnitureShape(layer, originalData, originalPos, originalState, pair.getSecond(), originalShape));
                 }
             }
@@ -357,17 +354,17 @@ public class FurnitureBlock extends Block {
         return shapes;
     }
 
-    protected VoxelShape getShapeForDataWithOffset(BlockState state, FurnitureData data) {
-        return this.getShapeForDataWithOffset(state, data, Vec3.ZERO);
+    protected VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+        return this.getShapeForDataWithOffset(level, pos, state, data, Vec3.ZERO);
     }
 
     @NotNull
-    private VoxelShape getShapeForDataWithOffset(BlockState state, FurnitureData data, Vec3 offset) {
+    private VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, Vec3 offset) {
         offset = offset.add(data.getX(), 0.0, data.getZ());
-        return this.getShapeForData(state, data).move(offset.x, offset.y, offset.z);
+        return this.getShapeForData(level, pos, state, data).move(offset.x, offset.y, offset.z);
     }
 
-    protected VoxelShape getShapeForData(BlockState state, FurnitureData data) {
+    protected VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
         return this.shapes.get(facing);
     }
@@ -404,7 +401,7 @@ public class FurnitureBlock extends Block {
 
     public static void destroyEffects(ClientLevel level, BlockPos pos, BlockState state, FurnitureData data) {
         if(state.getBlock() instanceof FurnitureBlock block) {
-            VoxelShape shape = block.getShapeForData(state, data);
+            VoxelShape shape = block.getShapeForData(level, pos, state, data);
             SoundType soundType = state.getSoundType();
             level.playLocalSound(pos, soundType.getBreakSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
             shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {

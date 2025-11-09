@@ -9,6 +9,7 @@ import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -54,7 +55,7 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
     }
 
     @Override
-    protected VoxelShape getShapeForData(BlockState state, FurnitureData data) {
+    protected VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         return Shapes.block();
     }
 
