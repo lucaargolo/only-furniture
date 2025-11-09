@@ -29,10 +29,9 @@ import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -62,25 +61,15 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     }
 
     @Override
-    protected void renderFurnitureModel(FurnitureBlock block, BlockPlaceContext context, PoseStack poseStack, VertexConsumer consumer) {
+    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor) {
         Minecraft minecraft = Minecraft.getInstance();
-
-        FurnitureData data = block.getFurnitureDataForPlacement(context);
-        BlockState state = block.getStateForPlacement(context, data);
-        boolean isValidPlacement = true;
-        if(state == null) {
-            isValidPlacement = false;
-            state = block.defaultBlockState();
-        }
-        int color = !isValidPlacement || !context.getLevel().getBlockState(context.getClickedPos()).canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
-        int packedColor = FastColor.ARGB32.color(120, color);
 
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
         BakedModel model = dispatcher.getBlockModel(state);
 
         if(model instanceof FurnitureBakedModel furnitureModel) {
             RenderContext render = VanillaRenderContext.of(poseStack, consumer, LightTexture.FULL_BRIGHT, packedColor);
-            furnitureModel.emitBlockQuads(context.getLevel(), state, context.getClickedPos(), () -> random, render, data);
+            furnitureModel.emitBlockQuads(level, state, pos, () -> random, render, data);
         }
     }
 

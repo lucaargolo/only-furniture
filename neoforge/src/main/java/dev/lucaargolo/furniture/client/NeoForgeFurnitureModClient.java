@@ -21,11 +21,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -56,27 +56,17 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @Override
-    protected void renderFurnitureModel(FurnitureBlock block, BlockPlaceContext context, PoseStack poseStack, VertexConsumer consumer) {
+    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor) {
         Minecraft minecraft = Minecraft.getInstance();
-
-        FurnitureData data = block.getFurnitureDataForPlacement(context);
-        BlockState state = block.getStateForPlacement(context, data);
-        boolean isValidPlacement = true;
-        if(state == null) {
-            isValidPlacement = false;
-            state = block.defaultBlockState();
-        }
-        int color = !isValidPlacement || !context.getLevel().getBlockState(context.getClickedPos()).canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
-        int packedColor = FastColor.ARGB32.color(120, color);
-
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
+
         BakedModel model = dispatcher.getBlockModel(state);
         ModelData modelData = ModelData.EMPTY.derive()
-                .with(FurnitureBakedModel.COLOR, minecraft.getBlockColors().getColor(state, context.getLevel(), context.getClickedPos(), 0))
+                .with(FurnitureBakedModel.COLOR, minecraft.getBlockColors().getColor(state, level, pos, 0))
                 .with(FurnitureBakedModel.DATA_PROPERTY, data)
                 .with(FurnitureBakedModel.HAS_DATA_PROPERTY, true)
                 .build();
-        modelData = model.getModelData(context.getLevel(), context.getClickedPos(), state, modelData);
+        modelData = model.getModelData(level, pos, state, modelData);
 
         for (Direction direction : Direction.values()) {
             random.setSeed(42L);

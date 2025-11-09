@@ -6,11 +6,14 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
+import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -20,6 +23,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -28,6 +32,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -45,31 +50,6 @@ public abstract class FurnitureModClient {
     protected final void init() {
         INSTANCE = this;
         shaderManager.init();
-    }
-
-    protected abstract void renderFurnitureModel(FurnitureBlock block, BlockPlaceContext context, PoseStack poseStack, VertexConsumer consumer);
-
-    public final void renderFurniturePreview(Level level, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
-        Minecraft minecraft = Minecraft.getInstance();
-        LocalPlayer player = minecraft.player;
-        HitResult hitResult = minecraft.hitResult;
-        if(player != null && level == player.level() && hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
-            Pair<FurnitureBlockItem, InteractionHand> holding = FurnitureBlockItem.getHoldingFurniture(player);
-            if(holding != null) {
-                FurnitureBlock block = holding.getFirst().getFurnitureBlock();
-                BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, holding.getSecond(), blockHitResult));
-
-                poseStack.pushPose();
-                poseStack.translate(context.getClickedPos().getX()-camera.getPosition().x, context.getClickedPos().getY()-camera.getPosition().y, context.getClickedPos().getZ()-camera.getPosition().z);
-                poseStack.translate(0.5, 0.5, 0.5);
-                poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
-                poseStack.translate(-0.5, -0.5, -0.5);
-
-                RenderType renderType = renderTypeManager.hologramTranslucent(InventoryMenu.BLOCK_ATLAS);
-                renderFurnitureModel(block, context, poseStack, bufferSource.getBuffer(renderType));
-                poseStack.popPose();
-            }
-        }
     }
 
     public final void onRegisterEntityRenderers(BiConsumer<EntityType<?>, EntityRendererProvider<?>> consumer) {
@@ -109,6 +89,77 @@ public abstract class FurnitureModClient {
         LocalFurnitureData.renderFurnitureDataDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         this.renderFurniturePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         bufferSource.endBatch();
+    }
+
+    protected abstract void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor);
+
+    private void renderFurniturePreview(Level level, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
+        Minecraft minecraft = Minecraft.getInstance();
+        LocalPlayer player = minecraft.player;
+        HitResult hitResult = minecraft.hitResult;
+        if(player != null && level == player.level() && hitResult instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
+            Pair<FurnitureBlockItem, InteractionHand> holding = FurnitureBlockItem.getHoldingFurniture(player);
+            if(holding != null) {
+                FurnitureBlockItem blockItem = holding.getFirst();
+                FurnitureBlock block = blockItem.getFurnitureBlock();
+                BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, holding.getSecond(), blockHitResult));
+
+                RenderType renderType = renderTypeManager.hologramTranslucent(InventoryMenu.BLOCK_ATLAS);
+                VertexConsumer consumer = bufferSource.getBuffer(renderType);
+
+                BlockPos clickedPos = blockHitResult.getBlockPos();
+                BlockState clickedState = level.getBlockState(clickedPos);
+                BlockPos placingPos = context.getClickedPos();
+                BlockState placingState = level.getBlockState(placingPos);
+
+                FurnitureData data = block.getFurnitureDataForPlacement(context);
+                BlockState state = block.getStateForPlacement(context, data);
+                boolean isValidPlacement = true;
+                if(state == null) {
+                    isValidPlacement = false;
+                    state = block.defaultBlockState();
+                }
+                int color = !isValidPlacement || !placingState.canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
+                int packedColor = FastColor.ARGB32.color(120, color);
+
+                if(blockItem instanceof FurnitureConnectingBlockItem connectingBlockItem && connectingBlockItem.getFurnitureBlock().getType().isDependentOnLastPosition()) {
+                    BlockPos lastPosition = FurnitureConnectingBlockItem.getLastPosition(player);
+                    if(lastPosition != null) {
+                        BlockState lastState = level.getBlockState(lastPosition);
+                        if (lastState.getBlock() instanceof FurnitureConnectingBlock lastBlock && lastBlock.getType().isDependentOnLastPosition()) {
+                            FurnitureData lastData = FurnitureData.get(level, lastPosition, lastState.getValue(FurnitureBlock.LAYER));
+
+                            BooleanProperty propertyToManuallyConnect = connectingBlockItem.manuallyConnectNeighbors(level, lastPosition, clickedPos, clickedState);
+                            boolean isManuallyConnecting = !player.isShiftKeyDown() && propertyToManuallyConnect != null;
+                            if (isManuallyConnecting) {
+                                lastState = lastState.cycle(propertyToManuallyConnect);
+                                poseStack.pushPose();
+                                poseStack.translate(lastPosition.getX() - camera.getPosition().x, lastPosition.getY() - camera.getPosition().y, lastPosition.getZ() - camera.getPosition().z);
+                                poseStack.translate(0.5, 0.5, 0.5);
+                                poseStack.scale(1f - 0.005f, 1f - 0.005f, 1f - 0.005f);
+                                poseStack.translate(-0.5, -0.5, -0.5);
+                                renderFurnitureModel(level, lastPosition, lastData, lastState, poseStack, consumer, FastColor.ARGB32.color(120, 0x5865f2));
+                                poseStack.popPose();
+                                return;
+                            }
+
+                            if(!player.isShiftKeyDown() && clickedState.is(connectingBlockItem.getFurnitureBlock().getConnecting())) {
+                                return;
+                            }
+                        }
+                    }
+                }
+
+
+                poseStack.pushPose();
+                poseStack.translate(placingPos.getX()-camera.getPosition().x, placingPos.getY()-camera.getPosition().y, placingPos.getZ()-camera.getPosition().z);
+                poseStack.translate(0.5, 0.5, 0.5);
+                poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
+                poseStack.translate(-0.5, -0.5, -0.5);
+                renderFurnitureModel(level, placingPos, data, state, poseStack, consumer, packedColor);
+                poseStack.popPose();
+            }
+        }
     }
 
 }

@@ -42,7 +42,8 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
         assert renderer != null;
         if(state.getBlock() instanceof FancyFenceBlock furniture) {
             List<Vec3i> offsets = furniture.getType().getOffsets();
-            for (Vec3i neighborOffset : offsets) {
+            for (int index = 0; index < offsets.size(); index++) {
+                Vec3i neighborOffset = offsets.get(index);
                 if (furniture.isOffsetConnected(state, neighborOffset)) {
                     BlockPos neighborPos = pos.offset(neighborOffset);
                     BlockState neighborState = blockView.getBlockState(neighborPos);
@@ -59,10 +60,12 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
                             float distance = origin.distance(destination);
                             float size = ((FancyFenceBlock) state.getBlock()).getSize() / 16f;
 
+                            float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
                             Matrix4f transform = new Matrix4f()
                                     .translate(data.getX(), 0f, data.getZ())
                                     .translate(0.5f, 0.5f, 0.5f)
                                     .rotate(Axis.YP.rotation(-angle))
+                                    .scale(1f - (index * offset), 1f - (index * offset), 1f - (index * offset))
                                     .translate(-0.5f, -0.5f, -0.5f);
 
                             context.pushTransform((quad) -> {

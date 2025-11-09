@@ -2,8 +2,11 @@ package dev.lucaargolo.furniture.utils;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.block.FurnitureSeatBlock;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
+import dev.lucaargolo.furniture.item.FurnitureBlockItem;
+import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import it.unimi.dsi.fastutil.ints.Int2LongMap;
 import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -12,6 +15,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -21,6 +25,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -150,13 +155,28 @@ public class LocalFurnitureData {
             return;
         }
 
+        VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
+
+        if(camera.getEntity() instanceof LocalPlayer player) {
+            Pair<FurnitureBlockItem, InteractionHand> holding = FurnitureBlockItem.getHoldingFurniture(player);
+            if(holding != null && holding.getFirst() instanceof FurnitureConnectingBlockItem) {
+                BlockPos blockPos = FurnitureConnectingBlockItem.getLastPosition(player);
+                if(blockPos != null) {
+                    Vec3 pos = Vec3.atLowerCornerOf(blockPos);
+                    poseStack.pushPose();
+                    poseStack.translate(pos.x - camera.getPosition().x, pos.y - camera.getPosition().y, pos.z - camera.getPosition().z);
+                    LevelRenderer.renderLineBox(poseStack, lineConsumer, 0.25f, 0.25f, 0.25f, 0.75f, 0.75f, 0.75f, 1f, 1f, 1f, 1f);
+                    poseStack.popPose();
+                }
+            }
+        }
+
         Long2ObjectMap<Int2LongMap> levelMap = dimensionToLevelMap.get(level.dimension());
 
         if(levelMap == null) {
             return;
         }
 
-        VertexConsumer lineConsumer = bufferSource.getBuffer(RenderType.lines());
         levelMap.forEach((regionPos, regionMap) -> {
             regionMap.forEach((regionLocalBlockPos, packedFurnitureData) -> {
                 BlockPos blockPos = FurnitureUtils.regionLocalBlockPosToBlockPos(regionPos, regionLocalBlockPos);

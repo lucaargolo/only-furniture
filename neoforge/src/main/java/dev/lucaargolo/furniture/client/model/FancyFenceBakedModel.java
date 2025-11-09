@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.block.FancyFenceBlock;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 public class FancyFenceBakedModel extends FurnitureBakedModel {
 
-    private static final ModelProperty<Map<Vec3i, FurnitureData>> NEIGHBOR_DATA_PROPERTY = new ModelProperty<>();
+    private static final ModelProperty<Map<Pair<Vec3i, Integer>, FurnitureData>> NEIGHBOR_DATA_PROPERTY = new ModelProperty<>();
 
     public FancyFenceBakedModel(BakedModel originalModel) {
         super(originalModel);
@@ -46,7 +47,7 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
 
         BlockPos pos = modelData.get(POS_PROPERTY);
         FurnitureData data = modelData.get(DATA_PROPERTY);
-        Map<Vec3i, FurnitureData> neighborDataMap = modelData.get(NEIGHBOR_DATA_PROPERTY);
+        Map<Pair<Vec3i, Integer>, FurnitureData> neighborDataMap = modelData.get(NEIGHBOR_DATA_PROPERTY);
 
         if(state != null && pos != null && data != null && neighborDataMap != null) {
             PoseStack stack = new PoseStack();
@@ -56,7 +57,9 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
 
             Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(), pos.getY() + 0.5f, pos.getZ() + 0.5f + data.getZ());
 
-            neighborDataMap.forEach((neighborOffset, neighborData) -> {
+            neighborDataMap.forEach((neighborPair, neighborData) -> {
+                Vec3i neighborOffset = neighborPair.getFirst();
+                int index = neighborPair.getSecond();
                 BlockPos neighborPos = pos.offset(neighborOffset);
 
                 Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + neighborData.getX(), neighborPos.getY() + 0.5f, neighborPos.getZ() + 0.5f + neighborData.getZ());
@@ -67,10 +70,12 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
                 float distance = origin.distance(destination);
                 float size = ((FancyFenceBlock) state.getBlock()).getSize()/16f;
 
+                float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
                 Matrix4f transform = new Matrix4f()
                         .translate(data.getX(), 0f, data.getZ())
                         .translate(0.5f, 0.5f, 0.5f)
                         .rotate(Axis.YP.rotation(-angle))
+                        .scale(1f - (index * offset), 1f - (index * offset), 1f - (index * offset))
                         .translate(-0.5f, -0.5f, -0.5f);
                 Transformation transformation = new Transformation(transform);
                 IQuadTransformer transformer = QuadTransformers.applying(transformation);
@@ -97,16 +102,17 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
         modelData = super.getModelData(level, pos, state, modelData);
         FurnitureData data = modelData.get(DATA_PROPERTY);
         if(data != null && data.hasOriginal() && state.getBlock() instanceof FancyFenceBlock furniture) {
-            Map<Vec3i, FurnitureData> neighborData = new HashMap<>();
+            Map<Pair<Vec3i, Integer>, FurnitureData> neighborData = new HashMap<>();
             List<Vec3i> offsets = furniture.getType().getOffsets();
-            for (Vec3i neighborOffset : offsets) {
+            for (int index = 0; index < offsets.size(); index++) {
+                Vec3i neighborOffset = offsets.get(index);
                 if (furniture.isOffsetConnected(state, neighborOffset)) {
                     BlockPos neighborPos = pos.offset(neighborOffset);
                     BlockState neighborState = level.getBlockState(neighborPos);
                     if(neighborState.getBlock() instanceof FancyFenceBlock) {
                         FurnitureData connectedData = FurnitureData.get(level, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
                         if (connectedData.hasOriginal()) {
-                            neighborData.put(neighborOffset, connectedData);
+                            neighborData.put(Pair.of(neighborOffset, index), connectedData);
                         }
                     }
                 }

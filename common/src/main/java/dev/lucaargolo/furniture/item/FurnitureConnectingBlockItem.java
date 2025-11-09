@@ -1,6 +1,5 @@
 package dev.lucaargolo.furniture.item;
 
-import dev.lucaargolo.furniture.block.FancyFenceBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -10,6 +9,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,23 +30,52 @@ public class FurnitureConnectingBlockItem extends FurnitureBlockItem{
     }
 
     @Override
+    public FurnitureConnectingBlock getFurnitureBlock() {
+        return this.block;
+    }
+
+    @Override
     @NotNull
     public InteractionResult useOn(@NotNull UseOnContext context) {
-        Player player = context.getPlayer();
-        if(this.block.getType().isDependentOnLastPosition() && player != null) {
+        if(this.block.getType().isDependentOnLastPosition()) {
             Level level = context.getLevel();
-            BlockPos pos = context.getClickedPos();
-            BlockState state = level.getBlockState(pos);
-            if(state.getBlock() instanceof FancyFenceBlock) {
-                if(player instanceof ServerPlayer serverPlayer) {
-                    setLastPosition(serverPlayer, pos);
-                }else if(level.isClientSide){
-                    lastLocalPosition = pos;
+            BlockPos clickedPos = context.getClickedPos();
+            BlockState clickedState = level.getBlockState(clickedPos);
+            Player player = context.getPlayer();
+            if(player != null && !player.isShiftKeyDown() && clickedState.is(this.block.getConnecting())) {
+                BlockPos lastPosition = FurnitureConnectingBlockItem.getLastPosition(player);
+                BooleanProperty propertyToConnect = lastPosition != null ? manuallyConnectNeighbors(level, lastPosition, clickedPos, clickedState) : null;
+                if(propertyToConnect != null) {
+                    BlockState lastState = level.getBlockState(lastPosition);
+                    level.setBlockAndUpdate(lastPosition, lastState.cycle(propertyToConnect));
+                }else {
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        FurnitureConnectingBlockItem.setLastPosition(serverPlayer, clickedPos);
+                    } else if (level.isClientSide) {
+                        lastLocalPosition = clickedPos;
+                    }
                 }
                 return InteractionResult.SUCCESS;
             }
         }
         return super.useOn(context);
+    }
+
+    @Nullable
+    public BooleanProperty manuallyConnectNeighbors(Level level, BlockPos lastPosition, BlockPos clickedPos, BlockState clickedState) {
+        BlockState lastState = level.getBlockState(lastPosition);
+        if(clickedState.is(this.block.getConnecting()) && lastState.is(this.block.getConnecting())) {
+            BooleanProperty clickedProperty = this.block.getType().getProperty(lastPosition.subtract(clickedPos));
+            BooleanProperty lastProperty = this.block.getType().getProperty(clickedPos.subtract(lastPosition));
+            if (clickedProperty != null && lastProperty != null) {
+                boolean clicked = clickedState.getValue(clickedProperty);
+                boolean last = lastState.getValue(lastProperty);
+                if(clicked == last) {
+                    return lastProperty;
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -57,7 +86,7 @@ public class FurnitureConnectingBlockItem extends FurnitureBlockItem{
             Level level = pContext.getLevel();
             BlockPos pos = pContext.getClickedPos();
             if(player instanceof ServerPlayer serverPlayer) {
-                setLastPosition(serverPlayer, pos);
+                FurnitureConnectingBlockItem.setLastPosition(serverPlayer, pos);
             }else if(level.isClientSide){
                 lastLocalPosition = pos;
             }
