@@ -1,6 +1,6 @@
 package dev.lucaargolo.furniture.mixin;
 
-import dev.lucaargolo.furniture.utils.RenderTypeHint;
+import dev.lucaargolo.furniture.client.utils.RenderTypeHint;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;

@@ -3,7 +3,7 @@ package dev.lucaargolo.furniture.mixin;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.lucaargolo.furniture.utils.RenderTypeHint;
+import dev.lucaargolo.furniture.client.utils.RenderTypeHint;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;

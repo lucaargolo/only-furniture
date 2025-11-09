@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.block.impl;
 import com.google.common.collect.ImmutableMap;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
+import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
@@ -26,7 +27,7 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
     private final boolean simple;
 
     public TableBlock(Block base, TagKey<Block> connecting, WoodType wood, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple) {
-        super(base, connecting);
+        super(base, ModBlockShapes.EMPTY, connecting);
         this.shapes = computeVoxelShapes(centerShapes, footShapes);
         this.wood = wood;
         this.simple = simple;
@@ -38,7 +39,7 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
 
     @Override
     public ConnectionType getType() {
-        return ConnectionType.SAME_DATA;
+        return ConnectionType.HORIZONTAL_WITH_SAME_DATA;
     }
 
     @Override

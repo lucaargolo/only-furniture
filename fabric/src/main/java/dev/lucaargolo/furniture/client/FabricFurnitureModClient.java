@@ -1,14 +1,18 @@
 package dev.lucaargolo.furniture.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FancyFenceBlock;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FancyFenceBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
+import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
+import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -17,15 +21,25 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 public class FabricFurnitureModClient extends FurnitureModClient implements ClientModInitializer {
+
+    private static final RandomSource random = RandomSource.create();
 
     @Override
     public void onInitializeClient() {
@@ -45,6 +59,29 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
             if (entry.getTintColor() != null)
                 ColorProviderRegistry.ITEM.register(entry.getTintColor()::getColor, entry.get());
         });
+    }
+
+    @Override
+    protected void renderFurnitureModel(FurnitureBlock block, BlockPlaceContext context, PoseStack poseStack, VertexConsumer consumer) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        FurnitureData data = block.getFurnitureDataForPlacement(context);
+        BlockState state = block.getStateForPlacement(context, data);
+        boolean isValidPlacement = true;
+        if(state == null) {
+            isValidPlacement = false;
+            state = block.defaultBlockState();
+        }
+        int color = !isValidPlacement || !context.getLevel().getBlockState(context.getClickedPos()).canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
+        int packedColor = FastColor.ARGB32.color(120, color);
+
+        BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
+        BakedModel model = dispatcher.getBlockModel(state);
+
+        if(model instanceof FurnitureBakedModel furnitureModel) {
+            RenderContext render = VanillaRenderContext.of(poseStack, consumer, LightTexture.FULL_BRIGHT, packedColor);
+            furnitureModel.emitBlockQuads(context.getLevel(), state, context.getClickedPos(), () -> random, render, data);
+        }
     }
 
     private void registerModelPlugins() {

@@ -1,6 +1,6 @@
 package dev.lucaargolo.furniture.mixin;
 
-import dev.lucaargolo.furniture.utils.RenderTypeHint;
+import dev.lucaargolo.furniture.client.utils.RenderTypeHint;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;

@@ -25,9 +25,10 @@ import java.util.List;
 
 public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
-    protected static final ModelProperty<BlockPos> POS_PROPERTY = new ModelProperty<>();
-    protected static final ModelProperty<FurnitureData> DATA_PROPERTY = new ModelProperty<>();
-    protected static final ModelProperty<Boolean> HAS_DATA_PROPERTY = new ModelProperty<>();
+    public static final ModelProperty<BlockPos> POS_PROPERTY = new ModelProperty<>();
+    public static final ModelProperty<FurnitureData> DATA_PROPERTY = new ModelProperty<>();
+    public static final ModelProperty<Boolean> HAS_DATA_PROPERTY = new ModelProperty<>();
+    public static final ModelProperty<Integer> COLOR = new ModelProperty<>();
 
     public FurnitureBakedModel(BakedModel originalModel) {
         super(originalModel);
@@ -73,10 +74,12 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
                 data = null;
             }
         }
-        if(data != null) {
+        if(data != null && !modelData.has(DATA_PROPERTY)) {
             return modelData.derive().with(POS_PROPERTY, pos).with(DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
+        }else if(hasData && !modelData.has(HAS_DATA_PROPERTY)) {
+            return modelData.derive().with(POS_PROPERTY, pos).with(HAS_DATA_PROPERTY, true).build();
         }else{
-            return modelData.derive().with(POS_PROPERTY, pos).with(HAS_DATA_PROPERTY, hasData).build();
+            return modelData.derive().with(POS_PROPERTY, pos).build();
         }
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -22,69 +23,71 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.List;
 import java.util.function.Supplier;
 
-public class FancyFenceBakedModel extends FurnitureBakedModel{
+public class FancyFenceBakedModel extends FurnitureBakedModel {
 
     public FancyFenceBakedModel(BakedModel wrapped) {
         super(wrapped);
     }
 
     @Override
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data) {
+        super.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
         if(!RendererAccess.INSTANCE.hasRenderer()) {
             return;
         }
         Renderer renderer = RendererAccess.INSTANCE.getRenderer();
         assert renderer != null;
-        FurnitureData data = FurnitureData.get(blockView, pos, state.getValue(FurnitureBlock.LAYER));
-        if(data.hasOriginal()) {
-            FancyFenceBlock.Connecting connecting = state.getValue(FancyFenceBlock.CONNECTING);
-            if(connecting != FancyFenceBlock.Connecting.NONE) {
-                BlockPos connectedPos = connecting.getConnectedPos(pos);
-                BlockState connectedState = blockView.getBlockState(connectedPos);
-                if(connectedState.getBlock() instanceof FancyFenceBlock) {
-                    FurnitureData connectedData = FurnitureData.get(blockView, connectedPos, connectedState.getValue(FurnitureBlock.LAYER));
-                    if(connectedData.hasOriginal()) {
-                        Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(), pos.getY() + 0.5f, pos.getZ() + 0.5f + data.getZ());
-                        Vector3f destination = new Vector3f(connectedPos.getX() + 0.5f + connectedData.getX(), connectedPos.getY() + 0.5f, connectedPos.getZ() + 0.5f + connectedData.getZ());
+        if(state.getBlock() instanceof FancyFenceBlock furniture) {
+            List<Vec3i> offsets = furniture.getType().getOffsets();
+            for (Vec3i neighborOffset : offsets) {
+                if (furniture.isOffsetConnected(state, neighborOffset)) {
+                    BlockPos neighborPos = pos.offset(neighborOffset);
+                    BlockState neighborState = blockView.getBlockState(neighborPos);
+                    if(neighborState.getBlock() instanceof FancyFenceBlock) {
+                        FurnitureData connectedData = FurnitureData.get(blockView, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
+                        if (connectedData.hasOriginal()) {
+                            Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(), pos.getY() + 0.5f, pos.getZ() + 0.5f + data.getZ());
+                            Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + connectedData.getX(), neighborPos.getY() + 0.5f, neighborPos.getZ() + 0.5f + connectedData.getZ());
 
-                        Vector3f direction = new Vector3f(destination).sub(origin);
-                        direction.normalize();
+                            Vector3f direction = new Vector3f(destination).sub(origin);
+                            direction.normalize();
 
-                        float angle = (float) Math.atan2(direction.x, -direction.z);
-                        float distance = origin.distance(destination);
-                        float size = ((FancyFenceBlock) state.getBlock()).getSize()/16f;
+                            float angle = (float) Math.atan2(direction.x, -direction.z);
+                            float distance = origin.distance(destination);
+                            float size = ((FancyFenceBlock) state.getBlock()).getSize() / 16f;
 
-                        Matrix4f transform = new Matrix4f()
-                                .translate(data.getX(), 0f, data.getZ())
-                                .translate(0.5f, 0.5f, 0.5f)
-                                .rotate(Axis.YP.rotation(-angle))
-                                .translate(-0.5f, -0.5f, -0.5f);
+                            Matrix4f transform = new Matrix4f()
+                                    .translate(data.getX(), 0f, data.getZ())
+                                    .translate(0.5f, 0.5f, 0.5f)
+                                    .rotate(Axis.YP.rotation(-angle))
+                                    .translate(-0.5f, -0.5f, -0.5f);
 
-                        context.pushTransform((quad) -> {
-                            for (int i = 0; i < 4; i++) {
-                                Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-                                vector.mul(transform);
-                                quad.pos(i, vector.x, vector.y, vector.z);
-                            }
-                            return true;
-                        });
+                            context.pushTransform((quad) -> {
+                                for (int i = 0; i < 4; i++) {
+                                    Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
+                                    vector.mul(transform);
+                                    quad.pos(i, vector.x, vector.y, vector.z);
+                                }
+                                return true;
+                            });
 
-                        QuadEmitter emitter = context.getEmitter();
+                            QuadEmitter emitter = context.getEmitter();
 
-                        int color = Minecraft.getInstance().getBlockColors().getColor(state, blockView, pos, 0);
-                        int packedColor = FastColor.ARGB32.color(255, color);
+                            int color = Minecraft.getInstance().getBlockColors().getColor(state, blockView, pos, 0);
+                            int packedColor = FastColor.ARGB32.color(255, color);
 
-                        emitSide(emitter, this.getParticleIcon(), Direction.NORTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 1f - distance - 0.5f, packedColor);
-                        emitSide(emitter, this.getParticleIcon(), Direction.SOUTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 0.5f, packedColor);
-                        emitSide(emitter, this.getParticleIcon(), Direction.EAST, 0.5f, 0, 0.5f + distance, 1, (0.5f - size / 2f), packedColor);
-                        emitSide(emitter, this.getParticleIcon(), Direction.WEST, 1f - distance - 0.5f, 0, 1f - 0.5f, 1, (0.5f - size / 2f), packedColor);
-                        emitSide(emitter, this.getParticleIcon(), Direction.UP, (0.5f - size / 2f), 0.5f, (0.5f + size / 2f), distance + 0.5f, 0, packedColor);
-                        emitSide(emitter, this.getParticleIcon(), Direction.DOWN, (0.5f - size / 2f), 1f - distance - 0.5f, (0.5f + size / 2f), 1f - 0.5f, 0, packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.NORTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 1f - distance - 0.5f, packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.SOUTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 0.5f, packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.EAST, 0.5f, 0, 0.5f + distance, 1, (0.5f - size / 2f), packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.WEST, 1f - distance - 0.5f, 0, 1f - 0.5f, 1, (0.5f - size / 2f), packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.UP, (0.5f - size / 2f), 0.5f, (0.5f + size / 2f), distance + 0.5f, 0, packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.DOWN, (0.5f - size / 2f), 1f - distance - 0.5f, (0.5f + size / 2f), 1f - 0.5f, 0, packedColor);
 
-                        context.popTransform();
+                            context.popTransform();
+                        }
                     }
                 }
             }

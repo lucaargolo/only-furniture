@@ -99,10 +99,13 @@ public class FurnitureBlock extends Block {
 
     @Override
     public final @Nullable BlockState getStateForPlacement(@NotNull BlockPlaceContext pContext) {
-        Level level = pContext.getLevel();
-        BlockPos pos = pContext.getClickedPos();
-        Vec3 location = pContext.getClickLocation();
-        Player player = pContext.getPlayer();
+        return getStateForPlacement(pContext, getFurnitureDataForPlacement(pContext));
+    }
+
+    public final FurnitureData getFurnitureDataForPlacement(BlockPlaceContext context) {
+        BlockPos pos = context.getClickedPos();
+        Vec3 location = context.getClickLocation();
+        Player player = context.getPlayer();
 
         boolean snapToGrid = player == null || !player.isShiftKeyDown();
         float ox, oz;
@@ -114,14 +117,20 @@ public class FurnitureBlock extends Block {
             oz = (float) (location.z - pos.getZ());
         }
 
-        FurnitureData data = new FurnitureData(ox, oz, FurnitureBlockItem.getRotation(player), null, true);
+        return new FurnitureData(ox, oz, FurnitureBlockItem.getRotation(player), null, true);
+    }
+
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context, FurnitureData data) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+
         VoxelShape shape = this.getShapeForDataWithOffset(this.defaultBlockState(), data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pos, shape, Vec3.atLowerCornerOf(pos));
         intersectingPositions.add(pos);
 
         for(BlockPos intersectingPos: intersectingPositions) {
             BlockState intersectingState = level.getBlockState(intersectingPos);
-            if(!intersectingState.canBeReplaced(pContext)) {
+            if(!intersectingState.canBeReplaced(context)) {
                 return null;
             }else if(intersectingState.getBlock() instanceof FurnitureBlock) {
                 VoxelShape intersectingShape = intersectingState.getShape(level, intersectingPos).move(
@@ -142,16 +151,10 @@ public class FurnitureBlock extends Block {
         }
 
         if(calculateIntersectingDirections(pos, intersectingPositions) != null) {
-            return getStateForPlacement(pContext, data, layer).setValue(LAYER, layer);
+            return computeStateForData(level, pos, this.defaultBlockState(), data, context).setValue(LAYER, layer);
         }else {
             return null;
         }
-    }
-
-    public BlockState getStateForPlacement(BlockPlaceContext context, FurnitureData data, int layer) {
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        return computeStateForData(level, pos, this.defaultBlockState(), data);
     }
 
     @Override
@@ -271,10 +274,10 @@ public class FurnitureBlock extends Block {
         }
         int layer = state.getValue(LAYER);
         FurnitureData data = FurnitureData.get(level, pos, layer);
-        return computeStateForData(level, pos, state, data);
+        return computeStateForData(level, pos, state, data, null);
     }
 
-    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data) {
+    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data, @Nullable BlockPlaceContext context) {
         return state;
     }
 

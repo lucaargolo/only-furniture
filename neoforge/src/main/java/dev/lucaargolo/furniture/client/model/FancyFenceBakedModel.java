@@ -6,13 +6,13 @@ import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.block.FancyFenceBlock;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -28,13 +28,13 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FancyFenceBakedModel extends FurnitureBakedModel {
 
-    protected static final ModelProperty<FurnitureData> CONNECTED_DATA_PROPERTY = new ModelProperty<>();
-    protected static final ModelProperty<BlockPos> CONNECTED_POS_PROPERTY = new ModelProperty<>();
-    protected static final ModelProperty<Integer> COLOR = new ModelProperty<>();
+    private static final ModelProperty<Map<Vec3i, FurnitureData>> NEIGHBOR_DATA_PROPERTY = new ModelProperty<>();
 
     public FancyFenceBakedModel(BakedModel originalModel) {
         super(originalModel);
@@ -46,46 +46,49 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
 
         BlockPos pos = modelData.get(POS_PROPERTY);
         FurnitureData data = modelData.get(DATA_PROPERTY);
-        BlockPos connectedPos = modelData.get(CONNECTED_POS_PROPERTY);
-        FurnitureData connectedData = modelData.get(CONNECTED_DATA_PROPERTY);
+        Map<Vec3i, FurnitureData> neighborDataMap = modelData.get(NEIGHBOR_DATA_PROPERTY);
 
-        if(state != null && pos != null && data != null && connectedPos != null && connectedData != null) {
+        if(state != null && pos != null && data != null && neighborDataMap != null) {
             PoseStack stack = new PoseStack();
             QuadBakingVertexConsumer consumer = new QuadBakingVertexConsumer();
+            consumer.setTintIndex(0);
             consumer.setShade(true);
 
             Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(), pos.getY() + 0.5f, pos.getZ() + 0.5f + data.getZ());
-            Vector3f destination = new Vector3f(connectedPos.getX() + 0.5f + connectedData.getX(), connectedPos.getY() + 0.5f, connectedPos.getZ() + 0.5f + connectedData.getZ());
 
-            Vector3f direction = new Vector3f(destination).sub(origin);
-            direction.normalize();
+            neighborDataMap.forEach((neighborOffset, neighborData) -> {
+                BlockPos neighborPos = pos.offset(neighborOffset);
 
-            float angle = (float) Math.atan2(direction.x, -direction.z);
-            float distance = origin.distance(destination);
-            float size = ((FancyFenceBlock) state.getBlock()).getSize()/16f;
+                Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + neighborData.getX(), neighborPos.getY() + 0.5f, neighborPos.getZ() + 0.5f + neighborData.getZ());
+                Vector3f direction = new Vector3f(destination).sub(origin);
+                direction.normalize();
 
-            Matrix4f transform = new Matrix4f()
-                    .translate(data.getX(), 0f, data.getZ())
-                    .translate(0.5f, 0.5f, 0.5f)
-                    .rotate(Axis.YP.rotation(-angle))
-                    .translate(-0.5f, -0.5f, -0.5f);
-            Transformation transformation = new Transformation(transform);
-            IQuadTransformer transformer = QuadTransformers.applying(transformation);
+                float angle = (float) Math.atan2(direction.x, -direction.z);
+                float distance = origin.distance(destination);
+                float size = ((FancyFenceBlock) state.getBlock()).getSize()/16f;
 
-            Integer color = modelData.get(COLOR);
-            int packedColor = FastColor.ARGB32.color(255, color != null ? color : 0xFFFFFF);
+                Matrix4f transform = new Matrix4f()
+                        .translate(data.getX(), 0f, data.getZ())
+                        .translate(0.5f, 0.5f, 0.5f)
+                        .rotate(Axis.YP.rotation(-angle))
+                        .translate(-0.5f, -0.5f, -0.5f);
+                Transformation transformation = new Transformation(transform);
+                IQuadTransformer transformer = QuadTransformers.applying(transformation);
 
-            List<BakedQuad> fenceQuads = new ArrayList<>();
-            fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.NORTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 1f - distance - 0.5f, packedColor));
-            fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.SOUTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 0.5f, packedColor));
-            fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.EAST, 0.5f, 0, 0.5f + distance, 1, (0.5f - size / 2f), packedColor));
-            fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.WEST, 1f - distance - 0.5f, 0, 1f - 0.5f, 1, (0.5f - size / 2f), packedColor));
-            fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.UP, (0.5f - size / 2f), 0.5f, (0.5f + size / 2f), distance + 0.5f, 0, packedColor));
-            fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.DOWN, (0.5f - size / 2f), 1f - distance - 0.5f, (0.5f + size / 2f), 1f - 0.5f, 0, packedColor));
+                Integer color = modelData.get(COLOR);
+                int packedColor = FastColor.ARGB32.color(255, color != null ? color : 0xFFFFFF);
 
-            quads.addAll(transformer.process(fenceQuads));
+                List<BakedQuad> fenceQuads = new ArrayList<>();
+                fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.NORTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 1f - distance - 0.5f, packedColor));
+                fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.SOUTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 0.5f, packedColor));
+                fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.EAST, 0.5f, 0, 0.5f + distance, 1, (0.5f - size / 2f), packedColor));
+                fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.WEST, 1f - distance - 0.5f, 0, 1f - 0.5f, 1, (0.5f - size / 2f), packedColor));
+                fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.UP, (0.5f - size / 2f), 0.5f, (0.5f + size / 2f), distance + 0.5f, 0, packedColor));
+                fenceQuads.addAll(emitSide(stack, consumer, this.getParticleIcon(), Direction.DOWN, (0.5f - size / 2f), 1f - distance - 0.5f, (0.5f + size / 2f), 1f - 0.5f, 0, packedColor));
+
+                quads.addAll(transformer.process(fenceQuads));
+            });
         }
-
         return quads;
     }
 
@@ -93,29 +96,28 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
     public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData) {
         modelData = super.getModelData(level, pos, state, modelData);
         FurnitureData data = modelData.get(DATA_PROPERTY);
-        if(data != null && data.hasOriginal()) {
-            FancyFenceBlock.Connecting connecting = state.getValue(FancyFenceBlock.CONNECTING);
-            if(connecting != FancyFenceBlock.Connecting.NONE) {
-                BlockPos connectedPos = connecting.getConnectedPos(pos);
-                BlockState connectedState = level.getBlockState(connectedPos);
-                if (connectedState.getBlock() instanceof FancyFenceBlock) {
-                    FurnitureData connectedData = FurnitureData.get(level, connectedPos, connectedState.getValue(FurnitureBlock.LAYER));
-                    if (connectedData.hasOriginal()) {
-                        int color = Minecraft.getInstance().getBlockColors().getColor(state, level, pos, 0);
-                        return modelData.derive()
-                                .with(CONNECTED_POS_PROPERTY, connectedPos)
-                                .with(CONNECTED_DATA_PROPERTY, connectedData)
-                                .with(COLOR, color)
-                                .build();
+        if(data != null && data.hasOriginal() && state.getBlock() instanceof FancyFenceBlock furniture) {
+            Map<Vec3i, FurnitureData> neighborData = new HashMap<>();
+            List<Vec3i> offsets = furniture.getType().getOffsets();
+            for (Vec3i neighborOffset : offsets) {
+                if (furniture.isOffsetConnected(state, neighborOffset)) {
+                    BlockPos neighborPos = pos.offset(neighborOffset);
+                    BlockState neighborState = level.getBlockState(neighborPos);
+                    if(neighborState.getBlock() instanceof FancyFenceBlock) {
+                        FurnitureData connectedData = FurnitureData.get(level, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
+                        if (connectedData.hasOriginal()) {
+                            neighborData.put(neighborOffset, connectedData);
+                        }
                     }
                 }
             }
+            return modelData.derive().with(NEIGHBOR_DATA_PROPERTY, neighborData).build();
         }
         return modelData;
     }
 
 
-    private static List<BakedQuad> emitSide(PoseStack poseStack, QuadBakingVertexConsumer vertexConsumer, TextureAtlasSprite sprite, Direction dir, float x1, float y1, float x2, float y2, float depthOffset, int color) {
+    private static List<BakedQuad> emitSide(PoseStack poseStack, QuadBakingVertexConsumer vertexConsumer, TextureAtlasSprite sprite, Direction dir, float x1, float y1, float x2, float y2, float depthOffset, int packedColor) {
         List<BakedQuad> quads = new ArrayList<>();
         PoseStack.Pose pose = poseStack.last();
 
@@ -140,13 +142,13 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
                 float v0 = sprite.getV0();
                 float v1 = sprite.getV0() + (sprite.getV1()-sprite.getV0())*dy;
 
-                quads.addAll(emitQuad(pose, vertexConsumer, dir, sx1, sy1, sx2, sy2, depthOffset, u0, u1, v0, v1, color));
+                quads.addAll(emitQuad(pose, vertexConsumer, dir, sx1, sy1, sx2, sy2, depthOffset, u0, u1, v0, v1, packedColor));
             }
         }
         return quads;
     }
 
-    private static List<BakedQuad> emitQuad(PoseStack.Pose pose, QuadBakingVertexConsumer vertexConsumer, Direction nominalFace, float left, float bottom, float right, float top, float depth, float u0, float u1, float v0, float v1, int color) {
+    private static List<BakedQuad> emitQuad(PoseStack.Pose pose, QuadBakingVertexConsumer vertexConsumer, Direction nominalFace, float left, float bottom, float right, float top, float depth, float u0, float u1, float v0, float v1, int packedColor) {
         List<BakedQuad> quads = new ArrayList<>();
         switch (nominalFace) {
             case UP:
@@ -156,10 +158,10 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
 
             case DOWN:
                 vertexConsumer.setDirection(nominalFace);
-                vertexConsumer.addVertex(pose, left, depth, top).setColor(color).setUv(u0, v0);
-                vertexConsumer.addVertex(pose, left, depth, bottom).setColor(color).setUv(u0, v1);
-                vertexConsumer.addVertex(pose, right, depth, bottom).setColor(color).setUv(u1, v1);
-                vertexConsumer.addVertex(pose, right, depth, top).setColor(color).setUv(u1, v0);
+                vertexConsumer.addVertex(pose, left, depth, top).setColor(packedColor).setUv(u0, v0).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, left, depth, bottom).setColor(packedColor).setUv(u0, v1).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, right, depth, bottom).setColor(packedColor).setUv(u1, v1).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, right, depth, top).setColor(packedColor).setUv(u1, v0).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
                 quads.add(vertexConsumer.bakeQuad());
                 break;
 
@@ -170,10 +172,10 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
 
             case WEST:
                 vertexConsumer.setDirection(nominalFace);
-                vertexConsumer.addVertex(pose, depth, top, left).setColor(color).setUv(u0, v0);
-                vertexConsumer.addVertex(pose, depth, bottom, left).setColor(color).setUv(u0, v1);
-                vertexConsumer.addVertex(pose, depth, bottom, right).setColor(color).setUv(u1, v1);
-                vertexConsumer.addVertex(pose, depth, top, right).setColor(color).setUv(u1, v0);
+                vertexConsumer.addVertex(pose, depth, top, left).setColor(packedColor).setUv(u0, v0).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, depth, bottom, left).setColor(packedColor).setUv(u0, v1).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, depth, bottom, right).setColor(packedColor).setUv(u1, v1).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, depth, top, right).setColor(packedColor).setUv(u1, v0).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
                 quads.add(vertexConsumer.bakeQuad());
                 break;
 
@@ -184,10 +186,10 @@ public class FancyFenceBakedModel extends FurnitureBakedModel {
 
             case NORTH:
                 vertexConsumer.setDirection(nominalFace);
-                vertexConsumer.addVertex(pose, 1 - left, top, depth).setColor(color).setUv(u0, v0);
-                vertexConsumer.addVertex(pose, 1 - left, bottom, depth).setColor(color).setUv(u0, v1);
-                vertexConsumer.addVertex(pose, 1 - right, bottom, depth).setColor(color).setUv(u1, v1);
-                vertexConsumer.addVertex(pose, 1 - right, top, depth).setColor(color).setUv(u1, v0);
+                vertexConsumer.addVertex(pose, 1 - left, top, depth).setColor(packedColor).setUv(u0, v0).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, 1 - left, bottom, depth).setColor(packedColor).setUv(u0, v1).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, 1 - right, bottom, depth).setColor(packedColor).setUv(u1, v1).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                vertexConsumer.addVertex(pose, 1 - right, top, depth).setColor(packedColor).setUv(u1, v0).setNormal(pose, nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
                 quads.add(vertexConsumer.bakeQuad());
                 break;
         }

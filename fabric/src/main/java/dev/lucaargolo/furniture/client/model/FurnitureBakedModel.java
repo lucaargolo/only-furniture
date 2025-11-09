@@ -27,7 +27,7 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
     }
 
     @Override
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
+    public final void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
         FurnitureData[] layers = FurnitureData.get(blockView, pos);
         FurnitureData data = null;
         boolean hasData = false;
@@ -42,23 +42,27 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             }
         }
         if(data != null) {
-            Matrix4f transform = this.getDataTransform(pos, data);
-
-            context.pushTransform((quad) -> {
-                for (int i = 0; i < 4; i++) {
-                    Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-                    vector.mul(transform);
-                    quad.pos(i, vector.x, vector.y, vector.z);
-                }
-                return true;
-            });
-
-            this.wrapped.emitBlockQuads(blockView, state, pos, randomSupplier, context);
-
-            context.popTransform();
+            this.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
         }else if(!hasData){
             super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
         }
+    }
+
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data) {
+        Matrix4f transform = this.getDataTransform(pos, data);
+
+        context.pushTransform((quad) -> {
+            for (int i = 0; i < 4; i++) {
+                Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
+                vector.mul(transform);
+                quad.pos(i, vector.x, vector.y, vector.z);
+            }
+            return true;
+        });
+
+        this.wrapped.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+
+        context.popTransform();
     }
 
     protected Matrix4f getDataTransform(BlockPos pos, FurnitureData data) {

@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
@@ -19,6 +20,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
@@ -40,8 +42,8 @@ public class KitchenSinkBlock extends FurnitureBlock {
     }
 
     @Override
-    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data) {
-        BlockState computed = super.computeStateForData(level, pos, state, data);
+    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data, @Nullable BlockPlaceContext context) {
+        BlockState computed = super.computeStateForData(level, pos, state, data, context);
         BlockPos downPos = pos.below();
         BlockState downState = level.getBlockState(downPos);
         if(downState.is(ModBlockTags.CONNECTING_KITCHEN_COUNTER) && !downState.getValue(FurnitureConnectingBlock.OUTER) && !downState.getValue(FurnitureConnectingBlock.NORTH) && !downState.getValue(FurnitureConnectingBlock.EAST) && !downState.getValue(FurnitureConnectingBlock.SOUTH) && !downState.getValue(FurnitureConnectingBlock.WEST)) {

@@ -1,5 +1,7 @@
 package dev.lucaargolo.furniture.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.block.FancyFenceBlock;
@@ -10,19 +12,34 @@ import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
+import dev.lucaargolo.furniture.utils.FurnitureData;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Direction;
+import net.minecraft.util.FastColor;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 
+import java.util.List;
 import java.util.Map;
 
 public class NeoForgeFurnitureModClient extends FurnitureModClient {
+
+    private static final RandomSource random = RandomSource.create();
 
     public NeoForgeFurnitureModClient() {
         this.init();
@@ -36,6 +53,43 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
         NeoForge.EVENT_BUS.addListener(this::onMouseScrolling);
         NeoForge.EVENT_BUS.addListener(this::onDrawBlockHighlight);
         NeoForge.EVENT_BUS.addListener(this::onRenderLevelStage);
+    }
+
+    @Override
+    protected void renderFurnitureModel(FurnitureBlock block, BlockPlaceContext context, PoseStack poseStack, VertexConsumer consumer) {
+        Minecraft minecraft = Minecraft.getInstance();
+
+        FurnitureData data = block.getFurnitureDataForPlacement(context);
+        BlockState state = block.getStateForPlacement(context, data);
+        boolean isValidPlacement = true;
+        if(state == null) {
+            isValidPlacement = false;
+            state = block.defaultBlockState();
+        }
+        int color = !isValidPlacement || !context.getLevel().getBlockState(context.getClickedPos()).canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
+        int packedColor = FastColor.ARGB32.color(120, color);
+
+        BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
+        BakedModel model = dispatcher.getBlockModel(state);
+        ModelData modelData = ModelData.EMPTY.derive()
+                .with(FurnitureBakedModel.COLOR, minecraft.getBlockColors().getColor(state, context.getLevel(), context.getClickedPos(), 0))
+                .with(FurnitureBakedModel.DATA_PROPERTY, data)
+                .with(FurnitureBakedModel.HAS_DATA_PROPERTY, true)
+                .build();
+        modelData = model.getModelData(context.getLevel(), context.getClickedPos(), state, modelData);
+
+        for (Direction direction : Direction.values()) {
+            random.setSeed(42L);
+            renderQuadList(poseStack, consumer, model.getQuads(state, direction, random, modelData, null), LightTexture.FULL_BRIGHT, packedColor);
+        }
+        random.setSeed(42L);
+        renderQuadList(poseStack, consumer, model.getQuads(state, null, random, modelData, null), LightTexture.FULL_BRIGHT, packedColor);
+    }
+
+    private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, int packedLight, int packedColor) {
+        for (BakedQuad bakedquad : quads) {
+            consumer.putBulkData(poseStack.last(), bakedquad, FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
+        }
     }
 
     @SubscribeEvent

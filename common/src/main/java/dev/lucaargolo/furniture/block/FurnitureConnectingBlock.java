@@ -1,19 +1,26 @@
 package dev.lucaargolo.furniture.block;
 
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class FurnitureConnectingBlock extends FurnitureBlock {
@@ -22,109 +29,188 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
     public static final BooleanProperty SOUTH = BlockStateProperties.SOUTH;
     public static final BooleanProperty WEST = BlockStateProperties.WEST;
+
+    public static final BooleanProperty NORTHEAST = BooleanProperty.create("northeast");
+    public static final BooleanProperty SOUTHEAST = BooleanProperty.create("southeast");
+    public static final BooleanProperty SOUTHWEST = BooleanProperty.create("southwest");
+    public static final BooleanProperty NORTHWEST = BooleanProperty.create("northwest");
+
     public static final BooleanProperty OUTER = BooleanProperty.create("outer");
 
     private final TagKey<Block> connecting;
 
-    public FurnitureConnectingBlock(Block base, TagKey<Block> connecting) {
-        super(base, ModBlockShapes.EMPTY);
-        BlockState defaultState = this.defaultBlockState()
-                .setValue(NORTH, false)
-                .setValue(EAST, false)
-                .setValue(SOUTH, false)
-                .setValue(WEST, false);
-        if(this.getType().computesOuter()) {
-            defaultState.setValue(OUTER, false);
+    public FurnitureConnectingBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting) {
+        super(base, shapes);
+        BlockState state = this.defaultBlockState();
+        state = state.setValue(NORTH, false);
+        state = state.setValue(EAST, false);
+        state = state.setValue(SOUTH, false);
+        state = state.setValue(WEST, false);
+        if(this.getType().isDiagonalProvider()) {
+            state = state.setValue(NORTHEAST, false);
+            state = state.setValue(SOUTHEAST, false);
+            state = state.setValue(SOUTHWEST, false);
+            state = state.setValue(NORTHWEST, false);
         }
-        this.registerDefaultState(defaultState);
+        if(this.getType().isOuterProvider()) {
+            state = state.setValue(OUTER, false);
+        }
+        this.registerDefaultState(state);
         this.connecting = connecting;
     }
 
     public abstract ConnectionType getType();
 
+    public TagKey<Block> getConnecting() {
+        return this.connecting;
+    }
+
     @Override
     public void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(NORTH, EAST, SOUTH, WEST);
-        if(this.getType().computesOuter()) {
+        if(this.getType().isDiagonalProvider()) {
+            builder.add(NORTHEAST, SOUTHEAST, SOUTHWEST, NORTHWEST);
+        }
+        if(this.getType().isOuterProvider()) {
             builder.add(OUTER);
         }
     }
 
     @Override
-    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data) {
+    protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data, @Nullable BlockPlaceContext context) {
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
         if (data.getRotation() % 90f == 0f) {
 
-            Map<Direction, FurnitureData> neighbors = new HashMap<>();
-            for (Direction neighborDirection : Direction.Plane.HORIZONTAL) {
-                BlockPos neighborPos = pos.relative(neighborDirection);
+            List<Vec3i> offsets = this.getType().getOffsets();
+
+            Map<Vec3i, FurnitureData> neighbors = new HashMap<>();
+            for (Vec3i neighborOffset : offsets) {
+                BlockPos neighborPos = pos.offset(neighborOffset);
                 BlockState neighborState = level.getBlockState(neighborPos);
 
                 if (neighborState.is(this.connecting)) {
                     FurnitureData neighborData = FurnitureData.get(level, neighborPos, neighborState.getValue(LAYER));
-                    if(data.equalsIgnoreRotation(neighborData) && neighborData.getRotation() % 90f == 0f) {
-                        neighbors.put(neighborDirection, neighborData);
+                    if(neighborData.getRotation() % 90f == 0f) {
+                        neighbors.put(neighborOffset, neighborData);
                     }
                 }
             }
 
-            Pair<Boolean, Boolean> north = computeNeighbor(pos, facing, data, neighbors, Direction.NORTH);
-            Pair<Boolean, Boolean> east = computeNeighbor(pos, facing, data, neighbors, Direction.EAST);
-            Pair<Boolean, Boolean> south = computeNeighbor(pos, facing, data, neighbors, Direction.SOUTH);
-            Pair<Boolean, Boolean> west = computeNeighbor(pos, facing, data, neighbors, Direction.WEST);
+            Pair<Boolean, Boolean> north = computeNeighbor(level, state, pos, data, neighbors, offsets.get(0), context);
+            Pair<Boolean, Boolean> east = computeNeighbor(level, state, pos, data, neighbors, offsets.get(1), context);
+            Pair<Boolean, Boolean> south = computeNeighbor(level, state, pos, data, neighbors, offsets.get(2), context);
+            Pair<Boolean, Boolean> west = computeNeighbor(level, state, pos, data, neighbors, offsets.get(3), context);
 
-            if (this.getType().computesOuter()) {
+            switch (facing) {
+                case NORTH -> {
+                    state = state.setValue(NORTH, north.getFirst());
+                    state = state.setValue(EAST, east.getFirst());
+                    state = state.setValue(SOUTH, south.getFirst());
+                    state = state.setValue(WEST, west.getFirst());
+                }
+                case EAST -> {
+                    state = state.setValue(NORTH, east.getFirst());
+                    state = state.setValue(EAST, south.getFirst());
+                    state = state.setValue(SOUTH, west.getFirst());
+                    state = state.setValue(WEST, north.getFirst());
+                }
+                case SOUTH -> {
+                    state = state.setValue(NORTH, south.getFirst());
+                    state = state.setValue(EAST, west.getFirst());
+                    state = state.setValue(SOUTH, north.getFirst());
+                    state = state.setValue(WEST, east.getFirst());
+                }
+                case WEST -> {
+                    state = state.setValue(NORTH, west.getFirst());
+                    state = state.setValue(EAST, north.getFirst());
+                    state = state.setValue(SOUTH, east.getFirst());
+                    state = state.setValue(WEST, south.getFirst());
+                }
+            }
+
+            if(this.getType().isDiagonalProvider()) {
+                Pair<Boolean, Boolean> northeast = computeNeighbor(level, state, pos, data, neighbors, offsets.get(4), context);
+                Pair<Boolean, Boolean> southeast = computeNeighbor(level, state, pos, data, neighbors, offsets.get(5), context);
+                Pair<Boolean, Boolean> southwest = computeNeighbor(level, state, pos, data, neighbors, offsets.get(6), context);
+                Pair<Boolean, Boolean> northwest = computeNeighbor(level, state, pos, data, neighbors, offsets.get(7), context);
+
+                switch (facing) {
+                    case NORTH -> {
+                        state = state.setValue(NORTHEAST, northeast.getFirst());
+                        state = state.setValue(SOUTHEAST, southeast.getFirst());
+                        state = state.setValue(SOUTHWEST, southwest.getFirst());
+                        state = state.setValue(NORTHWEST, northwest.getFirst());
+                    }
+                    case EAST -> {
+                        state = state.setValue(NORTHEAST, southeast.getFirst());
+                        state = state.setValue(SOUTHEAST, southwest.getFirst());
+                        state = state.setValue(SOUTHWEST, northwest.getFirst());
+                        state = state.setValue(NORTHWEST, northeast.getFirst());
+                    }
+                    case SOUTH -> {
+                        state = state.setValue(NORTHEAST, southwest.getFirst());
+                        state = state.setValue(SOUTHEAST, northwest.getFirst());
+                        state = state.setValue(SOUTHWEST, northeast.getFirst());
+                        state = state.setValue(NORTHWEST, southeast.getFirst());
+                    }
+                    case WEST -> {
+                        state = state.setValue(NORTHEAST, northwest.getFirst());
+                        state = state.setValue(SOUTHEAST, northeast.getFirst());
+                        state = state.setValue(SOUTHWEST, southeast.getFirst());
+                        state = state.setValue(NORTHWEST, southwest.getFirst());
+                    }
+                }
+            }
+
+            if (this.getType().isOuterProvider()) {
                 state = state.setValue(OUTER, north.getSecond() || east.getSecond() || south.getSecond() || west.getSecond());
             }
 
-            return switch (facing) {
-                case NORTH -> state.setValue(NORTH, north.getFirst()).setValue(EAST, east.getFirst()).setValue(SOUTH, south.getFirst()).setValue(WEST, west.getFirst());
-                case EAST -> state.setValue(NORTH, east.getFirst()).setValue(EAST, south.getFirst()).setValue(SOUTH, west.getFirst()).setValue(WEST, north.getFirst());
-                case SOUTH -> state.setValue(NORTH, south.getFirst()).setValue(EAST, west.getFirst()).setValue(SOUTH, north.getFirst()).setValue(WEST, east.getFirst());
-                case WEST -> state.setValue(NORTH, west.getFirst()).setValue(EAST, north.getFirst()).setValue(SOUTH, east.getFirst()).setValue(WEST, south.getFirst());
-                default -> throw new IllegalStateException("Unexpected value: " + facing);
-            };
-        } else {
-            return state;
         }
+        return state;
     }
 
-    private Pair<Boolean, Boolean> computeNeighbor(BlockPos pos, Direction facing, FurnitureData data, Map<Direction, FurnitureData> neighbors, Direction direction) {
-        FurnitureData neighborData = neighbors.get(direction);
+    private Pair<Boolean, Boolean> computeNeighbor(LevelAccessor level, BlockState state, BlockPos pos, FurnitureData data, Map<Vec3i, FurnitureData> neighbors, Vec3i offset, @Nullable BlockPlaceContext context) {
+        FurnitureData neighborData = neighbors.get(offset);
         if(neighborData == null) {
             return Pair.of(false, false);
         }
 
         return switch (this.getType()) {
-            case SAME_DATA -> Pair.of(neighborData.equalsIgnoreRotation(data) && neighborData.getRotation() % 90f == 0f, false);
-            case SAME_DATA_SAME_ROTATION -> Pair.of(neighborData.equals(data), false);
-            case SAME_DATA_90_DEGREES -> {
+            case HORIZONTAL, DIAGONAL -> Pair.of(true, false);
+            case HORIZONTAL_WITH_SAME_DATA -> Pair.of(neighborData.equalsIgnoreRotation(data) && neighborData.getRotation() % 90f == 0f, false);
+            case HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION -> Pair.of(neighborData.equals(data), false);
+            case HORIZONTAL_WITH_SAME_DATA_AND_90_DEGREES_NEIGHBOR -> {
                 float r1 = data.getRotation();
                 float r2 = neighborData.getRotation();
                 boolean valid = (Math.floorMod((int)(r1 - r2), 360) == 90) || (Math.floorMod((int)(r2 - r1), 360) == 90);
                 yield Pair.of(neighborData.equalsIgnoreRotation(data) && valid, false);
             }
-            case COUNTER -> {
+            case KITCHEN_COUNTER -> {
                 //If neighbor is not on the same rotation returns false
-                BlockPos neighborPos = pos.relative(direction);
+                BlockPos neighborPos = pos.offset(offset);
                 if(!neighborData.equals(data)) {
                     yield Pair.of(false, false);
                 }
                 //If both axis neighbors on the same rotation returns false
-                FurnitureData oppositeNeighborData = neighbors.get(direction.getOpposite());
+                FurnitureData oppositeNeighborData = neighbors.get(offset.multiply(-1));
                 if(oppositeNeighborData != null && oppositeNeighborData.equals(data)) {
                     yield Pair.of(false, false);
                 }
+                //Computes direction from offset
+                Direction direction = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
+                assert direction != null;
                 //If both non-axis neighbors are matching or both are not matching returns false
-                FurnitureData clockwiseNeighborData = neighbors.get(direction.getClockWise());
+                FurnitureData clockwiseNeighborData = neighbors.get(direction.getClockWise().getNormal());
                 boolean clockwiseNeighborValid = clockwiseNeighborData != null && clockwiseNeighborData.equalsIgnoreRotation(data);
-                FurnitureData counterClockwiseNeighborData = neighbors.get(direction.getCounterClockWise());
+                FurnitureData counterClockwiseNeighborData = neighbors.get(direction.getCounterClockWise().getNormal());
                 boolean counterClockwiseNeighborValid = counterClockwiseNeighborData != null && counterClockwiseNeighborData.equalsIgnoreRotation(data);
                 if((clockwiseNeighborValid && counterClockwiseNeighborValid) || (!clockwiseNeighborValid && !counterClockwiseNeighborValid)) {
                     yield Pair.of(false, false);
                 }
                 //Calculates the validity of the counter based on the neighbor rotations (facing)
+                Direction facing = Direction.fromYRot(data.getRotation() + 180);
                 BlockPos rotatedPos = pos.relative(clockwiseNeighborValid ? direction.getClockWise() : direction.getCounterClockWise());
                 Direction rotatedFacing = Direction.fromYRot((clockwiseNeighborValid ? clockwiseNeighborData.getRotation() : counterClockwiseNeighborData.getRotation()) + 180);
                 if(neighborPos.relative(facing).equals(rotatedPos.relative(rotatedFacing))) {
@@ -137,24 +223,87 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                     yield Pair.of(false, false);
                 }
             }
+            case FANCY_FENCE -> {;
+                if(context != null && context.getPlayer() != null) {
+                    BlockPos lastPosition = FurnitureConnectingBlockItem.getLastPosition(context.getPlayer());
+                    yield Pair.of(pos.offset(offset).equals(lastPosition), false);
+                }else{
+                    boolean isConnected = isOffsetConnected(state, offset);
+                    boolean isConnectionValid = level.getBlockState(pos.offset(offset)).is(this.getConnecting());
+                    yield Pair.of(isConnected && isConnectionValid, false);
+                }
+            }
         };
     }
 
+    public boolean isOffsetConnected(BlockState state, Vec3i offset) {
+        if(offset.equals(Direction.NORTH.getNormal())) {
+            return state.getValue(NORTH);
+        }else if(offset.equals(Direction.EAST.getNormal())) {
+            return state.getValue(EAST);
+        }else if(offset.equals(Direction.SOUTH.getNormal())) {
+            return state.getValue(SOUTH);
+        }else if(offset.equals(Direction.WEST.getNormal())) {
+            return state.getValue(WEST);
+        }else if(this.getType().isDiagonalProvider()) {
+            if(offset.equals(Direction.NORTH.getNormal().relative(Direction.EAST))) {
+                return state.getValue(NORTHEAST);
+            }else if(offset.equals(Direction.SOUTH.getNormal().relative(Direction.EAST))) {
+                return state.getValue(SOUTHEAST);
+            }else if(offset.equals(Direction.SOUTH.getNormal().relative(Direction.WEST))) {
+                return state.getValue(SOUTHWEST);
+            }else if(offset.equals(Direction.NORTH.getNormal().relative(Direction.WEST))) {
+                return state.getValue(NORTHWEST);
+            }
+        }
+        return false;
+    }
 
     public enum ConnectionType {
-        SAME_DATA(false),
-        SAME_DATA_SAME_ROTATION(false),
-        SAME_DATA_90_DEGREES(false),
-        COUNTER(true);
+        HORIZONTAL(false, false, false),
+        HORIZONTAL_WITH_SAME_DATA(false, false, false),
+        HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION(false, false, false),
+        HORIZONTAL_WITH_SAME_DATA_AND_90_DEGREES_NEIGHBOR(false, false, false),
+        DIAGONAL(true, false, false),
+        KITCHEN_COUNTER(false, true, false),
+        FANCY_FENCE(true, false, true);
 
-        private final boolean computesOuter;
+        private final boolean diagonalProvider;
+        private final boolean outerProvider;
+        private final boolean dependentOnLastPosition;
 
-        ConnectionType(boolean computesOuter) {
-            this.computesOuter = computesOuter;
+        ConnectionType(boolean diagonalProvider, boolean outerProvider, boolean dependentOnLastPosition) {
+            this.diagonalProvider = diagonalProvider;
+            this.outerProvider = outerProvider;
+            this.dependentOnLastPosition = dependentOnLastPosition;
         }
 
-        public boolean computesOuter() {
-            return this.computesOuter;
+        public boolean isDiagonalProvider() {
+            return this.diagonalProvider;
+        }
+
+        public boolean isOuterProvider() {
+            return this.outerProvider;
+        }
+
+        public boolean isDependentOnLastPosition() {
+            return this.dependentOnLastPosition;
+        }
+
+        public List<Vec3i> getOffsets() {
+            List<Vec3i> offsets = new ArrayList<>();
+            offsets.add(Direction.NORTH.getNormal());
+            offsets.add(Direction.EAST.getNormal());
+            offsets.add(Direction.SOUTH.getNormal());
+            offsets.add(Direction.WEST.getNormal());
+
+            if(this.isDiagonalProvider()) {
+                offsets.add(Direction.NORTH.getNormal().relative(Direction.EAST));
+                offsets.add(Direction.SOUTH.getNormal().relative(Direction.EAST));
+                offsets.add(Direction.SOUTH.getNormal().relative(Direction.WEST));
+                offsets.add(Direction.NORTH.getNormal().relative(Direction.WEST));
+            }
+            return offsets;
         }
     }
 
