@@ -11,7 +11,8 @@ public class ModBlockTags {
     public static final TagKey<Block> CONNECTING_TABLE = create("connecting_table");
     public static final TagKey<Block> CONNECTING_COFFEE_TABLE = create("connecting_coffee_table"); ;
     public static final TagKey<Block> CONNECTING_KITCHEN_COUNTER = create("connecting_kitchen_counter");
-    public static final TagKey<Block> CONNECTING_HEDGES = create("connecting_hedges");
+    public static final TagKey<Block> CONNECTING_HEDGE = create("connecting_hedges");
+    public static final TagKey<Block> CONNECTING_SOFA = create("connecting_sofa");
 
     public static final TagKey<Block> TOP_FOR_KITCHEN_COUNTER = create("top_for_kitchen_counter");
 

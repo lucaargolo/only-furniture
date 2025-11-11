@@ -3,11 +3,13 @@ package dev.lucaargolo.furniture.data;
 import com.google.gson.JsonElement;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.base.ColorBlock;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.block.impl.KitchenCounterBlock;
 import dev.lucaargolo.furniture.block.impl.KitchenSinkBlock;
+import dev.lucaargolo.furniture.block.impl.SofaBlock;
 import dev.lucaargolo.furniture.block.impl.TableBlock;
 import dev.lucaargolo.furniture.mixin.BlockModelGeneratorsAccessor;
 import dev.lucaargolo.furniture.mixin.TextureSlotAccessor;
@@ -18,6 +20,7 @@ import net.minecraft.data.models.model.ModelTemplate;
 import net.minecraft.data.models.model.TextureMapping;
 import net.minecraft.data.models.model.TextureSlot;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -41,13 +44,15 @@ public class ModBlockModelProvider {
     private static final TextureSlot METAL = TextureSlotAccessor.invokeCreate("metal");
     private static final TextureSlot BASE = TextureSlotAccessor.invokeCreate("base");
     private static final TextureSlot LEAVES = TextureSlotAccessor.invokeCreate("leaves");
+    private static final TextureSlot PILLOW = TextureSlotAccessor.invokeCreate("pillow");
 
     public static void generate(BlockModelGenerators generators) {
         ModBlocks.REGISTRY.forEach((entry) -> {
             switch (entry.get()) {
                 case TableBlock table -> createTableBlockState(generators, entry, table.isSimple());
                 case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);
-                case KitchenSinkBlock ignored ->createSinkBlockState(generators, entry);
+                case KitchenSinkBlock ignored -> createSinkBlockState(generators, entry);
+                case SofaBlock ignored -> createSofaBlockState(generators, entry);
                 default -> createBaseBlockState(generators, entry);
             }
         });
@@ -80,14 +85,14 @@ public class ModBlockModelProvider {
             tryAddSlot(slots, LOG);
             tryAddSlot(slots, PLANKS);
             if(slots.contains(DOORS))
-                mapping.put(DOORS, DataHelper.getWoodDoors(wood));
-            mapping.put(LOG, DataHelper.getWoodLog(wood));
-            mapping.put(slots.contains(BASE) ? BASE : PLANKS, DataHelper.getWoodPlanks(wood));
-            mapping.put(PARTICLE, DataHelper.getWoodLog(wood));
+                mapping.put(DOORS, DataHelper.getDoors(wood));
+            mapping.put(LOG, DataHelper.getLog(wood));
+            mapping.put(slots.contains(BASE) ? BASE : PLANKS, DataHelper.getPlanks(wood));
+            mapping.put(PARTICLE, DataHelper.getLog(wood));
             if(block instanceof WoodBlock.LeafBlock) {
                 tryAddSlot(slots, LEAVES);
-                mapping.put(slots.contains(BASE) ? BASE : LEAVES, DataHelper.getWoodLeaves(wood));
-                mapping.put(PARTICLE, DataHelper.getWoodLeaves(wood));
+                mapping.put(slots.contains(BASE) ? BASE : LEAVES, DataHelper.getLeaves(wood));
+                mapping.put(PARTICLE, DataHelper.getLeaves(wood));
             }
         }
 
@@ -108,6 +113,13 @@ public class ModBlockModelProvider {
             tryAddSlot(slots, METAL);
             mapping.put(slots.contains(BASE) ? BASE : METAL, DataHelper.getMetal(metal, age));
             mapping.put(PARTICLE, DataHelper.getMetal(metal, age));
+        }
+
+        if(block instanceof ColorBlock colorBlock) {
+            DyeColor color = colorBlock.getColor();
+            path = path.replace(color.getSerializedName() + "_", "");
+            if(slots.contains(PILLOW))
+                mapping.put(PILLOW, DataHelper.getPillow(color));
         }
 
         ResourceLocation parent = FurnitureMod.id(prefix+path+suffix);
@@ -200,10 +212,10 @@ public class ModBlockModelProvider {
         ResourceLocation outerPath = computeModel(generators, entry, "block/", "_outer", PARTICLE, PLANKS, DOORS, STONE);
 
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
-        PropertyDispatch.C4<Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.EAST, KitchenCounterBlock.WEST, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW);
+        PropertyDispatch.C4<Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.NORTH, KitchenCounterBlock.SOUTH, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW);
         for (int i = 0; i < 1 << 4; i++) {
-            boolean east = (i & (1)) != 0;
-            boolean west = (i & (1 << 1)) != 0;
+            boolean north = (i & (1)) != 0;
+            boolean south = (i & (1 << 1)) != 0;
             boolean outer = (i & (1 << 2)) != 0;
             boolean hollow = (i & (1 << 3)) != 0;
 
@@ -212,12 +224,52 @@ public class ModBlockModelProvider {
             Variant innerVariant = Variant.variant().with(VariantProperties.MODEL, innerPath);
             Variant outerVariant = Variant.variant().with(VariantProperties.MODEL, outerPath);
 
-            Variant variant = (east && !west) || (!east && west) ? outer ? outerVariant : innerVariant : hollow ? hollowVariant : defaultVariant;
-            if ((east && !west && outer) || (!east && west && !outer)) {
+            Variant variant = (north && !south) || (!north && south) ? outer ? outerVariant : innerVariant : hollow ? hollowVariant : defaultVariant;
+            if ((north && !south && outer) || (!north && south && !outer)) {
                 variant = variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
             }
 
-            dispatch.select(east, west, outer, hollow, variant);
+            dispatch.select(north, south, outer, hollow, variant);
+        }
+        generator.with(dispatch);
+        blockStateOutput.accept(generator);
+    }
+
+    private static void createSofaBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
+        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
+
+        ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PILLOW);
+        ResourceLocation centerPath = computeModel(generators, entry, "block/", "_center", PILLOW);
+        ResourceLocation rightPath = computeModel(generators, entry, "block/", "_right", PILLOW);
+        ResourceLocation leftPath = computeModel(generators, entry, "block/", "_left", PILLOW);
+        ResourceLocation innerPath = computeModel(generators, entry, "block/", "_inner", PILLOW);
+        ResourceLocation outerPath = computeModel(generators, entry, "block/", "_outer", PILLOW);
+
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
+        PropertyDispatch.C5<Boolean, Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(SofaBlock.NORTH, SofaBlock.EAST, SofaBlock.SOUTH, SofaBlock.WEST, SofaBlock.OUTER);
+        for (int i = 0; i < 1 << 5; i++) {
+            boolean north = (i & (1)) != 0;
+            boolean east = (i & (1 << 1)) != 0;
+            boolean south = (i & (1 << 2)) != 0;
+            boolean west = (i & (1 << 3)) != 0;
+            boolean outer = (i & (1 << 4)) != 0;
+
+            Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
+            Variant centerVariant = Variant.variant().with(VariantProperties.MODEL, centerPath);
+            Variant rightVariant = Variant.variant().with(VariantProperties.MODEL, rightPath);
+            Variant leftVariant = Variant.variant().with(VariantProperties.MODEL, leftPath);
+            Variant normalVariant = (east && west) ? centerVariant : east ? rightVariant : west ? leftVariant : defaultVariant;
+
+            Variant innerVariant = Variant.variant().with(VariantProperties.MODEL, innerPath);
+            Variant outerVariant = Variant.variant().with(VariantProperties.MODEL, outerPath);
+            Variant cornerVariant = outer ? outerVariant : innerVariant;
+
+            Variant variant = (north && !south) || (!north && south) ? cornerVariant : normalVariant;
+            if ((north && !south && outer) || (!north && south && !outer)) {
+                variant = variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
+            }
+
+            dispatch.select(north, east, south, west, outer, variant);
         }
         generator.with(dispatch);
         blockStateOutput.accept(generator);

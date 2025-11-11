@@ -3,7 +3,7 @@ package dev.lucaargolo.furniture.utils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import dev.lucaargolo.furniture.block.FurnitureSeatBlock;
+import dev.lucaargolo.furniture.block.base.SeatBlock;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
@@ -244,7 +244,7 @@ public class LocalFurnitureData {
 
         if(data.hasOriginal()) {
             BlockState state = level.getBlockState(blockPos);
-            if(state.getBlock() instanceof FurnitureSeatBlock block) {
+            if(state.getBlock() instanceof SeatBlock block) {
                 Vec3[] seats = block.getSeats();
                 for(int i = 0; i < seats.length; i++) {
                     Vec3 position = block.getPositionForSeat(data, blockPos, i).subtract(pos);

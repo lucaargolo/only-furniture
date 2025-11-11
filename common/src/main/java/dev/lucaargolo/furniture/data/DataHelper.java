@@ -5,6 +5,7 @@ import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.WoodType;
@@ -25,15 +26,15 @@ public class DataHelper {
         return ResourceLocation.withDefaultNamespace("block/"+path);
     }
 
-    public static ResourceLocation getWoodLeaves(WoodType wood) {
+    public static ResourceLocation getLeaves(WoodType wood) {
         return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_leaves");
     }
 
-    public static ResourceLocation getWoodPlanks(WoodType wood) {
+    public static ResourceLocation getPlanks(WoodType wood) {
         return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_planks");
     }
 
-    public static ResourceLocation getWoodLog(WoodType wood) {
+    public static ResourceLocation getLog(WoodType wood) {
         if (wood == WoodType.BAMBOO) {
             return ResourceLocation.withDefaultNamespace("block/" + wood.name() + "_stalk");
         } else if (wood == WoodType.CRIMSON || wood == WoodType.WARPED) {
@@ -43,7 +44,7 @@ public class DataHelper {
         }
     }
 
-    public static ResourceLocation getWoodDoors(WoodType wood) {
+    public static ResourceLocation getDoors(WoodType wood) {
         return FurnitureMod.id("block/" + wood.name() + "_doors");
     }
 
@@ -51,6 +52,10 @@ public class DataHelper {
         Block block = metal.getTexture(age);
         ResourceLocation location = BuiltInRegistries.BLOCK.getKey(block);
         return location.withPrefix("block/");
+    }
+
+    public static ResourceLocation getPillow(DyeColor color) {
+        return FurnitureMod.id("block/" + color.getSerializedName() + "_pillow");
     }
 
     public static String defaultTranslation(String string) {

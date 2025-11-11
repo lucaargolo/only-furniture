@@ -1,14 +1,10 @@
 package dev.lucaargolo.furniture.block;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.LightBlock;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
-import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.FurnitureShape;
@@ -17,17 +13,10 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.TerrainParticle;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,7 +26,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -281,7 +269,7 @@ public class FurnitureBlock extends Block {
     }
 
     @Override
-    protected final @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
+    public final @NotNull VoxelShape getShape(@NotNull BlockState state, @NotNull BlockGetter level, @NotNull BlockPos pos, @NotNull CollisionContext context) {
         if(context instanceof EntityCollisionContext entityContext && entityContext.getEntity() instanceof Player player) {
             Vec3 eyePos = player.getEyePosition();
             Vec3 lookVec = player.getLookAngle();
@@ -354,7 +342,7 @@ public class FurnitureBlock extends Block {
         return shapes;
     }
 
-    protected VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    private VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         return this.getShapeForDataWithOffset(level, pos, state, data, Vec3.ZERO);
     }
 
@@ -364,7 +352,7 @@ public class FurnitureBlock extends Block {
         return this.getShapeForData(level, pos, state, data).move(offset.x, offset.y, offset.z);
     }
 
-    protected VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
         return this.shapes.get(facing);
     }
@@ -372,66 +360,6 @@ public class FurnitureBlock extends Block {
     @Override
     protected final boolean isPathfindable(@NotNull BlockState state, @NotNull PathComputationType pathComputationType) {
         return false;
-    }
-
-    public boolean renderFurnitureOutline(Level level, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
-        VoxelShape s = getShape(state, level, pos, CollisionContext.of(camera.getEntity()));
-        if(s instanceof FurnitureShape shape) {
-            FurnitureData data = shape.data();
-            if(data.getRotation() % 90f != 0f) {
-                VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
-
-                Vec3 offsetVec = Vec3.atLowerCornerOf(shape.offset());
-                offsetVec = offsetVec.add(data.getX(), 0.0, data.getZ());
-                Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
-
-                poseStack.pushPose();
-                poseStack.translate(offsetPos.x - camera.getPosition().x, offsetPos.y - camera.getPosition().y, offsetPos.z - camera.getPosition().z);
-                Direction facing = Direction.fromYRot(data.getRotation() + 180);
-                poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() - 180));
-                poseStack.mulPose(Axis.YN.rotationDegrees(data.getRotation()));
-
-                LevelRendererAccessor.invokeRenderShape(poseStack, consumer, shape, (double) pos.getX() - offsetPos.x, (double) pos.getY() - offsetPos.y, (double) pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);
-                poseStack.popPose();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static void destroyEffects(ClientLevel level, BlockPos pos, BlockState state, FurnitureData data) {
-        if(state.getBlock() instanceof FurnitureBlock block) {
-            VoxelShape shape = block.getShapeForData(level, pos, state, data);
-            SoundType soundType = state.getSoundType();
-            level.playLocalSound(pos, soundType.getBreakSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
-            shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                double xSize = Math.min(1.0, maxX - minX);
-                double ySize = Math.min(1.0, maxY - minY);
-                double zSize = Math.min(1.0, maxZ - minZ);
-
-                int xBounds = Math.max(2, Mth.ceil(xSize / 0.25));
-                int yBounds = Math.max(2, Mth.ceil(ySize / 0.25));
-                int zBounds = Math.max(2, Mth.ceil(zSize / 0.25));
-
-                for (int x = 0; x < xBounds; x++) {
-                    for (int y = 0; y < yBounds; y++) {
-                        for (int z = 0; z < zBounds; z++) {
-                            double xOffset = ((double)x + 0.5) / (double)xBounds;
-                            double yOffset = ((double)y + 0.5) / (double)yBounds;
-                            double zOffset = ((double)z + 0.5) / (double)zBounds;
-                            double xPos = xOffset * xSize + minX;
-                            double yPos = yOffset * ySize + minY;
-                            double zPos = zOffset * zSize + minZ;
-                            TerrainParticle particle = new TerrainParticle(
-                                    level, (double) pos.getX() + xPos, (double) pos.getY() + yPos, (double) pos.getZ() + zPos,
-                                    xOffset - 0.5, yOffset - 0.5, zOffset - 0.5, state, pos
-                            );
-                            Minecraft.getInstance().particleEngine.add(particle);
-                        }
-                    }
-                }
-            });
-        }
     }
 
     public static Map<Direction, VoxelShape> computeVoxelShapes(VoxelShape[] shapes) {

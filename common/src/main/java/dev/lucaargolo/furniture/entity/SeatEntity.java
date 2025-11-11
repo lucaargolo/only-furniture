@@ -29,7 +29,7 @@
 
 package dev.lucaargolo.furniture.entity;
 
-import dev.lucaargolo.furniture.block.FurnitureSeatBlock;
+import dev.lucaargolo.furniture.block.base.SeatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -67,7 +67,7 @@ public class SeatEntity extends Entity {
     @Override
     public void tick() {
         if (this.level().isClientSide) return;
-        if (this.blockPos != null && this.level().getBlockState(this.blockPos).getBlock() instanceof FurnitureSeatBlock && isVehicle()) return;
+        if (this.blockPos != null && this.level().getBlockState(this.blockPos).getBlock() instanceof SeatBlock && isVehicle()) return;
 
         this.discard();
     }

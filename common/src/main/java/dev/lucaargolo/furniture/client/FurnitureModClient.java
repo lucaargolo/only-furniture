@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
@@ -14,15 +15,18 @@ import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.FurnitureShape;
 import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
@@ -35,6 +39,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.function.BiConsumer;
 
@@ -79,7 +86,7 @@ public abstract class FurnitureModClient {
 
     public final boolean onDrawBlockOutline(LevelRendererAccessor levelRenderer, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
         if(state.getBlock() instanceof FurnitureBlock block) {
-            return block.renderFurnitureOutline(levelRenderer.getLevel(), camera, pos, state, poseStack, bufferSource);
+            return renderFurnitureOutline(block, levelRenderer.getLevel(), camera, pos, state, poseStack, bufferSource);
         }else{
             return false;
         }
@@ -160,6 +167,34 @@ public abstract class FurnitureModClient {
                 poseStack.popPose();
             }
         }
+    }
+
+    private boolean renderFurnitureOutline(FurnitureBlock block, ClientLevel level, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
+        if(block instanceof FurnitureConnectingBlock furniture && furniture.getType().isDependentOnOriginalRotation()) {
+            return false;
+        }
+        VoxelShape s = block.getShape(state, level, pos, CollisionContext.of(camera.getEntity()));
+        if(s instanceof FurnitureShape shape) {
+            FurnitureData data = shape.data();
+            if(data.getRotation() % 90f != 0f) {
+                VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
+
+                Vec3 offsetVec = Vec3.atLowerCornerOf(shape.offset());
+                offsetVec = offsetVec.add(data.getX(), 0.0, data.getZ());
+                Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
+
+                poseStack.pushPose();
+                poseStack.translate(offsetPos.x - camera.getPosition().x, offsetPos.y - camera.getPosition().y, offsetPos.z - camera.getPosition().z);
+                Direction facing = Direction.fromYRot(data.getRotation() + 180);
+                poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() - 180));
+                poseStack.mulPose(Axis.YN.rotationDegrees(data.getRotation()));
+
+                LevelRendererAccessor.invokeRenderShape(poseStack, consumer, shape, (double) pos.getX() - offsetPos.x, (double) pos.getY() - offsetPos.y, (double) pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);
+                poseStack.popPose();
+                return true;
+            }
+        }
+        return false;
     }
 
 }

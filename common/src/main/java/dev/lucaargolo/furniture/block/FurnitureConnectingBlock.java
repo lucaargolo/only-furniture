@@ -100,7 +100,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
 
     @Override
     protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data, @Nullable BlockPlaceContext context) {
-        Direction facing = this.getType().isDependentOnLastPosition() ? Direction.NORTH : Direction.fromYRot(data.getRotation() + 180);
+        Direction facing = this.getType().isDependentOnOriginalRotation() ? Direction.NORTH : Direction.fromYRot(data.getRotation() + 180);
 
         List<Vec3i> offsets = this.getType().getOffsets();
 
@@ -191,28 +191,64 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
 
     private Pair<Boolean, Boolean> computeNeighbor(LevelAccessor level, BlockState state, BlockPos pos, FurnitureData data, Map<Vec3i, FurnitureData> neighbors, Vec3i offset, @Nullable BlockPlaceContext context) {
         FurnitureData neighborData = neighbors.get(offset);
-        if(neighborData == null) {
-            return Pair.of(false, false);
-        }
-
         return switch (this.getType()) {
-            case HORIZONTAL, DIAGONAL -> Pair.of(data.getRotation() % 90f == 0f && neighborData.getRotation() % 90 == 0f, false);
-            case HORIZONTAL_WITH_SAME_DATA -> Pair.of(data.getRotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && neighborData.getRotation() % 90f == 0f, false);
-            case HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION -> Pair.of(data.getRotation() % 90f == 0f && neighborData.equals(data), false);
+            case HORIZONTAL, DIAGONAL -> Pair.of(neighborData != null && data.getRotation() % 90f == 0f && neighborData.getRotation() % 90 == 0f, false);
+            case HORIZONTAL_WITH_SAME_DATA -> Pair.of(neighborData != null && data.getRotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && neighborData.getRotation() % 90f == 0f, false);
+            case HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION -> Pair.of(neighborData != null && data.getRotation() % 90f == 0f && neighborData.equals(data), false);
             case HORIZONTAL_WITH_SAME_DATA_AND_90_DEGREES_NEIGHBOR -> {
-                float r1 = data.getRotation();
-                float r2 = neighborData.getRotation();
-                boolean valid = (Math.floorMod((int)(r1 - r2), 360) == 90) || (Math.floorMod((int)(r2 - r1), 360) == 90);
-                yield Pair.of(data.getRotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && valid, false);
+                if(neighborData != null) {
+                    float r1 = data.getRotation();
+                    float r2 = neighborData.getRotation();
+                    boolean valid = (Math.floorMod((int) (r1 - r2), 360) == 90) || (Math.floorMod((int) (r2 - r1), 360) == 90);
+                    yield Pair.of(data.getRotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && valid, false);
+                }else{
+                    yield Pair.of(false, false);
+                }
             }
-            case KITCHEN_COUNTER -> {
+            case SOFA, COUNTER -> {
                 //If not axis aligned return false
                 if(data.getRotation() % 90f != 0f) {
                     yield Pair.of(false, false);
                 }
+                //Computes direction from offset
+                Direction facing = Direction.fromYRot(data.getRotation() + 180);
+                Direction direction = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
+                assert direction != null;
+                //Calculates the real direction
+                Direction realDirection = switch (facing) {
+                    case NORTH -> direction;
+                    case EAST -> direction.getClockWise();
+                    case SOUTH -> direction.getOpposite();
+                    case WEST -> direction.getCounterClockWise();
+                    default -> throw new IllegalStateException("Unexpected value: " + facing);
+                };
+                //We will handle the connections always from the EAST and WEST neighbors.
+                //If the direction is NORTH, we rotate it to EAST and then do the corner calculation.
+                //If the direction is EAST, we keep it as is and then do the regular calculation.
+                if(realDirection.getAxis() == Direction.Axis.Z) {
+                    direction = direction.getClockWise();
+                    offset = direction.getNormal();
+                    neighborData = neighbors.get(offset);
+                }else{
+                    //If neighbor is null
+                    if(neighborData == null) {
+                        yield Pair.of(false, false);
+                    }
+                    //If neighbor is on same rotation
+                    if(neighborData.equals(data)) {
+                        yield Pair.of(true, false);
+                    }
+                    //If neighbor is connected but on another rotation
+                    BlockState neighborState = level.getBlockState(pos.offset(offset));
+                    Direction neighborFacing = Direction.fromYRot(neighborData.getRotation() + 180);
+                    if(direction == neighborFacing.getOpposite()) {
+                        yield Pair.of(neighborState.getValue(NORTH) || neighborState.getValue(SOUTH), false);
+                    }else if(direction == neighborFacing) {
+                        yield Pair.of(neighborState.getValue(OUTER), false);
+                    }
+                }
                 //If neighbor is not on the same rotation returns false
-                BlockPos neighborPos = pos.offset(offset);
-                if(!neighborData.equals(data)) {
+                if(neighborData == null || !neighborData.equals(data)) {
                     yield Pair.of(false, false);
                 }
                 //If both axis neighbors on the same rotation returns false
@@ -220,9 +256,6 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                 if(oppositeNeighborData != null && oppositeNeighborData.equals(data)) {
                     yield Pair.of(false, false);
                 }
-                //Computes direction from offset
-                Direction direction = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
-                assert direction != null;
                 //If both non-axis neighbors are matching or both are not matching returns false
                 FurnitureData clockwiseNeighborData = neighbors.get(direction.getClockWise().getNormal());
                 boolean clockwiseNeighborValid = clockwiseNeighborData != null && clockwiseNeighborData.equalsIgnoreRotation(data);
@@ -232,9 +265,9 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                     yield Pair.of(false, false);
                 }
                 //Calculates the validity of the counter based on the neighbor rotations (facing)
-                Direction facing = Direction.fromYRot(data.getRotation() + 180);
                 BlockPos rotatedPos = pos.relative(clockwiseNeighborValid ? direction.getClockWise() : direction.getCounterClockWise());
                 Direction rotatedFacing = Direction.fromYRot((clockwiseNeighborValid ? clockwiseNeighborData.getRotation() : counterClockwiseNeighborData.getRotation()) + 180);
+                BlockPos neighborPos = pos.offset(offset);
                 if(neighborPos.relative(facing).equals(rotatedPos.relative(rotatedFacing))) {
                     //Inner counter
                     yield Pair.of(true, false);
@@ -245,7 +278,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                     yield Pair.of(false, false);
                 }
             }
-            case FANCY_FENCE -> {
+            case FENCE -> {
                 if(context != null && context.getPlayer() != null) {
                     Player player = context.getPlayer();
                     BlockPos lastPosition = FurnitureConnectingBlockItem.getLastPosition(player);
@@ -290,23 +323,26 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
     }
 
     public enum ConnectionType {
-        HORIZONTAL(false, false, false),
-        HORIZONTAL_WITH_SAME_DATA(false, false, false),
-        HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION(false, false, false),
-        HORIZONTAL_WITH_SAME_DATA_AND_90_DEGREES_NEIGHBOR(false, false, false),
-        DIAGONAL(true, false, false),
-        KITCHEN_COUNTER(false, true, false),
-        FANCY_FENCE(true, false, true);
+        HORIZONTAL(false, false, false, false),
+        HORIZONTAL_WITH_SAME_DATA(false, false, false, false),
+        HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION(false, false, false, false),
+        HORIZONTAL_WITH_SAME_DATA_AND_90_DEGREES_NEIGHBOR(false, false, false, false),
+        DIAGONAL(true, false, false, false),
+        COUNTER(false, true, false, false),
+        SOFA(false, true, false, false),
+        FENCE(true, false, true, true);
 
         private final boolean diagonalProvider;
         private final boolean outerProvider;
         private final boolean dependentOnLastPosition;
+        private final boolean dependentOnOriginalRotation;
         private final List<Vec3i> offsets;
 
-        ConnectionType(boolean diagonalProvider, boolean outerProvider, boolean dependentOnLastPosition) {
+        ConnectionType(boolean diagonalProvider, boolean outerProvider, boolean dependentOnLastPosition, boolean dependentOnOriginalRotation) {
             this.diagonalProvider = diagonalProvider;
             this.outerProvider = outerProvider;
             this.dependentOnLastPosition = dependentOnLastPosition;
+            this.dependentOnOriginalRotation = dependentOnOriginalRotation;
             ImmutableList.Builder<Vec3i> builder = ImmutableList.builder();
             builder.add(Direction.NORTH.getNormal());
             builder.add(Direction.EAST.getNormal());
@@ -321,16 +357,24 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
             this.offsets = builder.build();
         }
 
+        //Provides the NORTHEAST, SOUTHEAST, SOUTHWEST, NORTHWEST properties
         public boolean isDiagonalProvider() {
             return this.diagonalProvider;
         }
 
+        //Provides an OUTER property (used for corner connections)
         public boolean isOuterProvider() {
             return this.outerProvider;
         }
 
+        //Depends on the last position (doesn't connect automatically)
         public boolean isDependentOnLastPosition() {
             return this.dependentOnLastPosition;
+        }
+
+        //Ignores the rotation when calculating the neighbors
+        public boolean isDependentOnOriginalRotation() {
+            return this.dependentOnOriginalRotation;
         }
 
         public List<Vec3i> getOffsets() {
@@ -352,6 +396,8 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                 default -> null;
             };
         }
+
+
     }
 
 }

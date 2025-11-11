@@ -1,0 +1,6 @@
+{
+  "parent": "onlyfurniture:block/sofa_right",
+  "textures": {
+    "pillow": "onlyfurniture:block/light_gray_pillow"
+  }
+}

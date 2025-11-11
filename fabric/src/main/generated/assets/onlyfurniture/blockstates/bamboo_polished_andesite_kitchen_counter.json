@@ -1,55 +1,55 @@
 {
   "variants": {
-    "east=false,hollow=false,outer=false,west=false": {
+    "hollow=false,north=false,outer=false,south=false": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
     },
-    "east=false,hollow=false,outer=false,west=true": {
+    "hollow=false,north=false,outer=false,south=true": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_inner",
       "y": 270
     },
-    "east=false,hollow=false,outer=true,west=false": {
+    "hollow=false,north=false,outer=true,south=false": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
     },
-    "east=false,hollow=false,outer=true,west=true": {
+    "hollow=false,north=false,outer=true,south=true": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_outer"
     },
-    "east=false,hollow=true,outer=false,west=false": {
+    "hollow=false,north=true,outer=false,south=false": {
+      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_inner"
+    },
+    "hollow=false,north=true,outer=false,south=true": {
+      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
+    },
+    "hollow=false,north=true,outer=true,south=false": {
+      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_outer",
+      "y": 270
+    },
+    "hollow=false,north=true,outer=true,south=true": {
+      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
+    },
+    "hollow=true,north=false,outer=false,south=false": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_hollow"
     },
-    "east=false,hollow=true,outer=false,west=true": {
+    "hollow=true,north=false,outer=false,south=true": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_inner",
       "y": 270
     },
-    "east=false,hollow=true,outer=true,west=false": {
+    "hollow=true,north=false,outer=true,south=false": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_hollow"
     },
-    "east=false,hollow=true,outer=true,west=true": {
+    "hollow=true,north=false,outer=true,south=true": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_outer"
     },
-    "east=true,hollow=false,outer=false,west=false": {
+    "hollow=true,north=true,outer=false,south=false": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_inner"
     },
-    "east=true,hollow=false,outer=false,west=true": {
-      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
-    },
-    "east=true,hollow=false,outer=true,west=false": {
-      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_outer",
-      "y": 270
-    },
-    "east=true,hollow=false,outer=true,west=true": {
-      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
-    },
-    "east=true,hollow=true,outer=false,west=false": {
-      "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_inner"
-    },
-    "east=true,hollow=true,outer=false,west=true": {
+    "hollow=true,north=true,outer=false,south=true": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_hollow"
     },
-    "east=true,hollow=true,outer=true,west=false": {
+    "hollow=true,north=true,outer=true,south=false": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_outer",
       "y": 270
     },
-    "east=true,hollow=true,outer=true,west=true": {
+    "hollow=true,north=true,outer=true,south=true": {
       "model": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter_hollow"
     }
   }

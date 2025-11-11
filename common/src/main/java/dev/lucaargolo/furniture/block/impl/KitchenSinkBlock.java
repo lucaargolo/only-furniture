@@ -56,7 +56,7 @@ public class KitchenSinkBlock extends FurnitureBlock {
     }
 
     @Override
-    protected VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         Direction facing = Direction.fromYRot(data.getRotation() + 180);
         return state.getValue(DROPPED) ? this.droppedShapes.get(facing) : super.getShapeForData(level, pos, state, data);
     }

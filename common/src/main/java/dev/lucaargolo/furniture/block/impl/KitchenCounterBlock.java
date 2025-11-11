@@ -55,13 +55,13 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
     }
 
     @Override
-    protected VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
         return Shapes.block();
     }
 
     @Override
     public ConnectionType getType() {
-        return ConnectionType.KITCHEN_COUNTER;
+        return ConnectionType.COUNTER;
     }
 
     @Override

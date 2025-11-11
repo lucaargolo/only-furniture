@@ -3,11 +3,11 @@ package dev.lucaargolo.furniture.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.block.FancyFenceBlock;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.client.model.FancyFenceBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
+import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
 import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
@@ -84,8 +84,8 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                     if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
                         ModBlockRegistry.BlockEntry<?> entry = ModBlocks.REGISTRY.get(path);
                         if(entry != null) {
-                            if(entry.get() instanceof FancyFenceBlock)
-                                return new FancyFenceBakedModel(model);
+                            if(entry.get() instanceof FurnitureFenceBlock)
+                                return new FurnitureFenceBakedModel(model);
                             if(entry.get() instanceof FurnitureBlock)
                                 return new FurnitureBakedModel(model);
                         }
