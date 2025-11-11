@@ -47,7 +47,7 @@ public class KitchenSinkBlock extends FurnitureBlock {
         BlockState computed = super.computeStateForData(level, pos, state, data, context);
         BlockPos downPos = pos.below();
         BlockState downState = level.getBlockState(downPos);
-        if(downState.is(ModBlockTags.CONNECTING_KITCHEN_COUNTER) && !downState.getValue(FurnitureConnectingBlock.OUTER) && !downState.getValue(FurnitureConnectingBlock.NORTH) && !downState.getValue(FurnitureConnectingBlock.EAST) && !downState.getValue(FurnitureConnectingBlock.SOUTH) && !downState.getValue(FurnitureConnectingBlock.WEST)) {
+        if(downState.is(ModBlockTags.CONNECTING_KITCHEN_COUNTER) && !downState.getValue(FurnitureConnectingBlock.OUTER) && !downState.getValue(FurnitureConnectingBlock.NORTH) && !downState.getValue(FurnitureConnectingBlock.SOUTH)) {
             FurnitureData downData = FurnitureData.get(level, downPos, downState.getValue(LAYER));
             return computed.setValue(DROPPED, data.equals(downData));
         }else{

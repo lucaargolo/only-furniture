@@ -7,6 +7,7 @@ import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -16,20 +17,24 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 public class KitchenCounterBlock extends FurnitureConnectingBlock implements StoneBlock, WoodBlock {
 
     public static final BooleanProperty HOLLOW = BooleanProperty.create("hollow");
 
+    private static final Map<Direction, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_INNER);
+    private static final Map<Direction, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_OUTER);
+
     private final StoneType stone;
     private final WoodType wood;
 
     public KitchenCounterBlock(Block base, TagKey<Block> connecting, StoneType stone, WoodType wood) {
-        super(base, ModBlockShapes.EMPTY, connecting);
+        super(base, ModBlockShapes.KITCHEN_COUNTER, connecting);
         this.registerDefaultState(this.defaultBlockState().setValue(HOLLOW, false));
         this.stone = stone;
         this.wood = wood;
@@ -56,7 +61,17 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
 
     @Override
     public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
-        return Shapes.block();
+        boolean north = state.getValue(NORTH);
+        boolean south = state.getValue(SOUTH);
+        boolean outer = state.getValue(OUTER);
+
+        Map<Direction, VoxelShape> s = (north && !south) || (!north && south) ? outer ? outerShapes : innerShapes : shapes;
+        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+        if ((north && !south && outer) || (!north && south && !outer)) {
+            return s.get(facing.getCounterClockWise());
+        }else{
+            return s.get(facing);
+        }
     }
 
     @Override

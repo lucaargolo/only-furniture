@@ -149,4 +149,73 @@ public class ModBlockShapes {
         Block.box(3, 8, 0, 13, 9, 2),
     };
 
+    public static final VoxelShape[] KITCHEN_COUNTER = new VoxelShape[] {
+        Block.box(0, 0, 3, 16, 16, 16),
+        Block.box(0, 16, 14, 16, 18, 16),
+        Block.box(0, 14, 2, 16, 16, 3),
+        Block.box(1, 3, 2, 15, 13, 3)
+    };
+
+    public static final VoxelShape[] KITCHEN_COUNTER_INNER = new VoxelShape[] {
+        Block.box(0, 0, 3, 13, 16, 16),
+        Block.box(0, 0, 0, 13, 16, 3),
+        Block.box(13, 0, 3, 16, 16, 16),
+        Block.box(2, 16, 14, 16, 18, 16),
+        Block.box(0, 16, 14, 2, 18, 16),
+        Block.box(0, 16, 0, 2, 18, 14),
+        Block.box(14, 14, 2, 16, 16, 3),
+        Block.box(13, 14, 2, 14, 16, 3),
+        Block.box(13, 14, 0, 14, 16, 2)
+    };
+
+    public static final VoxelShape[] KITCHEN_COUNTER_OUTER = new VoxelShape[] {
+        Block.box(0, 0, 3, 13, 14, 16),
+        Block.box(13, 3, 4, 14, 13, 15),
+        Block.box(1, 3, 2, 12, 13, 3),
+        Block.box(0, 14, 2, 14, 16, 16),
+        Block.box(0, 16, 14, 2, 18, 16)
+    };
+
+    public static final VoxelShape[] SOFA = new VoxelShape[] {
+        Block.box(0, 0, 2, 16, 8, 14),
+        Block.box(3, 8, 11, 13, 16, 14),
+        Block.box(13, 8, 2, 16, 11, 14),
+        Block.box(0, 8, 2, 3, 11, 14)
+    };
+
+    public static final VoxelShape[] SOFA_RIGHT = new VoxelShape[] {
+        Block.box(0, 0, 2, 16, 8, 14),
+        Block.box(3, 8, 11, 16, 16, 14),
+        Block.box(0, 8, 2, 3, 11, 14)
+    };
+
+    public static final VoxelShape[] SOFA_LEFT = new VoxelShape[] {
+        Block.box(0, 0, 2, 16, 8, 14),
+        Block.box(0, 8, 11, 13, 16, 14),
+        Block.box(13, 8, 2, 16, 11, 14)
+    };
+
+    public static final VoxelShape[] SOFA_CENTER = new VoxelShape[] {
+        Block.box(0, 0, 2, 16, 8, 14),
+        Block.box(0, 8, 11, 16, 16, 14)
+    };
+
+    public static final VoxelShape[] SOFA_INNER = new VoxelShape[] {
+        Block.box(2, 0, 0, 14, 8, 2),
+        Block.box(2, 8, 0, 5, 16, 11),
+        Block.box(2, 0, 2, 14, 8, 14),
+        Block.box(14, 0, 2, 16, 8, 14),
+        Block.box(5, 8, 11, 16, 16, 14),
+        Block.box(2, 8, 11, 5, 16, 14)
+    };
+
+    public static final VoxelShape[] SOFA_OUTER = new VoxelShape[] {
+        Block.box(0, 0, 2, 2, 8, 14),
+        Block.box(2, 0, 2, 14, 8, 14),
+        Block.box(2, 0, 14, 14, 8, 16),
+        Block.box(2, 8, 14, 5, 16, 16),
+        Block.box(2, 8, 11, 5, 16, 14),
+        Block.box(0, 8, 11, 2, 16, 14)
+    };
+
 }
