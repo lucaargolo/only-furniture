@@ -247,7 +247,7 @@ public class LocalFurnitureData {
             if(state.getBlock() instanceof SeatBlock block) {
                 Vec3[] seats = block.getSeats();
                 for(int i = 0; i < seats.length; i++) {
-                    Vec3 position = block.getPositionForSeat(data, blockPos, i).subtract(pos);
+                    Vec3 position = block.getPositionForSeat(data, blockPos, state, i).subtract(pos);
                     AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
                     LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);
                 }

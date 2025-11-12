@@ -6,7 +6,6 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.network.FurnitureRotationPayload;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -15,7 +14,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,24 +35,10 @@ public class FurnitureBlockItem extends BlockItem {
 
     @Override
     protected boolean placeBlock(@NotNull BlockPlaceContext pContext, @NotNull BlockState pState) {
-        Player player = pContext.getPlayer();
-        BlockPos pos = pContext.getClickedPos();
-        Vec3 location = pContext.getClickLocation();
-
-        boolean snapToGrid = player == null || !player.isShiftKeyDown();
-        float ox, oz;
-        if(snapToGrid) {
-            ox = 0.5f;
-            oz = 0.5f;
-        }else{
-            ox = (float) (location.x - pos.getX());
-            oz = (float) (location.z - pos.getZ());
-        }
-
-        FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), new FurnitureData(ox, oz, getRotation(player), null, true));
+        FurnitureData.set(pContext.getLevel(), pContext.getClickedPos(), pState.getValue(FurnitureBlock.LAYER), this.furnitureBlock.getFurnitureDataForPlacement(pContext));
         boolean placed = super.placeBlock(pContext, pState);
         if(!placed) {
-            FurnitureData.set(pContext.getLevel(), pos, pState.getValue(FurnitureBlock.LAYER), FurnitureData.DEFAULT);
+            FurnitureData.set(pContext.getLevel(), pContext.getClickedPos(), pState.getValue(FurnitureBlock.LAYER), FurnitureData.DEFAULT);
         }
         return placed;
     }
@@ -74,6 +58,9 @@ public class FurnitureBlockItem extends BlockItem {
     public static boolean rotateFurniture(LocalPlayer player, double delta) {
         Pair<FurnitureBlockItem, InteractionHand> holding = getHoldingFurniture(player);
         if(holding != null) {
+            if(holding.getFirst().getFurnitureBlock().isWallBlock()) {
+                delta *= -1;
+            }
             localRotation += Mth.sign(delta)*22.5f;
             if(localRotation >= 360.0f) {
                 localRotation -= 360.0f;

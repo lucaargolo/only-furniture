@@ -50,7 +50,11 @@ public class FurnitureFenceBlock extends FurnitureConnectingBlock {
                 FurnitureData connectedData = FurnitureData.get(level, connectedPos, state.getValue(FurnitureBlock.LAYER));
 
                 Vector3f origin = new Vector3f(0f, 0f, 0f);
-                Vector3f destination = new Vector3f(offset.getX() + connectedData.getX() - data.getX(), 0.0f, offset.getZ() + connectedData.getZ() - data.getZ());
+                Vector3f destination = new Vector3f(
+                    offset.getX() + connectedData.getX(connectedState) - data.getX(state),
+                    offset.getY() + connectedData.getY(connectedState) - data.getY(state),
+                    offset.getZ() + connectedData.getZ(connectedState) - data.getZ(state)
+                );
 
                 float maxDistance = (8 - size/2f)/16f;
                 float fullDistance = origin.distance(destination);

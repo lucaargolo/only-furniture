@@ -218,4 +218,12 @@ public class ModBlockShapes {
         Block.box(0, 8, 11, 2, 16, 14)
     };
 
+    public static final VoxelShape[] WALL_LAMP = new VoxelShape[] {
+        Block.box(5, 3, 5, 11, 11, 11),
+        Block.box(5, 3, 15, 11, 11, 16),
+        Block.box(7, 3, 14, 9, 11, 15),
+        Block.box(7, 11, 13, 9, 13, 15),
+        Block.box(7, 11, 7, 9, 13, 9),
+        Block.box(7, 12, 8, 9, 14, 14)
+    };
 }

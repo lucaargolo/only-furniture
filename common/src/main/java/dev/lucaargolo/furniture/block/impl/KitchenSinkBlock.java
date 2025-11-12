@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture.block.impl;
 
+import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
@@ -7,6 +8,7 @@ import dev.lucaargolo.furniture.block.ModBlockTags;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -28,11 +30,11 @@ import java.util.Map;
 public class KitchenSinkBlock extends FurnitureBlock {
 
     public static final BooleanProperty DROPPED = BooleanProperty.create("dropped");
-    private final Map<Direction, VoxelShape> droppedShapes;
+    private final Map<Pair<Direction, Rotation>, VoxelShape> droppedShapes;
 
     public KitchenSinkBlock(Block base) {
         super(base, ModBlockShapes.KITCHEN_SINK);
-        this.droppedShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_SINK_DROPPED);
+        this.droppedShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_SINK_DROPPED, false);
         this.registerDefaultState(this.defaultBlockState().setValue(DROPPED, false));
     }
 
@@ -57,8 +59,9 @@ public class KitchenSinkBlock extends FurnitureBlock {
 
     @Override
     public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        return state.getValue(DROPPED) ? this.droppedShapes.get(facing) : super.getShapeForData(level, pos, state, data);
+        Direction facing = data.getFacing(state);
+        Rotation rotation = data.getRotation();
+        return state.getValue(DROPPED) ? this.droppedShapes.get(Pair.of(facing, rotation)) : super.getShapeForData(level, pos, state, data);
     }
 
     public static class Stone extends KitchenSinkBlock implements StoneBlock {

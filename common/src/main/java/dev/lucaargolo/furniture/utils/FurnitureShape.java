@@ -35,6 +35,11 @@ public class FurnitureShape extends VoxelShape {
         return shape.getCoords(axis);
     }
 
+    @Override
+    public @NotNull VoxelShape move(double xOffset, double yOffset, double zOffset) {
+        return new FurnitureShape(layer, data, pos, state, offset, shape.move(xOffset, yOffset, zOffset));
+    }
+
     public int layer() {
         return layer;
     }
@@ -85,7 +90,7 @@ public class FurnitureShape extends VoxelShape {
                 "pos=" + pos + ", " +
                 "state=" + state + ", " +
                 "offset=" + offset + ", " +
-                "shape=" + this.bounds() + ']';
+                "shape=" + shape + ']';
     }
 
 }

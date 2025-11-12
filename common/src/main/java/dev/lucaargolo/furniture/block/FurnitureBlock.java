@@ -8,6 +8,7 @@ import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.FurnitureShape;
+import dev.lucaargolo.furniture.utils.Rotation;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
@@ -29,6 +30,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -44,26 +47,31 @@ import java.util.*;
 public class FurnitureBlock extends Block {
 
     public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 3);
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    protected final Map<Direction, VoxelShape> shapes;
+    protected final Map<Pair<Direction, Rotation>, VoxelShape> shapes;
 
     public FurnitureBlock(Block base, VoxelShape[] shapes) {
         super(furnitureProperties(base));
-        this.shapes = computeVoxelShapes(shapes);
-        this.registerDefaultState(this.stateDefinition.any().setValue(LAYER, 0));
+        this.shapes = computeVoxelShapes(shapes, this.isWallBlock());
+        BlockState state = this.stateDefinition.any();
+        state = state.setValue(LAYER, 0);
+        if(this.isWallBlock()) {
+            state = state.setValue(FACING, Direction.NORTH);
+        }
+        this.registerDefaultState(state);
     }
 
-    private static BlockBehaviour.Properties furnitureProperties(Block base) {
-        return BlockBehaviour.Properties.ofFullCopy(base)
-                .lightLevel(state -> state.getBlock() instanceof LightBlock lightBlock ? lightBlock.getLight(state) : 0)
-                .pushReaction(PushReaction.BLOCK)
-                .noTerrainParticles()
-                .randomTicks();
+    public boolean isWallBlock() {
+        return false;
     }
 
     @Override
     public void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
         builder.add(LAYER);
+        if(this.isWallBlock()) {
+            builder.add(FACING);
+        }
     }
 
     @Override
@@ -96,23 +104,30 @@ public class FurnitureBlock extends Block {
         Player player = context.getPlayer();
 
         boolean snapToGrid = player == null || !player.isShiftKeyDown();
-        float ox, oz;
-        if(snapToGrid) {
-            ox = 0.5f;
-            oz = 0.5f;
-        }else{
+        float ox = 0.5f;
+        float oy = 0.5f;
+        float oz = 0.5f;
+        if(!snapToGrid) {
             ox = (float) (location.x - pos.getX());
+            oy = (float) (location.y - pos.getY());
             oz = (float) (location.z - pos.getZ());
         }
 
-        return new FurnitureData(ox, oz, FurnitureBlockItem.getRotation(player), null, true);
+        Direction facing = context.getHorizontalDirection().getOpposite();
+        float x = this.isWallBlock() && facing.getAxis() == Direction.Axis.X ? oy : ox;
+        float z = this.isWallBlock() && facing.getAxis() == Direction.Axis.Z ? oy : oz;
+        return new FurnitureData(x, z, FurnitureBlockItem.getRotation(player), null, true);
     }
 
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context, FurnitureData data) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
+        BlockState state = this.defaultBlockState();
+        if(this.isWallBlock()) {
+            state = state.setValue(FACING, context.getHorizontalDirection().getOpposite());
+        }
 
-        VoxelShape shape = this.getShapeForDataWithOffset(level, pos, this.defaultBlockState(), data);
+        VoxelShape shape = this.getShapeForDataWithOffset(level, pos, state, data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pos, shape, Vec3.atLowerCornerOf(pos));
         intersectingPositions.add(pos);
 
@@ -139,7 +154,7 @@ public class FurnitureBlock extends Block {
         }
 
         if(calculateIntersectingDirections(pos, intersectingPositions) != null) {
-            return computeStateForData(level, pos, this.defaultBlockState(), data, context).setValue(LAYER, layer);
+            return computeStateForData(level, pos, state, data, context).setValue(LAYER, layer);
         }else {
             return null;
         }
@@ -154,7 +169,7 @@ public class FurnitureBlock extends Block {
 
         Map<BlockPos, Direction> intersectingDirections = Objects.requireNonNull(calculateIntersectingDirections(pPos, intersectingPositions));
         for(BlockPos intersectingPos: intersectingPositions) {
-            FurnitureData intersectingData = new FurnitureData(data.getX(), data.getZ(), data.getRotation(), intersectingDirections.get(intersectingPos), false);
+            FurnitureData intersectingData = new FurnitureData(data.x(), data.z(), data.rotation(), intersectingDirections.get(intersectingPos), false);
             FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
             BlockState intersectingState = pLevel.getBlockState(intersectingPos);
             if(!(intersectingState.getBlock() instanceof FurnitureBlock)) {
@@ -348,13 +363,14 @@ public class FurnitureBlock extends Block {
 
     @NotNull
     private VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, Vec3 offset) {
-        offset = offset.add(data.getX(), 0.0, data.getZ());
+        offset = offset.add(data.getX(state), data.getY(state), data.getZ(state));
         return this.getShapeForData(level, pos, state, data).move(offset.x, offset.y, offset.z);
     }
 
     public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-        return this.shapes.get(facing);
+        Direction facing = data.getFacing(state);
+        Rotation rotation = data.getRotation();
+        return this.shapes.get(Pair.of(facing, rotation));
     }
 
     @Override
@@ -362,16 +378,36 @@ public class FurnitureBlock extends Block {
         return false;
     }
 
-    public static Map<Direction, VoxelShape> computeVoxelShapes(VoxelShape[] shapes) {
-        VoxelShape shape = Shapes.empty();
+    private static BlockBehaviour.Properties furnitureProperties(Block base) {
+        return BlockBehaviour.Properties.ofFullCopy(base)
+                .lightLevel(state -> state.getBlock() instanceof LightBlock lightBlock ? lightBlock.getLight(state) : 0)
+                .pushReaction(PushReaction.BLOCK)
+                .noTerrainParticles()
+                .randomTicks();
+    }
+
+    public static Map<Pair<Direction, Rotation>, VoxelShape> computeVoxelShapes(VoxelShape[] shapes, boolean isWallBlock) {
+        VoxelShape northShape = Shapes.empty();
         for (VoxelShape s : shapes) {
-            shape = Shapes.join(shape, s, BooleanOp.OR);
+            northShape = Shapes.or(northShape, s);
         }
-        ImmutableMap.Builder<Direction, VoxelShape> builder = ImmutableMap.builder();
-        builder.put(Direction.NORTH, shape);
-        builder.put(Direction.EAST, VoxelShapeUtils.rotate(shape, Direction.EAST));
-        builder.put(Direction.SOUTH, VoxelShapeUtils.rotate(shape, Direction.SOUTH));
-        builder.put(Direction.WEST, VoxelShapeUtils.rotate(shape, Direction.WEST));
+        VoxelShape eastShape = VoxelShapeUtils.rotateY(northShape, Direction.EAST);
+        VoxelShape southShape = VoxelShapeUtils.rotateY(northShape, Direction.SOUTH);
+        VoxelShape westShape = VoxelShapeUtils.rotateY(northShape, Direction.WEST);
+        ImmutableMap.Builder<Pair<Direction, Rotation>, VoxelShape> builder = ImmutableMap.builder();
+        if(isWallBlock) {
+            for (Rotation rotation : Rotation.values()) {
+                builder.put(Pair.of(Direction.NORTH, rotation), VoxelShapeUtils.rotate(northShape, Direction.Axis.Z, -rotation.getAngle()));
+                builder.put(Pair.of(Direction.EAST, rotation), VoxelShapeUtils.rotate(eastShape, Direction.Axis.X, rotation.getAngle()));
+                builder.put(Pair.of(Direction.SOUTH, rotation), VoxelShapeUtils.rotate(southShape, Direction.Axis.Z, rotation.getAngle()));
+                builder.put(Pair.of(Direction.WEST, rotation), VoxelShapeUtils.rotate(westShape, Direction.Axis.X, -rotation.getAngle()));
+            }
+        }else{
+            builder.put(Pair.of(Direction.NORTH, Rotation.R0), northShape);
+            builder.put(Pair.of(Direction.EAST, Rotation.R90), eastShape);
+            builder.put(Pair.of(Direction.SOUTH, Rotation.R180), southShape);
+            builder.put(Pair.of(Direction.WEST, Rotation.R270), westShape);
+        }
         return builder.build();
     }
 

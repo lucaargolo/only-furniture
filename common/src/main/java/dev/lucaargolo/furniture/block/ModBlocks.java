@@ -47,9 +47,9 @@ public class ModBlocks {
         return new WoodSeatFurnitureBlock(base, wood, shapes, new Vec3(-1.0, 0.5, 1.0), new Vec3(0.0, 0.5, 1.0), new Vec3(1.0, 0.5, 1.0), new Vec3(-1.0, 0.5, -1.0), new Vec3(0.0, 0.5, -1.0), new Vec3(1.0, 0.5, -1.0));
     }, ModBlockShapes.PICNIC_BENCH, BlockTags.MINEABLE_WITH_AXE);
 
-    public static Supplier<LampPostBlock> LAMP_POST = REGISTRY.register("cast_iron_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Supplier<LampPostBlock> DUAL_LAMP_POST = REGISTRY.register("cast_iron_dual_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static Supplier<LampPostBlock> TRIPLE_LAMP_POST = REGISTRY.register("cast_iron_triple_lamp_post", () -> new LampPostBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<MetalLampBlock> LAMP_POST = REGISTRY.register("cast_iron_lamp_post", () -> new MetalLampBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<MetalLampBlock> DUAL_LAMP_POST = REGISTRY.register("cast_iron_dual_lamp_post", () -> new MetalLampBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.DUAL_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static Supplier<MetalLampBlock> TRIPLE_LAMP_POST = REGISTRY.register("cast_iron_triple_lamp_post", () -> new MetalLampBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.TRIPLE_LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
     public static final Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<KitchenCounterBlock>> KITCHEN_COUNTER_MAP = registerForCounter("kitchen_counter", true, KitchenCounterBlock::new, ModBlockTags.CONNECTING_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
@@ -67,6 +67,7 @@ public class ModBlocks {
 
     public static final Map<DyeColor, Supplier<SofaBlock>> SOFA_MAP = registerForSofa("sofa", Blocks.OAK_PLANKS, SofaBlock::new, ModBlockTags.CONNECTING_SOFA, BlockTags.MINEABLE_WITH_AXE);
 
+    public static Supplier<MetalLampBlock.Wall> WALL_LAMP = REGISTRY.register("cast_iron_wall_lamp", () -> new MetalLampBlock.Wall(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.WALL_LAMP), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], Boolean, T> furnitureConstructor, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple, TagKey<?>... tags) {
         return registerForWood(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, shapes, footShapes, simple), centerShapes, tags);

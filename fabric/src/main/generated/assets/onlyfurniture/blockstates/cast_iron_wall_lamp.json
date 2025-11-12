@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "onlyfurniture:block/cast_iron_wall_lamp",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "onlyfurniture:block/cast_iron_wall_lamp"
+    },
+    "facing=south": {
+      "model": "onlyfurniture:block/cast_iron_wall_lamp",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "onlyfurniture:block/cast_iron_wall_lamp",
+      "y": 270
+    }
+  }
+}

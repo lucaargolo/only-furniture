@@ -1,6 +1,5 @@
 package dev.lucaargolo.furniture.client.model;
 
-import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.renderer.RenderType;
@@ -19,7 +18,6 @@ import net.neoforged.neoforge.client.model.data.ModelProperty;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
 import java.util.List;
 
@@ -39,13 +37,12 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
         BlockPos pos = modelData.get(POS_PROPERTY);
         FurnitureData data = modelData.get(DATA_PROPERTY);
         Boolean hasData = modelData.get(HAS_DATA_PROPERTY);
-        if(pos != null && data != null) {
+        if(state != null && pos != null && data != null) {
             float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
-            Quaternionf rotation = Axis.YN.rotationDegrees(data.getRotation());
             Matrix4f transform = new Matrix4f()
-                    .translate(data.getX(), 0f, data.getZ())
+                    .translate(data.getX(state), data.getY(state), data.getZ(state))
                     .translate(0.5f, 0.5f, 0.5f)
-                    .rotate(rotation)
+                    .rotate(data.getRotation(state))
                     .scale(1f + offset, 1f + offset, 1f + offset)
                     .translate(-0.5f, -0.5f, -0.5f);
             Transformation transformation = new Transformation(transform);

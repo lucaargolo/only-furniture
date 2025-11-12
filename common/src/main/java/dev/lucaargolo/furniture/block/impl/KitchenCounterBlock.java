@@ -1,11 +1,13 @@
 package dev.lucaargolo.furniture.block.impl;
 
+import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.ModBlockTags;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
@@ -27,8 +29,8 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
 
     public static final BooleanProperty HOLLOW = BooleanProperty.create("hollow");
 
-    private static final Map<Direction, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_INNER);
-    private static final Map<Direction, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_OUTER);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_INNER, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_OUTER, false);
 
     private final StoneType stone;
     private final WoodType wood;
@@ -65,12 +67,13 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
         boolean south = state.getValue(SOUTH);
         boolean outer = state.getValue(OUTER);
 
-        Map<Direction, VoxelShape> s = (north && !south) || (!north && south) ? outer ? outerShapes : innerShapes : shapes;
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+        Map<Pair<Direction, Rotation>, VoxelShape> s = (north && !south) || (!north && south) ? outer ? outerShapes : innerShapes : shapes;
+        Direction facing = data.getFacing(state);
+        Rotation rotation = data.getRotation();
         if ((north && !south && outer) || (!north && south && !outer)) {
-            return s.get(facing.getCounterClockWise());
+            return s.get(Pair.of(facing.getCounterClockWise(), rotation.getCounterClockWise()));
         }else{
-            return s.get(facing);
+            return s.get(Pair.of(facing, rotation));
         }
     }
 

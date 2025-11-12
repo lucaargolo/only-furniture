@@ -1,6 +1,5 @@
 package dev.lucaargolo.furniture.block.base;
 
-import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.entity.SeatEntity;
@@ -31,11 +30,11 @@ public interface SeatBlock {
 
     Vec3[] getSeats();
 
-    default Vec3 getPositionForSeat(FurnitureData data, BlockPos pos, int seatIndex) {
-        Vec3 position = Vec3.atBottomCenterOf(pos).add(data.getX(), 0.0, data.getZ());
+    default Vec3 getPositionForSeat(FurnitureData data, BlockPos pos, BlockState state, int seatIndex) {
+        Vec3 position = Vec3.atBottomCenterOf(pos).add(data.getX(state), data.getY(state), data.getZ(state));
         Vec3 seatPosition = this.getSeats()[seatIndex];
 
-        Quaternionf rotation = Axis.YN.rotationDegrees(data.getRotation());
+        Quaternionf rotation = data.getRotation(state);
         Matrix4f transform = new Matrix4f().rotate(rotation);
         Vector4f seatOffset = new Vector4f((float) seatPosition.x, (float) seatPosition.y, (float) seatPosition.z, 1f);
         seatOffset.mul(transform);
@@ -55,7 +54,7 @@ public interface SeatBlock {
             if (freeSeats.isEmpty()) {
                 for (int i = 0; i < this.getSeats().length; i++) {
                     if (!activeSeats.containsKey(i)) {
-                        freeSeats.put(i, getPositionForSeat(data, pos, i));
+                        freeSeats.put(i, getPositionForSeat(data, pos, state, i));
                     }
                 }
             }
@@ -63,7 +62,7 @@ public interface SeatBlock {
             if (freeSeats.isEmpty()) {
                 for (int i = 0; i < this.getSeats().length; i++) {
                     if (activeSeats.containsKey(i) && ejectSeatedExceptPlayer(level, activeSeats.get(i))) {
-                        freeSeats.put(i, getPositionForSeat(data, pos, i));
+                        freeSeats.put(i, getPositionForSeat(data, pos, state, i));
                         break;
                     }
                 }
@@ -89,7 +88,7 @@ public interface SeatBlock {
         BlockState state = level.getBlockState(pos);
         FurnitureData data = FurnitureData.get(level, pos, state.getValue(FurnitureBlock.LAYER));
         if(data.hasOriginal()) {
-            SeatEntity seat = new SeatEntity(level, this.getPositionForSeat(data, pos, index), pos);
+            SeatEntity seat = new SeatEntity(level, this.getPositionForSeat(data, pos, state, index), pos);
             level.addFreshEntity(seat);
             entity.startRiding(seat);
 
@@ -105,7 +104,7 @@ public interface SeatBlock {
         FurnitureData data = FurnitureData.get(level, pos, state.getValue(FurnitureBlock.LAYER));
         if (data.hasOriginal()) {
             for(int i = 0; i < this.getSeats().length; i++) {
-                Vec3 position = this.getPositionForSeat(data, pos, i);
+                Vec3 position = this.getPositionForSeat(data, pos, state, i);
                 AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
                 List<SeatEntity> entities = level.getEntitiesOfClass(SeatEntity.class, bounds);
                 if(!entities.isEmpty()) {

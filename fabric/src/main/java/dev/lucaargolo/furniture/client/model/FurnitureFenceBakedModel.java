@@ -48,10 +48,10 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                     BlockPos neighborPos = pos.offset(neighborOffset);
                     BlockState neighborState = blockView.getBlockState(neighborPos);
                     if(neighborState.getBlock() instanceof FurnitureFenceBlock) {
-                        FurnitureData connectedData = FurnitureData.get(blockView, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
-                        if (connectedData.hasOriginal()) {
-                            Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(), pos.getY() + 0.5f, pos.getZ() + 0.5f + data.getZ());
-                            Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + connectedData.getX(), neighborPos.getY() + 0.5f, neighborPos.getZ() + 0.5f + connectedData.getZ());
+                        FurnitureData neighborData = FurnitureData.get(blockView, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
+                        if (neighborData.hasOriginal()) {
+                            Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(state), pos.getY() + 0.5f + data.getY(state), pos.getZ() + 0.5f + data.getZ(state));
+                            Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + neighborData.getX(neighborState), neighborPos.getY() + 0.5f + neighborData.getY(neighborState), neighborPos.getZ() + 0.5f + neighborData.getZ(neighborState));
 
                             Vector3f direction = new Vector3f(destination).sub(origin);
                             direction.normalize();
@@ -62,9 +62,9 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
 
                             float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
                             Matrix4f transform = new Matrix4f()
-                                    .translate(data.getX(), 0f, data.getZ())
+                                    .translate(data.getX(state), data.getY(state), data.getZ(state))
                                     .translate(0.5f, 0.5f, 0.5f)
-                                    .rotate(Axis.YP.rotation(-angle))
+                                    .rotate(Axis.YN.rotation(angle))
                                     .scale(1f - (index * offset), 1f - (index * offset), 1f - (index * offset))
                                     .translate(-0.5f, -0.5f, -0.5f);
 

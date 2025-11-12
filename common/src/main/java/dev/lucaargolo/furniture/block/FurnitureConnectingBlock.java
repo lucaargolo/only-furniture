@@ -100,7 +100,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
 
     @Override
     protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data, @Nullable BlockPlaceContext context) {
-        Direction facing = this.getType().isDependentOnOriginalRotation() ? Direction.NORTH : Direction.fromYRot(data.getRotation() + 180);
+        Direction facing = this.getType().isDependentOnOriginalRotation() ? Direction.NORTH : data.getFacing(state);
 
         List<Vec3i> offsets = this.getType().getOffsets();
 
@@ -192,26 +192,26 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
     private Pair<Boolean, Boolean> computeNeighbor(LevelAccessor level, BlockState state, BlockPos pos, FurnitureData data, Map<Vec3i, FurnitureData> neighbors, Vec3i offset, @Nullable BlockPlaceContext context) {
         FurnitureData neighborData = neighbors.get(offset);
         return switch (this.getType()) {
-            case HORIZONTAL, DIAGONAL -> Pair.of(neighborData != null && data.getRotation() % 90f == 0f && neighborData.getRotation() % 90 == 0f, false);
-            case HORIZONTAL_WITH_SAME_DATA -> Pair.of(neighborData != null && data.getRotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && neighborData.getRotation() % 90f == 0f, false);
-            case HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION -> Pair.of(neighborData != null && data.getRotation() % 90f == 0f && neighborData.equals(data), false);
+            case HORIZONTAL, DIAGONAL -> Pair.of(neighborData != null && data.rotation() % 90f == 0f && neighborData.rotation() % 90 == 0f, false);
+            case HORIZONTAL_WITH_SAME_DATA -> Pair.of(neighborData != null && data.rotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && neighborData.rotation() % 90f == 0f, false);
+            case HORIZONTAL_WITH_SAME_DATA_AND_SAME_ROTATION -> Pair.of(neighborData != null && data.rotation() % 90f == 0f && neighborData.equals(data), false);
             case HORIZONTAL_WITH_SAME_DATA_AND_90_DEGREES_NEIGHBOR -> {
                 if(neighborData != null) {
-                    float r1 = data.getRotation();
-                    float r2 = neighborData.getRotation();
+                    float r1 = data.rotation();
+                    float r2 = neighborData.rotation();
                     boolean valid = (Math.floorMod((int) (r1 - r2), 360) == 90) || (Math.floorMod((int) (r2 - r1), 360) == 90);
-                    yield Pair.of(data.getRotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && valid, false);
+                    yield Pair.of(data.rotation() % 90f == 0f && neighborData.equalsIgnoreRotation(data) && valid, false);
                 }else{
                     yield Pair.of(false, false);
                 }
             }
             case SOFA, COUNTER -> {
                 //If not axis aligned return false
-                if(data.getRotation() % 90f != 0f) {
+                if(data.rotation() % 90f != 0f) {
                     yield Pair.of(false, false);
                 }
                 //Computes direction from offset
-                Direction facing = Direction.fromYRot(data.getRotation() + 180);
+                Direction facing = Direction.fromYRot(data.rotation() + 180);
                 Direction direction = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
                 assert direction != null;
                 //Calculates the real direction
@@ -240,7 +240,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                     }
                     //If neighbor is connected but on another rotation
                     BlockState neighborState = level.getBlockState(pos.offset(offset));
-                    Direction neighborFacing = Direction.fromYRot(neighborData.getRotation() + 180);
+                    Direction neighborFacing = neighborData.getFacing(neighborState);
                     if(direction == neighborFacing.getOpposite()) {
                         yield Pair.of(neighborState.getValue(NORTH) || neighborState.getValue(SOUTH), false);
                     }else if(direction == neighborFacing) {
@@ -258,15 +258,17 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                 }
                 //If both non-axis neighbors are matching or both are not matching returns false
                 FurnitureData clockwiseNeighborData = neighbors.get(direction.getClockWise().getNormal());
+                BlockState clockwiseNeighborState = level.getBlockState(pos.relative(direction.getClockWise()));
                 boolean clockwiseNeighborValid = clockwiseNeighborData != null && clockwiseNeighborData.equalsIgnoreRotation(data);
                 FurnitureData counterClockwiseNeighborData = neighbors.get(direction.getCounterClockWise().getNormal());
+                BlockState counterClockwiseNeighborState = level.getBlockState(pos.relative(direction.getCounterClockWise()));
                 boolean counterClockwiseNeighborValid = counterClockwiseNeighborData != null && counterClockwiseNeighborData.equalsIgnoreRotation(data);
                 if((clockwiseNeighborValid && counterClockwiseNeighborValid) || (!clockwiseNeighborValid && !counterClockwiseNeighborValid)) {
                     yield Pair.of(false, false);
                 }
                 //Calculates the validity of the counter based on the neighbor rotations (facing)
                 BlockPos rotatedPos = pos.relative(clockwiseNeighborValid ? direction.getClockWise() : direction.getCounterClockWise());
-                Direction rotatedFacing = Direction.fromYRot((clockwiseNeighborValid ? clockwiseNeighborData.getRotation() : counterClockwiseNeighborData.getRotation()) + 180);
+                Direction rotatedFacing = clockwiseNeighborValid ? clockwiseNeighborData.getFacing(clockwiseNeighborState) : counterClockwiseNeighborData.getFacing(counterClockwiseNeighborState);
                 BlockPos neighborPos = pos.offset(offset);
                 if(neighborPos.relative(facing).equals(rotatedPos.relative(rotatedFacing))) {
                     //Inner counter

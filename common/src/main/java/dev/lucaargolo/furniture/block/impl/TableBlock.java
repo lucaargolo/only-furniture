@@ -1,11 +1,13 @@
 package dev.lucaargolo.furniture.block.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.Rotation;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
@@ -16,7 +18,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -46,7 +47,7 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
 
     @Override
     public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
+        Direction facing = data.getFacing(state);
         int key = 0;
         if (state.getValue(NORTH)) key |= 1;
         if (state.getValue(EAST)) key |= 2;
@@ -61,8 +62,8 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
     }
 
     public static Map<Direction, Byte2ObjectMap<VoxelShape>> computeVoxelShapes(VoxelShape[] centerShapes, VoxelShape[] footShapes) {
-        Map<Direction, VoxelShape> centerShapeMap = FurnitureBlock.computeVoxelShapes(centerShapes);
-        Map<Direction, VoxelShape> footShapeMap = FurnitureBlock.computeVoxelShapes(footShapes);
+        Map<Pair<Direction, Rotation>, VoxelShape> centerShapeMap = FurnitureBlock.computeVoxelShapes(centerShapes, false);
+        Map<Pair<Direction, Rotation>, VoxelShape> footShapeMap = FurnitureBlock.computeVoxelShapes(footShapes, false);
 
         Byte2ObjectMap<VoxelShape> northShapes = new Byte2ObjectOpenHashMap<>();
         Byte2ObjectMap<VoxelShape> eastShapes = new Byte2ObjectOpenHashMap<>();
@@ -74,20 +75,20 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
             boolean south = (i & 4) != 0;
             boolean west  = (i & 8) != 0;
 
-            VoxelShape combinedShape = centerShapeMap.get(Direction.NORTH);
+            VoxelShape combinedShape = centerShapeMap.get(Pair.of(Direction.NORTH, Rotation.R0));
             if (!north && !east)
-                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.NORTH), BooleanOp.OR);
+                combinedShape = Shapes.or(combinedShape, footShapeMap.get(Pair.of(Direction.NORTH, Rotation.R0)));
             if (!east && !south)
-                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.EAST), BooleanOp.OR);
+                combinedShape = Shapes.or(combinedShape, footShapeMap.get(Pair.of(Direction.EAST, Rotation.R90)));
             if (!south && !west)
-                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.SOUTH), BooleanOp.OR);
+                combinedShape = Shapes.or(combinedShape, footShapeMap.get(Pair.of(Direction.SOUTH, Rotation.R180)));
             if (!west && !north)
-                combinedShape = Shapes.join(combinedShape, footShapeMap.get(Direction.WEST), BooleanOp.OR);
+                combinedShape = Shapes.or(combinedShape, footShapeMap.get(Pair.of(Direction.WEST, Rotation.R270)));
 
             northShapes.put((byte) i, combinedShape);
-            eastShapes.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.EAST));
-            southShapes.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.SOUTH));
-            westShapes.put((byte) i, VoxelShapeUtils.rotate(combinedShape, Direction.WEST));
+            eastShapes.put((byte) i, VoxelShapeUtils.rotateY(combinedShape, Direction.EAST));
+            southShapes.put((byte) i, VoxelShapeUtils.rotateY(combinedShape, Direction.SOUTH));
+            westShapes.put((byte) i, VoxelShapeUtils.rotateY(combinedShape, Direction.WEST));
         }
 
         ImmutableMap.Builder<Direction, Byte2ObjectMap<VoxelShape>> builder = ImmutableMap.builder();

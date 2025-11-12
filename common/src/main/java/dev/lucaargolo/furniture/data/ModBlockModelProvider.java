@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.data;
 
 import com.google.gson.JsonElement;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.base.ColorBlock;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
@@ -14,6 +15,7 @@ import dev.lucaargolo.furniture.block.impl.TableBlock;
 import dev.lucaargolo.furniture.mixin.BlockModelGeneratorsAccessor;
 import dev.lucaargolo.furniture.mixin.TextureSlotAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
+import net.minecraft.core.Direction;
 import net.minecraft.data.models.BlockModelGenerators;
 import net.minecraft.data.models.blockstates.*;
 import net.minecraft.data.models.model.ModelTemplate;
@@ -138,7 +140,20 @@ public class ModBlockModelProvider {
     private static void createBaseBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
         ResourceLocation path = computeModel(generators, entry, "block/");
-        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get(), Variant.variant().with(VariantProperties.MODEL, path));
+
+        MultiVariantGenerator generator;
+        if(entry.get() instanceof FurnitureBlock furniture && furniture.isWallBlock()) {
+            generator = MultiVariantGenerator.multiVariant(entry.get());
+            PropertyDispatch.C1<Direction> dispatch = PropertyDispatch.property(FurnitureBlock.FACING);
+            dispatch.select(Direction.NORTH, Variant.variant().with(VariantProperties.MODEL, path));
+            dispatch.select(Direction.EAST, Variant.variant().with(VariantProperties.MODEL, path).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90));
+            dispatch.select(Direction.SOUTH, Variant.variant().with(VariantProperties.MODEL, path).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180));
+            dispatch.select(Direction.WEST, Variant.variant().with(VariantProperties.MODEL, path).with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270));
+            generator.with(dispatch);
+        }else{
+            generator = MultiVariantGenerator.multiVariant(entry.get(), Variant.variant().with(VariantProperties.MODEL, path));
+        }
+
         blockStateOutput.accept(generator);
     }
 

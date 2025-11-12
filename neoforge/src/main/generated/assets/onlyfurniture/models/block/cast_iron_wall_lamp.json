@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/wall_lamp",
+  "textures": {
+    "metal": "minecraft:block/anvil",
+    "particle": "minecraft:block/anvil"
+  }
+}

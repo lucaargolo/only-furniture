@@ -35,7 +35,7 @@ import java.util.Map;
 
 public class FurnitureFenceBakedModel extends FurnitureBakedModel {
 
-    private static final ModelProperty<Map<Pair<Vec3i, Integer>, FurnitureData>> NEIGHBOR_DATA_PROPERTY = new ModelProperty<>();
+    private static final ModelProperty<Map<Pair<Vec3i, Integer>, Pair<BlockState, FurnitureData>>> NEIGHBOR_DATA_PROPERTY = new ModelProperty<>();
 
     public FurnitureFenceBakedModel(BakedModel originalModel) {
         super(originalModel);
@@ -47,7 +47,7 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
 
         BlockPos pos = modelData.get(POS_PROPERTY);
         FurnitureData data = modelData.get(DATA_PROPERTY);
-        Map<Pair<Vec3i, Integer>, FurnitureData> neighborDataMap = modelData.get(NEIGHBOR_DATA_PROPERTY);
+        Map<Pair<Vec3i, Integer>, Pair<BlockState, FurnitureData>> neighborDataMap = modelData.get(NEIGHBOR_DATA_PROPERTY);
 
         if(state != null && pos != null && data != null && neighborDataMap != null) {
             PoseStack stack = new PoseStack();
@@ -55,14 +55,16 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
             consumer.setTintIndex(0);
             consumer.setShade(true);
 
-            Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(), pos.getY() + 0.5f, pos.getZ() + 0.5f + data.getZ());
+            Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(state), pos.getY() + 0.5f + data.getY(state), pos.getZ() + 0.5f + data.getZ(state));
 
-            neighborDataMap.forEach((neighborPair, neighborData) -> {
-                Vec3i neighborOffset = neighborPair.getFirst();
-                int index = neighborPair.getSecond();
+            neighborDataMap.forEach((neighborOffsetPair, neighborDataPair) -> {
+                Vec3i neighborOffset = neighborOffsetPair.getFirst();
+                int offsetIndex = neighborOffsetPair.getSecond();
                 BlockPos neighborPos = pos.offset(neighborOffset);
+                BlockState neighborState = neighborDataPair.getFirst();
+                FurnitureData neighborData = neighborDataPair.getSecond();
 
-                Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + neighborData.getX(), neighborPos.getY() + 0.5f, neighborPos.getZ() + 0.5f + neighborData.getZ());
+                Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + neighborData.getX(neighborState), neighborPos.getY() + 0.5f + neighborData.getY(neighborState), neighborPos.getZ() + 0.5f + neighborData.getZ(neighborState));
                 Vector3f direction = new Vector3f(destination).sub(origin);
                 direction.normalize();
 
@@ -72,10 +74,10 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
 
                 float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
                 Matrix4f transform = new Matrix4f()
-                        .translate(data.getX(), 0f, data.getZ())
+                        .translate(data.getX(state), data.getY(state), data.getZ(state))
                         .translate(0.5f, 0.5f, 0.5f)
-                        .rotate(Axis.YP.rotation(-angle))
-                        .scale(1f - (index * offset), 1f - (index * offset), 1f - (index * offset))
+                        .rotate(Axis.YN.rotation(angle))
+                        .scale(1f - (offsetIndex * offset), 1f - (offsetIndex * offset), 1f - (offsetIndex * offset))
                         .translate(-0.5f, -0.5f, -0.5f);
                 Transformation transformation = new Transformation(transform);
                 IQuadTransformer transformer = QuadTransformers.applying(transformation);
@@ -102,7 +104,7 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
         modelData = super.getModelData(level, pos, state, modelData);
         FurnitureData data = modelData.get(DATA_PROPERTY);
         if(data != null && data.hasOriginal() && state.getBlock() instanceof FurnitureFenceBlock furniture) {
-            Map<Pair<Vec3i, Integer>, FurnitureData> neighborData = new HashMap<>();
+            Map<Pair<Vec3i, Integer>, Pair<BlockState, FurnitureData>> neighborDataMap = new HashMap<>();
             List<Vec3i> offsets = furniture.getType().getOffsets();
             for (int index = 0; index < offsets.size(); index++) {
                 Vec3i neighborOffset = offsets.get(index);
@@ -110,14 +112,14 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                     BlockPos neighborPos = pos.offset(neighborOffset);
                     BlockState neighborState = level.getBlockState(neighborPos);
                     if(neighborState.getBlock() instanceof FurnitureFenceBlock) {
-                        FurnitureData connectedData = FurnitureData.get(level, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
-                        if (connectedData.hasOriginal()) {
-                            neighborData.put(Pair.of(neighborOffset, index), connectedData);
+                        FurnitureData neighborData = FurnitureData.get(level, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
+                        if (neighborData.hasOriginal()) {
+                            neighborDataMap.put(Pair.of(neighborOffset, index), Pair.of(neighborState, neighborData));
                         }
                     }
                 }
             }
-            return modelData.derive().with(NEIGHBOR_DATA_PROPERTY, neighborData).build();
+            return modelData.derive().with(NEIGHBOR_DATA_PROPERTY, neighborDataMap).build();
         }
         return modelData;
     }

@@ -1,10 +1,12 @@
 package dev.lucaargolo.furniture.block.impl;
 
+import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.ColorBlock;
 import dev.lucaargolo.furniture.block.base.SeatBlock;
 import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
@@ -24,11 +26,11 @@ import java.util.Map;
 
 public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, SeatBlock {
 
-    private static final Map<Direction, VoxelShape> centerShapes = computeVoxelShapes(ModBlockShapes.SOFA_CENTER);
-    private static final Map<Direction, VoxelShape> rightShapes = computeVoxelShapes(ModBlockShapes.SOFA_RIGHT);
-    private static final Map<Direction, VoxelShape> leftShapes = computeVoxelShapes(ModBlockShapes.SOFA_LEFT);
-    private static final Map<Direction, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.SOFA_INNER);
-    private static final Map<Direction, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.SOFA_OUTER);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> centerShapes = computeVoxelShapes(ModBlockShapes.SOFA_CENTER, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> rightShapes = computeVoxelShapes(ModBlockShapes.SOFA_RIGHT, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> leftShapes = computeVoxelShapes(ModBlockShapes.SOFA_LEFT, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.SOFA_INNER, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.SOFA_OUTER, false);
 
     private static final Vec3[] seats = new Vec3[] {
             new Vec3(0.0, 0.375, 0.0)
@@ -58,16 +60,16 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, S
         boolean east = state.getValue(EAST);
         boolean outer = state.getValue(OUTER);
 
-        Map<Direction, VoxelShape> normalShapes = (east && west) ? centerShapes : east ? rightShapes : west ? leftShapes : shapes;
-        Map<Direction, VoxelShape> cornerShapes = outer ? outerShapes : innerShapes;
-        Map<Direction, VoxelShape> shapes = (north && !south) || (!north && south) ? cornerShapes : normalShapes;
+        Map<Pair<Direction, Rotation>, VoxelShape> normalShapes = (east && west) ? centerShapes : east ? rightShapes : west ? leftShapes : shapes;
+        Map<Pair<Direction, Rotation>, VoxelShape> cornerShapes = outer ? outerShapes : innerShapes;
 
-        Direction facing = Direction.fromYRot(data.getRotation() + 180);
-
+        Map<Pair<Direction, Rotation>, VoxelShape> s = (north && !south) || (!north && south) ? cornerShapes : normalShapes;
+        Direction facing = data.getFacing(state);
+        Rotation rotation = data.getRotation();
         if ((north && !south && outer) || (!north && south && !outer)) {
-            return shapes.get(facing.getCounterClockWise());
+            return s.get(Pair.of(facing.getCounterClockWise(), rotation.getCounterClockWise()));
         }else{
-            return shapes.get(facing);
+            return s.get(Pair.of(facing, rotation));
         }
     }
 

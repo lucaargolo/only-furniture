@@ -1,6 +1,8 @@
 package dev.lucaargolo.furniture.utils;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Axis;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.network.FurnitureDataPayload;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,8 +13,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -40,21 +44,74 @@ public class FurnitureData {
         this.packed = (short) ((origBit << 15) | (dir << 12) | (rot << 8) | (ofz << 4) | ofx);
     }
 
-    public float getX() {
+    public float x() {
         int value = packed & 0xFFFF;
         return (value & 0b1111) / 16f - 0.5f;
     }
 
-    public float getZ() {
+    public float z() {
         int value = packed & 0xFFFF;
         return ((value >> 4) & 0b1111) / 16f - 0.5f;
     }
 
-    public float getRotation() {
+    public float rotation() {
         int value = packed & 0xFFFF;
         int rotationIndex = (value >> 8) & 0b1111;
         return rotationIndex * 22.5f;
     }
+
+    public Rotation getRotation() {
+        int rounded = Math.round(this.rotation() / 90f) * 90;
+        return switch (rounded % 360) {
+            case 0 -> Rotation.R0;
+            case 90 -> Rotation.R90;
+            case 180 -> Rotation.R180;
+            case 270 -> Rotation.R270;
+            default -> throw new IllegalStateException("Unexpected value: " + rounded);
+        };
+    }
+
+    public Direction getFacing(BlockState state) {
+        return !state.hasProperty(FurnitureBlock.FACING) ? Direction.fromYRot(this.rotation() + 180) : state.getValue(FurnitureBlock.FACING);
+    }
+
+    public Quaternionf getRotation(BlockState state) {
+        if(!state.hasProperty(FurnitureBlock.FACING)) {
+            return Axis.YN.rotationDegrees(this.rotation());
+        }else{
+            Direction facing = state.getValue(FurnitureBlock.FACING);
+            return switch (facing.getAxis()) {
+                case X -> facing.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.XP.rotationDegrees(this.rotation()) : Axis.XN.rotationDegrees(this.rotation());
+                case Z ->  facing.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.ZP.rotationDegrees(this.rotation()) : Axis.ZN.rotationDegrees(this.rotation());
+                default -> throw new IllegalStateException("Unexpected value: " + state.getValue(FurnitureBlock.FACING));
+            };
+        }
+    }
+
+    public float getOffset(Direction.Axis axis, BlockState state) {
+        return switch (axis) {
+            case X -> !state.hasProperty(FurnitureBlock.FACING) || state.getValue(FurnitureBlock.FACING).getAxis() != Direction.Axis.X ? x() : 0f;
+            case Y -> !state.hasProperty(FurnitureBlock.FACING) ? 0f : switch (state.getValue(FurnitureBlock.FACING).getAxis()) {
+                case X -> this.x();
+                case Z -> this.z();
+                default -> 0f;
+            };
+            case Z -> !state.hasProperty(FurnitureBlock.FACING) || state.getValue(FurnitureBlock.FACING).getAxis() != Direction.Axis.Z ? z() : 0f;
+        };
+    }
+
+    public float getX(BlockState state) {
+        return getOffset(Direction.Axis.X, state);
+    }
+
+    public float getY(BlockState state) {
+        return getOffset(Direction.Axis.Y, state);
+    }
+
+    public float getZ(BlockState state) {
+        return getOffset(Direction.Axis.Z, state);
+    }
+
 
     @Nullable
     public Direction getDirectionToOriginal() {
@@ -161,7 +218,6 @@ public class FurnitureData {
         FurnitureData[] layers = FurnitureData.get(level, pos);
         FurnitureData.set(level, pos, layers);
     }
-
 
 }
 
