@@ -259,10 +259,10 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                 //If both non-axis neighbors are matching or both are not matching returns false
                 FurnitureData clockwiseNeighborData = neighbors.get(direction.getClockWise().getNormal());
                 BlockState clockwiseNeighborState = level.getBlockState(pos.relative(direction.getClockWise()));
-                boolean clockwiseNeighborValid = clockwiseNeighborData != null && clockwiseNeighborData.equalsIgnoreRotation(data);
+                boolean clockwiseNeighborValid = clockwiseNeighborData != null && clockwiseNeighborData.equalsIgnoreRotation(data) && clockwiseNeighborData.rotation() % 90f == 0f;
                 FurnitureData counterClockwiseNeighborData = neighbors.get(direction.getCounterClockWise().getNormal());
                 BlockState counterClockwiseNeighborState = level.getBlockState(pos.relative(direction.getCounterClockWise()));
-                boolean counterClockwiseNeighborValid = counterClockwiseNeighborData != null && counterClockwiseNeighborData.equalsIgnoreRotation(data);
+                boolean counterClockwiseNeighborValid = counterClockwiseNeighborData != null && counterClockwiseNeighborData.equalsIgnoreRotation(data) && counterClockwiseNeighborData.rotation() % 90f == 0f;
                 if((clockwiseNeighborValid && counterClockwiseNeighborValid) || (!clockwiseNeighborValid && !counterClockwiseNeighborValid)) {
                     yield Pair.of(false, false);
                 }

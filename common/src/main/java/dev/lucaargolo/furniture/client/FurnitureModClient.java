@@ -78,7 +78,7 @@ public abstract class FurnitureModClient {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
         if(player != null) {
-            return FurnitureBlockItem.rotateFurniture(player, deltaY);
+            return FurnitureBlockItem.rotateFurniture(player, -deltaY);
         }
         return false;
     }
@@ -172,32 +172,30 @@ public abstract class FurnitureModClient {
     }
 
     private boolean renderFurnitureOutline(FurnitureBlock block, ClientLevel level, Camera camera, BlockPos pos, BlockState state, PoseStack poseStack, MultiBufferSource bufferSource) {
-        if(block instanceof FurnitureConnectingBlock furniture && furniture.getType().isDependentOnOriginalRotation()) {
-            return false;
+        if(block instanceof FurnitureConnectingBlock furniture && furniture.getType().isDependentOnOriginalRotation()) return false;
+        if(!(block.getShape(state, level, pos, CollisionContext.of(camera.getEntity())) instanceof FurnitureShape shape)) return false;
+        if(shape.data().rotation() % 90f == 0f) return false;
+
+        VoxelShape original = shape.shape();
+        if(original instanceof RotatedShape rotated) {
+            original = rotated.getOriginal();
         }
-        VoxelShape s = block.getShape(state, level, pos, CollisionContext.of(camera.getEntity()));
-        if(s instanceof FurnitureShape shape) {
-            VoxelShape original = shape.shape();
-            if(original instanceof RotatedShape rotated) {
-                original = rotated.getOriginal();
-            }
 
-            FurnitureData data = shape.data();
-            VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
+        FurnitureData data = shape.data();
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.lines());
 
-            Vec3 offsetVec = Vec3.atLowerCornerOf(shape.offset());
-            offsetVec = offsetVec.add(data.getX(state), data.getY(state), data.getZ(state));
-            Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
+        Vec3 offsetVec = Vec3.atLowerCornerOf(shape.offset());
+        offsetVec = offsetVec.add(data.getX(state), data.getY(state), data.getZ(state));
+        Vec3 offsetPos = Vec3.atCenterOf(pos).add(offsetVec);
 
-            poseStack.pushPose();
-            poseStack.translate(offsetPos.x - camera.getPosition().x, offsetPos.y - camera.getPosition().y, offsetPos.z - camera.getPosition().z);
-            poseStack.mulPose(data.getRotation(state));
+        poseStack.pushPose();
+        poseStack.translate(offsetPos.x - camera.getPosition().x, offsetPos.y - camera.getPosition().y, offsetPos.z - camera.getPosition().z);
+        poseStack.mulPose(data.getRotation(state));
 
-            LevelRendererAccessor.invokeRenderShape(poseStack, consumer, original, (double) pos.getX() - offsetPos.x, (double) pos.getY() - offsetPos.y, (double) pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);
-            poseStack.popPose();
-            return true;
-        }
-        return false;
+        LevelRendererAccessor.invokeRenderShape(poseStack, consumer, original, (double) pos.getX() - offsetPos.x, (double) pos.getY() - offsetPos.y, (double) pos.getZ() - offsetPos.z, 0.0F, 0.0F, 0.0F, 0.4F);
+        poseStack.popPose();
+
+        return true;
     }
 
 }
