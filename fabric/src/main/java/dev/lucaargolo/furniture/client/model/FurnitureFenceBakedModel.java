@@ -1,9 +1,9 @@
 package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Axis;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;

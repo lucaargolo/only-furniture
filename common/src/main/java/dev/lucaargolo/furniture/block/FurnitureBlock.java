@@ -2,11 +2,11 @@ package dev.lucaargolo.furniture.block;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.LightBlock;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.FurnitureShape;
 import dev.lucaargolo.furniture.utils.Rotation;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;

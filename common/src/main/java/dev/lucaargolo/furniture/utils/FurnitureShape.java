@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture.utils;
 
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.mixin.VoxelShapeAccessor;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.core.BlockPos;

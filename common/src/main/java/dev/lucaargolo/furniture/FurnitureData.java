@@ -1,18 +1,18 @@
-package dev.lucaargolo.furniture.utils;
+package dev.lucaargolo.furniture;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
-import dev.lucaargolo.furniture.network.FurnitureDataPayload;
+import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
+import dev.lucaargolo.furniture.utils.FurnitureUtils;
+import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -148,21 +148,6 @@ public class FurnitureData {
         return Objects.hashCode(packed);
     }
 
-    public static VoxelShape cachedShape(BlockGetter level, BlockPos pos, Supplier<VoxelShape> shapeSupplier) {
-        ChunkPos chunkPos = new ChunkPos(pos);
-        long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
-        int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
-        if(level instanceof ServerLevel serverLevel) {
-            return RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).cachedShape(regionLocalBlockPos, shapeSupplier);
-        }else{
-            ResourceKey<Level> dimension = FurnitureUtils.getBlockGetterDimension(level);
-            if(dimension != null) {
-                return LocalFurnitureData.cachedShape(dimension, regionPos, regionLocalBlockPos, shapeSupplier);
-            }
-        }
-        return shapeSupplier.get();
-    }
-
     public static Pair<FurnitureData, Vec3i> getOriginal(BlockGetter level, BlockPos pos, int layer) {
         FurnitureData data = FurnitureData.get(level, pos, layer);
         Vec3i toOriginal = Vec3i.ZERO;
@@ -177,23 +162,8 @@ public class FurnitureData {
         return Pair.of(data, toOriginal);
     }
 
-    public static FurnitureData get(BlockGetter level, BlockPos pos, int layer) {
-        return FurnitureData.get(level, pos)[layer];
-    }
-
-    public static FurnitureData[] get(BlockGetter level, BlockPos pos) {
-        ChunkPos chunkPos = new ChunkPos(pos);
-        long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
-        int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
-        if(level instanceof ServerLevel serverLevel) {
-            return RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).get(regionLocalBlockPos);
-        }else{
-            ResourceKey<Level> dimension = FurnitureUtils.getBlockGetterDimension(level);
-            if(dimension != null) {
-                return LocalFurnitureData.get(dimension, regionPos, regionLocalBlockPos);
-            }
-        }
-        return FurnitureData.DEFAULT_LAYERS.clone();
+    public static FurnitureData get(BlockGetter getter, BlockPos pos, int layer) {
+        return FurnitureData.get(getter, pos)[layer];
     }
 
     public static void set(Level level, BlockPos pos, int layer, FurnitureData data) {
@@ -202,16 +172,24 @@ public class FurnitureData {
         set(level, pos, layers);
     }
 
-    public static void set(Level level, BlockPos pos, FurnitureData[] layers) {
-        ChunkPos chunkPos = new ChunkPos(pos);
-        long regionPos = FurnitureUtils.chunkPosToRegionPos(chunkPos);
-        int regionLocalBlockPos = FurnitureUtils.blockPosToRegionLocalBlockPos(pos);
-        if(level instanceof ServerLevel serverLevel) {
-            RegionFurnitureData.get(serverLevel, FurnitureUtils.regionKey(regionPos)).set(regionLocalBlockPos, layers);
-            RegionFurnitureData.sendToPlayersTrackingRegion(serverLevel, regionPos, new FurnitureDataPayload(level.dimension(), regionPos, regionLocalBlockPos, layers));
-        }else {
-            LocalFurnitureData.set(level.dimension(), regionPos, regionLocalBlockPos, layers);
+    public static FurnitureData[] get(BlockGetter getter, BlockPos pos) {
+        if(getter instanceof LevelReader level) {
+            return FurnitureMod.INSTANCE.getDataManager().get(level, pos);
+        }else if(getter instanceof RenderChunkRegionAccessor region) {
+            return FurnitureMod.INSTANCE.getDataManager().get(region.getLevel(), pos);
         }
+        return FurnitureData.DEFAULT_LAYERS.clone();
+    }
+
+    public static void set(Level level, BlockPos pos, FurnitureData[] layers) {
+        FurnitureMod.INSTANCE.getDataManager().set(level, pos, layers);
+    }
+
+    public static VoxelShape cachedShape(BlockGetter getter, BlockPos pos, Supplier<VoxelShape> shapeSupplier) {
+        if(getter instanceof LevelReader level) {
+            return FurnitureMod.INSTANCE.getDataManager().cachedShape(level, pos, shapeSupplier);
+        }
+        return shapeSupplier.get();
     }
 
     public static void clearShapeCache(Level level, BlockPos pos) {

@@ -2,8 +2,8 @@ package dev.lucaargolo.furniture.block;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;

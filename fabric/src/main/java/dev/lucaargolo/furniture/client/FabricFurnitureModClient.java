@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
@@ -12,18 +13,14 @@ import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -34,7 +31,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 
 public class FabricFurnitureModClient extends FurnitureModClient implements ClientModInitializer {
 
@@ -45,9 +41,6 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         this.init();
         this.registerModelPlugins();
         this.registerEntityRenderers();
-        ClientChunkEvents.CHUNK_LOAD.register(this::onChunkLoad);
-        ClientChunkEvents.CHUNK_UNLOAD.register(this::onChunkUnload);
-        ClientPlayConnectionEvents.DISCONNECT.register(this::onDisconnect);
         WorldRenderEvents.BLOCK_OUTLINE.register(this::onBlockOutline);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(this::onAfterTranslucent);
         ModBlocks.REGISTRY.forEach(entry -> {
@@ -101,18 +94,6 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         this.onRegisterEntityRenderers((entityType, entityRendererProvider) -> {
             EntityRendererRegistry.register((EntityType) entityType, (EntityRendererProvider) entityRendererProvider);
         });
-    }
-
-    private void onChunkLoad(Level level, LevelChunk chunk) {
-        this.onClientChunkWatch(level, chunk.getPos());
-    }
-
-    private void onChunkUnload(Level level, LevelChunk chunk) {
-        this.onClientChunkUnwatch(level, chunk.getPos());
-    }
-
-    private void onDisconnect(ClientPacketListener handler, Minecraft client) {
-        this.onDisconnect();
     }
 
     private boolean onBlockOutline(WorldRenderContext worldContext, WorldRenderContext.BlockOutlineContext outlineContext) {

@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.mixin;
 
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.core.BlockPos;

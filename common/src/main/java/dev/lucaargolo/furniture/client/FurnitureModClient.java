@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.FurnitureDataDebug;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
@@ -13,9 +15,7 @@ import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.FurnitureShape;
-import dev.lucaargolo.furniture.utils.LocalFurnitureData;
 import dev.lucaargolo.furniture.utils.RotatedShape;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -62,18 +61,6 @@ public abstract class FurnitureModClient {
         consumer.accept(ModEntityTypes.SEAT.get(), NoopRenderer::new);
     }
 
-    public final void onClientChunkWatch(Level level, ChunkPos pos) {
-        LocalFurnitureData.watchChunk(level.dimension(), pos);
-    }
-
-    public final void onClientChunkUnwatch(Level level, ChunkPos pos) {
-        LocalFurnitureData.unwatchChunk(level.dimension(), pos);
-    }
-
-    public final void onDisconnect() {
-        LocalFurnitureData.unwatchWorld();
-    }
-
     public final boolean onMouseScroll(double deltaX, double deltaY) {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
@@ -92,7 +79,7 @@ public abstract class FurnitureModClient {
     }
 
     public final void onFinishTranslucentLayer(LevelRendererAccessor levelRenderer, Camera camera, PoseStack poseStack) {
-        LocalFurnitureData.renderFurnitureDataDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
+        FurnitureDataDebug.renderFurnitureDataDebug(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         this.renderFurniturePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         bufferSource.endBatch();
     }

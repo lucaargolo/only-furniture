@@ -4,12 +4,9 @@ package dev.lucaargolo.furniture;
 import dev.lucaargolo.furniture.client.FurnitureModClient;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.event.level.ChunkWatchEvent;
 
 @Mod(FurnitureMod.MOD_ID)
 public class NeoForgeFurnitureMod extends FurnitureMod {
@@ -19,21 +16,9 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
     public NeoForgeFurnitureMod(IEventBus modBus) {
         this.modBus = modBus;
         this.init();
-        NeoForge.EVENT_BUS.addListener(this::onChunkWatch);
-        NeoForge.EVENT_BUS.addListener(this::onChunkUnwatch);
         if(FMLEnvironment.dist.isClient()) {
             this.loadPlatformClass(FurnitureModClient.class);
         }
-    }
-
-    @SubscribeEvent
-    public void onChunkWatch(ChunkWatchEvent.Watch event) {
-        this.onServerChunkWatch(event.getLevel(), event.getPlayer(), event.getPos());
-    }
-
-    @SubscribeEvent
-    public void onChunkUnwatch(ChunkWatchEvent.UnWatch event) {
-        this.onServerChunkUnwatch(event.getLevel(), event.getPlayer(), event.getPos());
     }
 
     @Override

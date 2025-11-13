@@ -8,14 +8,10 @@ import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.registry.ModItemRegistry;
 import dev.lucaargolo.furniture.registry.ModRegistry;
-import dev.lucaargolo.furniture.utils.RegionFurnitureData;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ChunkPos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +24,7 @@ public abstract class FurnitureMod {
 
     public static FurnitureMod INSTANCE;
 
+    private final FurnitureDataManager dataManager = loadPlatformClass(FurnitureDataManager.class);
     private final ModPacketManager packetManager = loadPlatformClass(ModPacketManager.class);
 
     public final void init() {
@@ -36,23 +33,20 @@ public abstract class FurnitureMod {
         ModItems.REGISTRY.init();
         ModCreativeTabs.REGISTRY.init();
         ModEntityTypes.REGISTRY.init();
-        packetManager.init();
+        this.dataManager.init();
+        this.packetManager.init();
     }
 
     public abstract boolean isFakePlayer(Player player);
 
     public abstract String getPlatform();
 
+    public FurnitureDataManager getDataManager() {
+        return dataManager;
+    }
+
     public final ModPacketManager getPacketManager() {
         return packetManager;
-    }
-
-    public final void onServerChunkWatch(ServerLevel level, ServerPlayer player, ChunkPos pos) {
-        RegionFurnitureData.watchChunk(level, player, pos);
-    }
-
-    public final void onServerChunkUnwatch(ServerLevel level, ServerPlayer player, ChunkPos pos) {
-        RegionFurnitureData.unwatchChunk(level, player, pos);
     }
 
     public final <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {

@@ -1,10 +1,10 @@
 package dev.lucaargolo.furniture.item;
 
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.network.FurnitureRotationPayload;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;

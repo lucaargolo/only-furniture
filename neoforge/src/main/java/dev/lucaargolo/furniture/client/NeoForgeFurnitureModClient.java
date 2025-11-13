@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
@@ -12,7 +13,6 @@ import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -32,7 +32,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.ChunkEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -47,9 +46,6 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
         NeoForgeFurnitureMod.getModBus().addListener(this::onItemColorsRegister);
         NeoForgeFurnitureMod.getModBus().addListener(this::onModelRegister);
         NeoForgeFurnitureMod.getModBus().addListener(this::onRenderersRegister);
-        NeoForge.EVENT_BUS.addListener(this::onChunkLoad);
-        NeoForge.EVENT_BUS.addListener(this::onChunkUnload);
-        NeoForge.EVENT_BUS.addListener(this::onLoggingOut);
         NeoForge.EVENT_BUS.addListener(this::onMouseScrolling);
         NeoForge.EVENT_BUS.addListener(this::onDrawBlockHighlight);
         NeoForge.EVENT_BUS.addListener(this::onRenderLevelStage);
@@ -124,25 +120,6 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
         this.onRegisterEntityRenderers((entityType, entityRendererProvider) -> {
             event.registerEntityRenderer((EntityType) entityType, (EntityRendererProvider) entityRendererProvider);
         });
-    }
-
-    @SubscribeEvent
-    public void onChunkLoad(ChunkEvent.Load event) {
-        if(event.getLevel() instanceof Level level && level.isClientSide) {
-            this.onClientChunkWatch(level, event.getChunk().getPos());
-        }
-    }
-
-    @SubscribeEvent
-    public void onChunkUnload(ChunkEvent.Unload event) {
-        if(event.getLevel() instanceof Level level && level.isClientSide) {
-            this.onClientChunkUnwatch(level, event.getChunk().getPos());
-        }
-    }
-
-    @SubscribeEvent
-    public void onLoggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
-        this.onDisconnect();
     }
 
     @SubscribeEvent

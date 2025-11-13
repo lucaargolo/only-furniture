@@ -1,13 +1,13 @@
 package dev.lucaargolo.furniture.block.impl;
 
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.ModBlockTags;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

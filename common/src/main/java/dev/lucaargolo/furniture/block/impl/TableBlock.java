@@ -2,11 +2,11 @@ package dev.lucaargolo.furniture.block.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import dev.lucaargolo.furniture.utils.Rotation;
 import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;

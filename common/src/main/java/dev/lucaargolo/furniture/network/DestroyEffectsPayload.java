@@ -1,8 +1,8 @@
 package dev.lucaargolo.furniture.network;
 
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.TerrainParticle;

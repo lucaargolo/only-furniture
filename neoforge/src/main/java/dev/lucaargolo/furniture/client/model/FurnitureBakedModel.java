@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Transformation;
-import dev.lucaargolo.furniture.utils.FurnitureData;
+import dev.lucaargolo.furniture.FurnitureData;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;

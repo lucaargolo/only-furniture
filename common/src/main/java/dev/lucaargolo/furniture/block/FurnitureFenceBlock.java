@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.block;
 
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
-import dev.lucaargolo.furniture.utils.FurnitureData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.tags.TagKey;
