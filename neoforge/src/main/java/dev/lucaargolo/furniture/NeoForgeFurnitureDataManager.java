@@ -15,10 +15,10 @@ public class NeoForgeFurnitureDataManager extends FurnitureDataManager {
 
     private final DeferredRegister<AttachmentType<?>> REGISTRY = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, FurnitureMod.MOD_ID);
 
-    private final Supplier<AttachmentType<ChunkFurnitureData>> CHUNK_FURNITURE_DATA = REGISTRY.register("chunk_furniture_data", () -> AttachmentType
-        .builder(ChunkFurnitureData::new)
-        .serialize(ChunkFurnitureData.CODEC)
-        .sync(ChunkFurnitureData.STREAM_CODEC)
+    private final Supplier<AttachmentType<ChunkData>> CHUNK_FURNITURE_DATA = REGISTRY.register("chunk_furniture_data", () -> AttachmentType
+        .builder(ChunkData::new)
+        .serialize(ChunkData.CODEC)
+        .sync(ChunkData.STREAM_CODEC)
         .build()
     );
 
@@ -36,7 +36,7 @@ public class NeoForgeFurnitureDataManager extends FurnitureDataManager {
     @Override
     public void set(LevelReader level, BlockPos pos, FurnitureData[] layers) {
         ChunkAccess chunk = level.getChunk(pos);
-        ChunkFurnitureData data = chunk.getData(CHUNK_FURNITURE_DATA);
+        ChunkData data = chunk.getData(CHUNK_FURNITURE_DATA);
         data.set(pos, layers);
         chunk.setData(CHUNK_FURNITURE_DATA, data);
     }
@@ -48,7 +48,7 @@ public class NeoForgeFurnitureDataManager extends FurnitureDataManager {
     }
 
     @Override
-    protected ChunkFurnitureData getChunkData(LevelReader level, ChunkPos chunkPos) {
+    public ChunkData getChunkData(LevelReader level, ChunkPos chunkPos) {
         ChunkAccess chunk = level.getChunk(chunkPos.x, chunkPos.z);
         return chunk.getData(CHUNK_FURNITURE_DATA);
     }

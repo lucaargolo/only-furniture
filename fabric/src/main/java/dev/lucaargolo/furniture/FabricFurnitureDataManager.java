@@ -14,11 +14,11 @@ import java.util.function.Supplier;
 @SuppressWarnings("UnstableApiUsage")
 public class FabricFurnitureDataManager extends FurnitureDataManager {
 
-    private final AttachmentType<ChunkFurnitureData> CHUNK_FURNITURE_DATA = AttachmentRegistry.create(
+    private final AttachmentType<ChunkData> CHUNK_FURNITURE_DATA = AttachmentRegistry.create(
         FurnitureMod.id("chunk_furniture_data"), builder -> builder
-            .initializer(ChunkFurnitureData::new)
-            .persistent(ChunkFurnitureData.CODEC)
-            .syncWith(ChunkFurnitureData.STREAM_CODEC, AttachmentSyncPredicate.all())
+            .initializer(ChunkData::new)
+            .persistent(ChunkData.CODEC)
+            .syncWith(ChunkData.STREAM_CODEC, AttachmentSyncPredicate.all())
     );
 
     @Override
@@ -30,7 +30,7 @@ public class FabricFurnitureDataManager extends FurnitureDataManager {
     @Override
     public void set(LevelReader level, BlockPos pos, FurnitureData[] layers) {
         ChunkAccess chunk = level.getChunk(pos);
-        ChunkFurnitureData data = chunk.getAttachedOrCreate(CHUNK_FURNITURE_DATA);
+        ChunkData data = chunk.getAttachedOrCreate(CHUNK_FURNITURE_DATA);
         data.set(pos, layers);
         chunk.setAttached(CHUNK_FURNITURE_DATA, data);
     }
@@ -42,7 +42,7 @@ public class FabricFurnitureDataManager extends FurnitureDataManager {
     }
 
     @Override
-    protected ChunkFurnitureData getChunkData(LevelReader level, ChunkPos chunkPos) {
+    public ChunkData getChunkData(LevelReader level, ChunkPos chunkPos) {
         ChunkAccess chunk = level.getChunk(chunkPos.x, chunkPos.z);
         return chunk.getAttachedOrCreate(CHUNK_FURNITURE_DATA);
     }

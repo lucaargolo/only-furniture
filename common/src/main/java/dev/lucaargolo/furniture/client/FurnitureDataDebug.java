@@ -1,8 +1,11 @@
-package dev.lucaargolo.furniture;
+package dev.lucaargolo.furniture.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
+import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.FurnitureDataManager;
+import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.SeatBlock;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
@@ -71,7 +74,7 @@ public class FurnitureDataDebug {
         }
 
         chunksToDebug.forEach(chunkPos -> {
-            ChunkFurnitureData chunkData = FurnitureMod.INSTANCE.getDataManager().getChunkData(debugLevel, chunkPos);
+            FurnitureDataManager.ChunkData chunkData = FurnitureMod.INSTANCE.getDataManager().getChunkData(debugLevel, chunkPos);
             chunkData.forEach((packedPos, packedLayers) -> {
                 BlockPos blockPos = FurnitureUtils.unpackChunkLocalPos(chunkPos, packedPos);
                 FurnitureData[] layers = FurnitureUtils.unpackFurnitureDataLayers(packedLayers);
