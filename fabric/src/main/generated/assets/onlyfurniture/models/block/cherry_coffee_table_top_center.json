@@ -1,7 +1,0 @@
-{
-  "parent": "onlyfurniture:block/coffee_table_top_center",
-  "textures": {
-    "particle": "minecraft:block/cherry_log",
-    "planks": "minecraft:block/cherry_planks"
-  }
-}

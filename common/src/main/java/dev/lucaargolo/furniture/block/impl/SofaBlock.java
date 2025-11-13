@@ -33,7 +33,7 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, S
     private static final Map<Pair<Direction, Rotation>, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.SOFA_OUTER, false);
 
     private static final Vec3[] seats = new Vec3[] {
-            new Vec3(0.0, 0.375, 0.0)
+            new Vec3(0.0, 0.5, 0.0)
     };
 
     private final DyeColor color;

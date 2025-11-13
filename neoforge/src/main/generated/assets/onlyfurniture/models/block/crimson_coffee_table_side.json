@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/coffee_table_side",
+  "textures": {
+    "particle": "minecraft:block/crimson_stem",
+    "planks": "minecraft:block/crimson_planks"
+  }
+}

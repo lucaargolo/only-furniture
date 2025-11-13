@@ -26,10 +26,6 @@ public class WoodSeatFurnitureBlock extends FurnitureBlock implements WoodBlock,
         this.seats = seats;
     }
 
-    public WoodSeatFurnitureBlock(Block base, WoodType wood, VoxelShape[] shapes) {
-        this(base, wood, shapes, new Vec3(0.0, 0.375, 0.0));
-    }
-
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         if(tryAndSit(level, pos, player, hitResult)) {

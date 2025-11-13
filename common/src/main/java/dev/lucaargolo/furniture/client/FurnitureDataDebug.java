@@ -81,24 +81,28 @@ public class FurnitureDataDebug {
                 for(int layer = 0; layer < layers.length; layer++) {
                     renderFurnitureBlockDebug(debugLevel, blockPos, layers[layer], camera, poseStack, lineConsumer, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
                 }
-                renderFurnitureShapeDebug(blockPos, chunkData.getCachedShape(blockPos), camera, poseStack, lineConsumer);
+                renderFurnitureShapeDebug(blockPos, chunkData.getCachedShape(blockPos), camera, poseStack, lineConsumer, debugLevel.isClientSide ? 0xFFFFFF : 0x0000FF);
             });
         });
     }
 
-    private static void renderFurnitureShapeDebug(BlockPos blockPos, VoxelShape shape, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer) {
+    private static void renderFurnitureShapeDebug(BlockPos blockPos, VoxelShape shape, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int packedColor) {
         if(shape != null) {
+            float red = FastColor.ARGB32.red(packedColor)/255f;
+            float green = FastColor.ARGB32.green(packedColor)/255f;
+            float blue = FastColor.ARGB32.blue(packedColor)/255f;
+
             Vec3 pos = Vec3.atLowerCornerOf(blockPos);
             poseStack.pushPose();
             poseStack.translate(pos.x- camera.getPosition().x, pos.y- camera.getPosition().y, pos.z- camera.getPosition().z);
             shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, 0f, 0f, 1f, 1f);
+                LevelRenderer.renderLineBox(poseStack, lineConsumer, minX, minY, minZ, maxX, maxY, maxZ, red, green, blue, 1f);
             });
             poseStack.popPose();
         }
     }
 
-    private static void renderFurnitureBlockDebug(Level level, BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int color) {
+    private static void renderFurnitureBlockDebug(Level level, BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int packedColor) {
         Vec3 pos = Vec3.atLowerCornerOf(blockPos);
 
         poseStack.pushPose();
@@ -106,9 +110,9 @@ public class FurnitureDataDebug {
 
         Direction toOriginal = data.getDirectionToOriginal();
 
-        float red = FastColor.ARGB32.red(color)/255f;
-        float green = FastColor.ARGB32.green(color)/255f;
-        float blue = FastColor.ARGB32.blue(color)/255f;
+        float red = FastColor.ARGB32.red(packedColor)/255f;
+        float green = FastColor.ARGB32.green(packedColor)/255f;
+        float blue = FastColor.ARGB32.blue(packedColor)/255f;
 
         if(data.hasOriginal()) {
             BlockState state = level.getBlockState(blockPos);
@@ -117,7 +121,7 @@ public class FurnitureDataDebug {
                 for(int i = 0; i < seats.length; i++) {
                     Vec3 position = block.getPositionForSeat(data, blockPos, state, i).subtract(pos);
                     AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
-                    LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, level.isClientSide ? 1f : 0f, level.isClientSide ? 1f : 0f, 1f);
+                    LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);
                 }
             }
         }

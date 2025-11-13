@@ -29,11 +29,11 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
     private final WoodType wood;
     private final boolean simple;
 
-    public TableBlock(Block base, TagKey<Block> connecting, WoodType wood, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple) {
+    public TableBlock(Block base, TagKey<Block> connecting, WoodType wood, VoxelShape[] footShapes, VoxelShape[] centerShapes, VoxelShape[] sideShapes) {
         super(base, ModBlockShapes.EMPTY, connecting);
-        this.shapes = computeVoxelShapes(centerShapes, footShapes);
+        this.shapes = computeVoxelShapes(footShapes, centerShapes, sideShapes);
         this.wood = wood;
-        this.simple = simple;
+        this.simple = sideShapes.length == 0;
     }
 
     public boolean isSimple() {
@@ -61,9 +61,10 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
         return wood;
     }
 
-    public static Map<Direction, Byte2ObjectMap<VoxelShape>> computeVoxelShapes(VoxelShape[] centerShapes, VoxelShape[] footShapes) {
-        Map<Pair<Direction, Rotation>, VoxelShape> centerShapeMap = FurnitureBlock.computeVoxelShapes(centerShapes, false);
+    public static Map<Direction, Byte2ObjectMap<VoxelShape>> computeVoxelShapes(VoxelShape[] footShapes, VoxelShape[] centerShapes, VoxelShape[] sideShapes) {
         Map<Pair<Direction, Rotation>, VoxelShape> footShapeMap = FurnitureBlock.computeVoxelShapes(footShapes, false);
+        Map<Pair<Direction, Rotation>, VoxelShape> centerShapeMap = FurnitureBlock.computeVoxelShapes(centerShapes, false);
+        Map<Pair<Direction, Rotation>, VoxelShape> sideShapeMap = FurnitureBlock.computeVoxelShapes(sideShapes, false);
 
         Byte2ObjectMap<VoxelShape> northShapes = new Byte2ObjectOpenHashMap<>();
         Byte2ObjectMap<VoxelShape> eastShapes = new Byte2ObjectOpenHashMap<>();
@@ -76,6 +77,16 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
             boolean west  = (i & 8) != 0;
 
             VoxelShape combinedShape = centerShapeMap.get(Pair.of(Direction.NORTH, Rotation.R0));
+
+            if(east)
+                combinedShape = Shapes.or(combinedShape, sideShapeMap.get(Pair.of(Direction.NORTH, Rotation.R0)));
+            if(south)
+                combinedShape = Shapes.or(combinedShape, sideShapeMap.get(Pair.of(Direction.EAST, Rotation.R90)));
+            if(west)
+                combinedShape = Shapes.or(combinedShape, sideShapeMap.get(Pair.of(Direction.SOUTH, Rotation.R180)));
+            if(north)
+                combinedShape = Shapes.or(combinedShape, sideShapeMap.get(Pair.of(Direction.WEST, Rotation.R270)));
+
             if (!north && !east)
                 combinedShape = Shapes.or(combinedShape, footShapeMap.get(Pair.of(Direction.NORTH, Rotation.R0)));
             if (!east && !south)

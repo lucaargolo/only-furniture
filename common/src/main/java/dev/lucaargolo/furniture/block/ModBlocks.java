@@ -34,11 +34,11 @@ public class ModBlocks {
     public static final ModBlockRegistry REGISTRY = FurnitureMod.INSTANCE.blockRegistry();
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
-    public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerForTable("table", TableBlock::new, ModBlockShapes.TABLE, ModBlockShapes.TABLE_FOOT, true, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
-    public static final Map<WoodType, Supplier<TableBlock>> COFFEE_TABLE_MAP = registerForTable("coffee_table", TableBlock::new, ModBlockShapes.COFFEE_TABLE, ModBlockShapes.COFFEE_TABLE_FOOT, false, ModBlockTags.CONNECTING_COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<WoodSeatFurnitureBlock>> CHAIR_MAP = registerForWoodSeat("chair", WoodBlock::getPlanks, WoodSeatFurnitureBlock::new, new Vec3(0.0, 0.4375, 0.0), ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<TableBlock>> TABLE_MAP = registerForTable("table", TableBlock::new, ModBlockShapes.TABLE_FOOT, ModBlockShapes.TABLE_TOP, ModBlockShapes.EMPTY, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
 
-    public static final Map<WoodType, Supplier<WoodSeatFurnitureBlock>> SMALL_STOOL_MAP = registerForWood("small_stool", WoodBlock::getPlanks, WoodSeatFurnitureBlock::new, ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
-    public static final Map<WoodType, Supplier<WoodSeatFurnitureBlock>> CHAIR_MAP = registerForWood("chair", WoodBlock::getPlanks, WoodSeatFurnitureBlock::new, ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<TableBlock>> COFFEE_TABLE_MAP = registerForTable("coffee_table", TableBlock::new, ModBlockShapes.COFFEE_TABLE_FOOT, ModBlockShapes.COFFEE_TABLE_TOP, ModBlockShapes.COFFEE_TABLE_SIDE, ModBlockTags.CONNECTING_COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, Supplier<WoodSeatFurnitureBlock>> SMALL_STOOL_MAP = registerForWoodSeat("small_stool", WoodBlock::getPlanks, WoodSeatFurnitureBlock::new, new Vec3(0.0, 0.25, 0.0), ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
 
     public static final Map<WoodType, Supplier<OutdoorBenchBlock>> OUTDOOR_BENCH_MAP = registerForWood("outdoor_bench", WoodBlock::getPlanks, (base, wood, shapes) -> {
         return new OutdoorBenchBlock(base, MetalBlock.MetalType.CAST_IRON, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes, new Vec3(-0.5, 0.5, 0.0), new Vec3(0.5, 0.5, 0.0));
@@ -69,12 +69,16 @@ public class ModBlocks {
 
     public static Supplier<MetalLampBlock.Wall> WALL_LAMP = REGISTRY.register("cast_iron_wall_lamp", () -> new MetalLampBlock.Wall(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.WALL_LAMP), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    private static <T extends Block> Map<WoodType, Supplier<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], Boolean, T> furnitureConstructor, VoxelShape[] centerShapes, VoxelShape[] footShapes, boolean simple, TagKey<?>... tags) {
-        return registerForWood(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, shapes, footShapes, simple), centerShapes, tags);
+    private static <T extends Block> Map<WoodType, Supplier<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], VoxelShape[], T> furnitureConstructor, VoxelShape[] footShapes, VoxelShape[] centerShapes, VoxelShape[] sideShapes, TagKey<?>... tags) {
+        return registerForWood(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, footShapes, centerShapes, sideShapes), null, tags);
     }
 
     private static <T extends Block> Map<Pair<StoneBlock.StoneType, WoodType>, Supplier<T>> registerForCounter(String path, boolean polished, QuadFunction<Block, TagKey<Block>, StoneBlock.StoneType, WoodType, T> furnitureConstructor, TagKey<?>... tags) {
-        return registerForStoneAndWood(path, polished, (block, stone, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), stone, wood), ModBlockShapes.EMPTY, tags);
+        return registerForStoneAndWood(path, polished, (block, stone, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), stone, wood), null, tags);
+    }
+
+    private static <T extends Block> Map<WoodType, Supplier<T>> registerForWoodSeat(String path, Function<WoodType, Optional<Block>> baseGetter, QuadFunction<Block, WoodType, VoxelShape[], Vec3, T> furnitureConstructor, Vec3 seat, VoxelShape[] shapes, TagKey<?>... tags) {
+        return registerForWood(path, baseGetter, wood -> null, (block, wood, shape) -> furnitureConstructor.apply(block, wood, shape, seat), shapes, tags);
     }
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWood(String path, Function<WoodType, Optional<Block>> baseGetter, TriFunction<Block, WoodType, VoxelShape[], T> furnitureConstructor, VoxelShape[] shapes, TagKey<?>... tags) {
@@ -82,7 +86,7 @@ public class ModBlocks {
     }
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForHedge(String path, Function<WoodType, Optional<Block>> baseGetter, Function<WoodType, TintColor.Block> blockColorGetter, QuadFunction<Block, TagKey<Block>, WoodType, Float, T> furnitureConstructor, float size, TagKey<?>... tags) {
-        return registerForWood(path, baseGetter, blockColorGetter, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, size), ModBlockShapes.EMPTY, tags);
+        return registerForWood(path, baseGetter, blockColorGetter, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, size), null, tags);
     }
 
     private static <T extends Block> Map<WoodType, Supplier<T>> registerForWood(String path, Function<WoodType, Optional<Block>> baseGetter, Function<WoodType, TintColor.Block> blockColorGetter, TriFunction<Block, WoodType, VoxelShape[], T> furnitureConstructor, VoxelShape[] shapes, TagKey<?>... tags) {
@@ -111,7 +115,7 @@ public class ModBlocks {
     }
 
     private static <T extends Block> Map<DyeColor, Supplier<T>> registerForSofa(String path, Block base, TriFunction<Block, TagKey<Block>, DyeColor, T> furnitureConstructor, TagKey<?>... tags) {
-        return registerForColor(path, base, (block, color, shapes) -> furnitureConstructor.apply(base, tags[0].cast(Registries.BLOCK).orElseThrow(), color), ModBlockShapes.EMPTY, tags);
+        return registerForColor(path, base, (block, color, shapes) -> furnitureConstructor.apply(base, tags[0].cast(Registries.BLOCK).orElseThrow(), color), null, tags);
     }
 
     private static <T extends Block> Map<DyeColor, Supplier<T>> registerForColor(String path, Block base, TriFunction<Block, DyeColor, VoxelShape[], T> furnitureConstructor, VoxelShape[] shapes, TagKey<?>... tags) {

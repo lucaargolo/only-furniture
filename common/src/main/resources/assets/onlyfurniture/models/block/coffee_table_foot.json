@@ -4,13 +4,13 @@
 	"elements": [
 		{
 			"from": [12, 0, 2],
-			"to": [14, 10, 4],
+			"to": [14, 6, 4],
 			"rotation": {"angle": 0, "axis": "y", "origin": [12, 0, 2]},
 			"faces": {
-				"north": {"uv": [0, 0, 2, 10], "texture": "#log"},
-				"east": {"uv": [0, 0, 2, 10], "texture": "#log"},
-				"south": {"uv": [0, 0, 2, 10], "texture": "#log"},
-				"west": {"uv": [0, 0, 2, 10], "texture": "#log"},
+				"north": {"uv": [0, 0, 2, 6], "texture": "#log"},
+				"east": {"uv": [0, 0, 2, 6], "texture": "#log"},
+				"south": {"uv": [0, 0, 2, 6], "texture": "#log"},
+				"west": {"uv": [0, 0, 2, 6], "texture": "#log"},
 				"down": {"uv": [0, 0, 2, 2], "texture": "#log"}
 			}
 		}

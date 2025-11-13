@@ -8,20 +8,12 @@ public class ModBlockShapes {
 
     public static final VoxelShape[] EMPTY = new VoxelShape[0];
 
-    public static final VoxelShape[] TABLE = new VoxelShape[] {
-        Block.box(0, 12, 0, 16, 16, 16)
-    };
-
     public static final VoxelShape[] TABLE_FOOT = new VoxelShape[] {
         Block.box(11, 0, 2, 14, 12, 5)
     };
 
-    public static final VoxelShape[] COFFEE_TABLE = new VoxelShape[] {
-        Block.box(0, 10, 0, 16, 12, 16)
-    };
-
-    public static final VoxelShape[] COFFEE_TABLE_FOOT = new VoxelShape[] {
-        Block.box(12, 0, 2, 14, 10, 4)
+    public static final VoxelShape[] TABLE_TOP = new VoxelShape[] {
+        Block.box(0, 12, 0, 16, 16, 16)
     };
 
     public static final VoxelShape[] CHAIR = new VoxelShape[] {
@@ -29,10 +21,20 @@ public class ModBlockShapes {
         Block.box(3, 0, 3, 13, 7, 13)
     };
 
+    public static final VoxelShape[] COFFEE_TABLE_FOOT = new VoxelShape[] {
+        Block.box(12, 0, 2, 14, 6, 4)
+    };
+
+    public static final VoxelShape[] COFFEE_TABLE_TOP = new VoxelShape[] {
+        Block.box(2, 6, 2, 14, 8, 14)
+    };
+
+    public static final VoxelShape[] COFFEE_TABLE_SIDE = new VoxelShape[] {
+        Block.box(14, 6, 2, 16, 8, 14)
+    };
+
     public static final VoxelShape[] SMALL_STOOL = new VoxelShape[] {
-        Shapes.box(0.25,0,0.25,0.75,0.25,0.75),
-        Shapes.box(0.125,0.25,0.25,0.875,0.375,0.75),
-        Shapes.box(0.25,0.25,0.125,0.75,0.375,0.875)
+        Block.box(4, 0, 4, 12, 4, 12)
     };
 
     public static final VoxelShape[] OUTDOOR_BENCH = new VoxelShape[] {

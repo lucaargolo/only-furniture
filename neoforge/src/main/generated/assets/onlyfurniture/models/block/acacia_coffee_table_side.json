@@ -1,0 +1,7 @@
+{
+  "parent": "onlyfurniture:block/coffee_table_side",
+  "textures": {
+    "particle": "minecraft:block/acacia_log",
+    "planks": "minecraft:block/acacia_planks"
+  }
+}
