@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.utils;
+package dev.lucaargolo.furniture.utils.shape;
 
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.mixin.VoxelShapeAccessor;

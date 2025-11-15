@@ -8,7 +8,7 @@ import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.utils.Rotation;
-import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
+import dev.lucaargolo.furniture.utils.shape.ShapeUtils;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectMap;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
@@ -97,9 +97,9 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
                 combinedShape = Shapes.or(combinedShape, footShapeMap.get(Pair.of(Direction.WEST, Rotation.R270)));
 
             northShapes.put((byte) i, combinedShape);
-            eastShapes.put((byte) i, VoxelShapeUtils.rotateY(combinedShape, Direction.EAST));
-            southShapes.put((byte) i, VoxelShapeUtils.rotateY(combinedShape, Direction.SOUTH));
-            westShapes.put((byte) i, VoxelShapeUtils.rotateY(combinedShape, Direction.WEST));
+            eastShapes.put((byte) i, ShapeUtils.rotateY(combinedShape, Direction.EAST));
+            southShapes.put((byte) i, ShapeUtils.rotateY(combinedShape, Direction.SOUTH));
+            westShapes.put((byte) i, ShapeUtils.rotateY(combinedShape, Direction.WEST));
         }
 
         ImmutableMap.Builder<Direction, Byte2ObjectMap<VoxelShape>> builder = ImmutableMap.builder();

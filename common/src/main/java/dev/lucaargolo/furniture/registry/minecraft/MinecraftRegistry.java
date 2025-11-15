@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.utils;
+package dev.lucaargolo.furniture.registry.minecraft;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;

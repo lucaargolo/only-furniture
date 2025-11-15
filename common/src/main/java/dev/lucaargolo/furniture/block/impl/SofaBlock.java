@@ -5,36 +5,33 @@ import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.ColorBlock;
-import dev.lucaargolo.furniture.block.base.SeatBlock;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
+import dev.lucaargolo.furniture.block.interaction.SeatInteraction;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 
-public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, SeatBlock {
+public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock {
 
-    private static final Map<Pair<Direction, Rotation>, VoxelShape> centerShapes = computeVoxelShapes(ModBlockShapes.SOFA_CENTER, false);
-    private static final Map<Pair<Direction, Rotation>, VoxelShape> rightShapes = computeVoxelShapes(ModBlockShapes.SOFA_RIGHT, false);
-    private static final Map<Pair<Direction, Rotation>, VoxelShape> leftShapes = computeVoxelShapes(ModBlockShapes.SOFA_LEFT, false);
-    private static final Map<Pair<Direction, Rotation>, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.SOFA_INNER, false);
-    private static final Map<Pair<Direction, Rotation>, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.SOFA_OUTER, false);
+    private static final List<? extends Interaction<?>> INTERACTIONS = List.of(
+        new SeatInteraction(new Vec3(0.0, 0.5, 0.0))
+    );
 
-    private static final Vec3[] seats = new Vec3[] {
-            new Vec3(0.0, 0.5, 0.0)
-    };
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> CENTER_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_CENTER, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> RIGHT_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_RIGHT, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> LEFT_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_LEFT, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> INNER_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_INNER, false);
+    private static final Map<Pair<Direction, Rotation>, VoxelShape> OUTER_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_OUTER, false);
 
     private final DyeColor color;
 
@@ -44,12 +41,8 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, S
     }
 
     @Override
-    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        if(tryAndSit(level, pos, player, hitResult)) {
-            return InteractionResult.SUCCESS;
-        }else{
-            return InteractionResult.PASS;
-        }
+    public List<? extends Interaction<?>> getInteractions() {
+        return INTERACTIONS;
     }
 
     @Override
@@ -60,8 +53,8 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, S
         boolean east = state.getValue(EAST);
         boolean outer = state.getValue(OUTER);
 
-        Map<Pair<Direction, Rotation>, VoxelShape> normalShapes = (east && west) ? centerShapes : east ? rightShapes : west ? leftShapes : shapes;
-        Map<Pair<Direction, Rotation>, VoxelShape> cornerShapes = outer ? outerShapes : innerShapes;
+        Map<Pair<Direction, Rotation>, VoxelShape> normalShapes = (east && west) ? CENTER_SHAPES : east ? RIGHT_SHAPES : west ? LEFT_SHAPES : shapes;
+        Map<Pair<Direction, Rotation>, VoxelShape> cornerShapes = outer ? OUTER_SHAPES : INNER_SHAPES;
 
         Map<Pair<Direction, Rotation>, VoxelShape> s = (north && !south) || (!north && south) ? cornerShapes : normalShapes;
         Direction facing = data.getFacing(state);
@@ -81,11 +74,6 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock, S
     @Override
     public DyeColor getColor() {
         return color;
-    }
-
-    @Override
-    public Vec3[] getSeats() {
-        return seats;
     }
 
 }

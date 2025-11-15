@@ -228,4 +228,10 @@ public class ModBlockShapes {
         Block.box(7, 11, 7, 9, 13, 9),
         Block.box(7, 12, 8, 9, 14, 14)
     };
+
+    public static final VoxelShape[] FLOWER_POT = new VoxelShape[] {
+        Block.box(5, 0, 5, 11, 8, 11),
+        Block.box(5, 1, 4, 11, 7, 12),
+        Block.box(4, 1, 5, 12, 7, 11)
+    };
 }

@@ -5,11 +5,12 @@ import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.LightBlock;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
-import dev.lucaargolo.furniture.utils.FurnitureShape;
 import dev.lucaargolo.furniture.utils.Rotation;
-import dev.lucaargolo.furniture.utils.VoxelShapeUtils;
+import dev.lucaargolo.furniture.utils.shape.FurnitureShape;
+import dev.lucaargolo.furniture.utils.shape.ShapeUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntList;
@@ -19,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -41,6 +43,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector4f;
 
 import java.util.*;
 
@@ -64,6 +69,29 @@ public class FurnitureBlock extends Block {
 
     public boolean isWallBlock() {
         return false;
+    }
+
+    public List<? extends Interaction<?>> getInteractions() {
+        return List.of();
+    }
+
+    @Override
+    protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
+        if (!FurnitureMod.INSTANCE.isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching()) {
+            FurnitureData data = FurnitureData.get(level, pos, state.getValue(FurnitureBlock.LAYER));
+
+            List<? extends Interaction<?>> interactions = this.getInteractions().stream()
+                    .map(i -> computePositionedInteraction(pos, state, data, i))
+                    .sorted(Comparator.comparingDouble(i -> i.pos().distanceToSqr(hitResult.getLocation())))
+                    .toList();
+
+            for(Interaction<?> interaction : interactions) {
+                if(interaction.interact(level, player, hitResult)) {
+                    return InteractionResult.SUCCESS;
+                }
+            }
+        }
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -148,7 +176,7 @@ public class FurnitureBlock extends Block {
             }
         }
 
-        int layer = findAvailableLayer(level, pos, intersectingPositions);
+        int layer = calculateAvailableLayer(level, pos, intersectingPositions);
         if(layer == -1) {
             return null;
         }
@@ -378,7 +406,7 @@ public class FurnitureBlock extends Block {
         return false;
     }
 
-    private static BlockBehaviour.Properties furnitureProperties(Block base) {
+    public static BlockBehaviour.Properties furnitureProperties(Block base) {
         return BlockBehaviour.Properties.ofFullCopy(base)
                 .lightLevel(state -> state.getBlock() instanceof LightBlock lightBlock ? lightBlock.getLight(state) : 0)
                 .pushReaction(PushReaction.BLOCK)
@@ -391,16 +419,16 @@ public class FurnitureBlock extends Block {
         for (VoxelShape s : shapes) {
             northShape = Shapes.or(northShape, s);
         }
-        VoxelShape eastShape = VoxelShapeUtils.rotateY(northShape, Direction.EAST);
-        VoxelShape southShape = VoxelShapeUtils.rotateY(northShape, Direction.SOUTH);
-        VoxelShape westShape = VoxelShapeUtils.rotateY(northShape, Direction.WEST);
+        VoxelShape eastShape = ShapeUtils.rotateY(northShape, Direction.EAST);
+        VoxelShape southShape = ShapeUtils.rotateY(northShape, Direction.SOUTH);
+        VoxelShape westShape = ShapeUtils.rotateY(northShape, Direction.WEST);
         ImmutableMap.Builder<Pair<Direction, Rotation>, VoxelShape> builder = ImmutableMap.builder();
         if(isWallBlock) {
             for (Rotation rotation : Rotation.values()) {
-                builder.put(Pair.of(Direction.NORTH, rotation), VoxelShapeUtils.rotate(northShape, Direction.Axis.Z, -rotation.getAngle()));
-                builder.put(Pair.of(Direction.EAST, rotation), VoxelShapeUtils.rotate(eastShape, Direction.Axis.X, rotation.getAngle()));
-                builder.put(Pair.of(Direction.SOUTH, rotation), VoxelShapeUtils.rotate(southShape, Direction.Axis.Z, rotation.getAngle()));
-                builder.put(Pair.of(Direction.WEST, rotation), VoxelShapeUtils.rotate(westShape, Direction.Axis.X, -rotation.getAngle()));
+                builder.put(Pair.of(Direction.NORTH, rotation), ShapeUtils.rotate(northShape, Direction.Axis.Z, -rotation.getAngle()));
+                builder.put(Pair.of(Direction.EAST, rotation), ShapeUtils.rotate(eastShape, Direction.Axis.X, rotation.getAngle()));
+                builder.put(Pair.of(Direction.SOUTH, rotation), ShapeUtils.rotate(southShape, Direction.Axis.Z, rotation.getAngle()));
+                builder.put(Pair.of(Direction.WEST, rotation), ShapeUtils.rotate(westShape, Direction.Axis.X, -rotation.getAngle()));
             }
         }else{
             builder.put(Pair.of(Direction.NORTH, Rotation.R0), northShape);
@@ -409,6 +437,15 @@ public class FurnitureBlock extends Block {
             builder.put(Pair.of(Direction.WEST, Rotation.R270), westShape);
         }
         return builder.build();
+    }
+
+    public static Interaction<?> computePositionedInteraction(BlockPos pos, BlockState state, FurnitureData data, Interaction<?> interaction) {
+        Vec3 position = Vec3.atBottomCenterOf(pos).add(data.getX(state), data.getY(state), data.getZ(state));
+        Quaternionf rotation = data.getRotation(state);
+        Matrix4f transform = new Matrix4f().rotate(rotation);
+        Vector4f offset = new Vector4f(interaction.pos().toVector3f(), 1f);
+        offset.mul(transform);
+        return interaction.positioned(position.add(offset.x, offset.y, offset.z));
     }
 
     private static List<BlockPos> calculateIntersectingPositionsInLevel(Level level, BlockPos originalPos, int layer) {
@@ -488,8 +525,7 @@ public class FurnitureBlock extends Block {
         return result;
     }
 
-
-    private static int findAvailableLayer(Level level, BlockPos pos, List<BlockPos> intersectingPositions) {
+    private static int calculateAvailableLayer(Level level, BlockPos pos, List<BlockPos> intersectingPositions) {
         List<BlockPos> allPositions = new ArrayList<>(intersectingPositions);
         allPositions.add(pos);
 

@@ -1,10 +1,13 @@
 package dev.lucaargolo.furniture;
 
+import dev.lucaargolo.furniture.attachment.ModAttachmentManager;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
+import dev.lucaargolo.furniture.registry.ModBlockEntityRegistry;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.registry.ModItemRegistry;
 import dev.lucaargolo.furniture.registry.ModRegistry;
@@ -24,29 +27,30 @@ public abstract class FurnitureMod {
 
     public static FurnitureMod INSTANCE;
 
-    private final FurnitureDataManager dataManager = loadPlatformClass(FurnitureDataManager.class);
     private final ModPacketManager packetManager = loadPlatformClass(ModPacketManager.class);
+    private final ModAttachmentManager attachmentManager = loadPlatformClass(ModAttachmentManager.class);
 
     public final void init() {
         INSTANCE = this;
         ModBlocks.REGISTRY.init();
+        ModBlockEntities.REGISTRY.init();
         ModItems.REGISTRY.init();
         ModCreativeTabs.REGISTRY.init();
         ModEntityTypes.REGISTRY.init();
-        this.dataManager.init();
         this.packetManager.init();
+        this.attachmentManager.init();
     }
 
     public abstract boolean isFakePlayer(Player player);
 
     public abstract String getPlatform();
 
-    public FurnitureDataManager getDataManager() {
-        return dataManager;
-    }
-
     public final ModPacketManager getPacketManager() {
         return packetManager;
+    }
+
+    public final ModAttachmentManager getAttachmentManager() {
+        return attachmentManager;
     }
 
     public final <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
@@ -55,6 +59,10 @@ public abstract class FurnitureMod {
 
     public final ModBlockRegistry blockRegistry() {
         return loadPlatformClass(ModBlockRegistry.class);
+    }
+
+    public final ModBlockEntityRegistry blockEntityRegistry() {
+        return loadPlatformClass(ModBlockEntityRegistry.class);
     }
 
     public final ModItemRegistry itemRegistry() {

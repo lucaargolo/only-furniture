@@ -1,0 +1,31 @@
+package dev.lucaargolo.furniture.registry;
+
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+
+public abstract class ModBlockEntityRegistry extends MinecraftRegistry<BlockEntityType<?>, MinecraftEntry<? extends BlockEntityType<?>>> {
+
+    public ModBlockEntityRegistry() {
+        super(Registries.BLOCK_ENTITY_TYPE);
+    }
+
+    public abstract <B extends BlockEntity> MinecraftEntry<BlockEntityType<B>> register(String path, BiFunction<BlockPos, BlockState, B> factory, ModBlockRegistry.BlockEntry<?>... blocks);
+
+    @Override
+    public abstract <E extends BlockEntityType<?>> MinecraftEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags);
+
+    @Override
+    protected <E extends BlockEntityType<?>> MinecraftEntry<E> entry(String path, Supplier<E> supplier, TagKey<?>... tags) {
+        return new MinecraftEntry<>(id++, path, supplier, tags);
+    }
+
+}

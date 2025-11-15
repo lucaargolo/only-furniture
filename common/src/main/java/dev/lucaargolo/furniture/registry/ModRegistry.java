@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.registry;
 
-import dev.lucaargolo.furniture.utils.MinecraftEntry;
-import dev.lucaargolo.furniture.utils.MinecraftRegistry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;

@@ -2,15 +2,17 @@ package dev.lucaargolo.furniture;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
+import dev.lucaargolo.furniture.attachment.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
-import dev.lucaargolo.furniture.utils.FurnitureUtils;
+import dev.lucaargolo.furniture.utils.PackingUtils;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,7 +29,7 @@ public class FurnitureData {
 
     public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f, null, false);
     public static FurnitureData[] DEFAULT_LAYERS = new FurnitureData[] {DEFAULT, DEFAULT, DEFAULT, DEFAULT};
-    public static long DEFAULT_PACKED_LAYERS = FurnitureUtils.packFurnitureDataLayers(DEFAULT_LAYERS);
+    public static long DEFAULT_PACKED_LAYERS = PackingUtils.packFurnitureDataLayers(DEFAULT_LAYERS);
 
     private final short packed;
 
@@ -148,6 +150,14 @@ public class FurnitureData {
         return Objects.hashCode(packed);
     }
 
+    public static ChunkFurnitureDataAttachment getChunkData(LevelReader level, ChunkPos pos) {
+        return FurnitureMod.INSTANCE.getAttachmentManager().getOrCreate(level.getChunk(pos.x, pos.z), ChunkFurnitureDataAttachment.class);
+    }
+
+    public static void setChunkData(LevelReader level, ChunkPos pos, ChunkFurnitureDataAttachment chunkData) {
+        FurnitureMod.INSTANCE.getAttachmentManager().set(level.getChunk(pos.x, pos.z), chunkData);
+    }
+
     public static Pair<FurnitureData, Vec3i> getOriginal(BlockGetter level, BlockPos pos, int layer) {
         FurnitureData data = FurnitureData.get(level, pos, layer);
         Vec3i toOriginal = Vec3i.ZERO;
@@ -174,20 +184,22 @@ public class FurnitureData {
 
     public static FurnitureData[] get(BlockGetter getter, BlockPos pos) {
         if(getter instanceof LevelReader level) {
-            return FurnitureMod.INSTANCE.getDataManager().get(level, pos);
+            return getChunkData(level, new ChunkPos(pos)).get(pos);
         }else if(getter instanceof RenderChunkRegionAccessor region) {
-            return FurnitureMod.INSTANCE.getDataManager().get(region.getLevel(), pos);
+            return getChunkData(region.getLevel(), new ChunkPos(pos)).get(pos);
         }
         return FurnitureData.DEFAULT_LAYERS.clone();
     }
 
     public static void set(Level level, BlockPos pos, FurnitureData[] layers) {
-        FurnitureMod.INSTANCE.getDataManager().set(level, pos, layers);
+        ChunkFurnitureDataAttachment data = getChunkData(level, new ChunkPos(pos));
+        data.set(pos, layers);
+        setChunkData(level, new ChunkPos(pos), data);
     }
 
     public static VoxelShape cachedShape(BlockGetter getter, BlockPos pos, Supplier<VoxelShape> shapeSupplier) {
         if(getter instanceof LevelReader level) {
-            return FurnitureMod.INSTANCE.getDataManager().cachedShape(level, pos, shapeSupplier);
+            return getChunkData(level, new ChunkPos(pos)).cachedShape(pos, shapeSupplier);
         }
         return shapeSupplier.get();
     }

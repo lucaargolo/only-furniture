@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.registry;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
-import dev.lucaargolo.furniture.utils.MinecraftEntry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;

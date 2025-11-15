@@ -4,7 +4,7 @@ import dev.lucaargolo.furniture.FurnitureData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 
-public class FurnitureUtils {
+public class PackingUtils {
 
     public static long packFurnitureDataLayers(FurnitureData[] layers) {
         return ((long) (layers[0].getPacked() & 0xFFFF) << 48)

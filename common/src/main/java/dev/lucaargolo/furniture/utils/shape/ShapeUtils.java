@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.utils;
+package dev.lucaargolo.furniture.utils.shape;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -6,7 +6,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class VoxelShapeUtils {
+public class ShapeUtils {
 
     public static RotatedShape rotateY(VoxelShape shape, Direction to) {
         return rotateY(shape, Direction.NORTH, to);

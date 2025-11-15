@@ -4,13 +4,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
-import dev.lucaargolo.furniture.FurnitureDataManager;
-import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.block.base.SeatBlock;
+import dev.lucaargolo.furniture.attachment.ChunkFurnitureDataAttachment;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
-import dev.lucaargolo.furniture.utils.FurnitureUtils;
+import dev.lucaargolo.furniture.utils.PackingUtils;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -20,6 +22,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.ChunkPos;
@@ -29,10 +32,13 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 public class FurnitureDataDebug {
+
+    private static final Long2ObjectMap<WeakReference<ChunkFurnitureDataAttachment>> serverDataCache = new Long2ObjectOpenHashMap<>();
 
     public static void renderFurnitureDataDebug(Level level, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -66,22 +72,39 @@ public class FurnitureDataDebug {
         }
 
         IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        ServerLevel serverLevel = null;
+        if(server != null) {
+            serverLevel = server.getLevel(level.dimension());
+        }
+
         Level debugLevel;
-        if(server != null && camera.getEntity().isShiftKeyDown()) {
-            debugLevel = server.getLevel(level.dimension());
+        if(serverLevel != null && camera.getEntity().isShiftKeyDown()) {
+            debugLevel = serverLevel;
         }else{
             debugLevel = level;
         }
 
         chunksToDebug.forEach(chunkPos -> {
-            FurnitureDataManager.ChunkData chunkData = FurnitureMod.INSTANCE.getDataManager().getChunkData(debugLevel, chunkPos);
-            chunkData.forEach((packedPos, packedLayers) -> {
-                BlockPos blockPos = FurnitureUtils.unpackChunkLocalPos(chunkPos, packedPos);
-                FurnitureData[] layers = FurnitureUtils.unpackFurnitureDataLayers(packedLayers);
-                for(int layer = 0; layer < layers.length; layer++) {
-                    renderFurnitureBlockDebug(debugLevel, blockPos, layers[layer], camera, poseStack, lineConsumer, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
+            ChunkFurnitureDataAttachment chunkData;
+            if(debugLevel.isClientSide) {
+                chunkData = FurnitureData.getChunkData(debugLevel, chunkPos);
+            }else{
+                WeakReference<ChunkFurnitureDataAttachment> reference = serverDataCache.get(chunkPos.toLong());
+                if(reference == null || reference.get() == null) {
+                    chunkData = FurnitureData.getChunkData(debugLevel, chunkPos);
+                    serverDataCache.put(chunkPos.toLong(), new WeakReference<>(chunkData));
+                }else{
+                    chunkData = reference.get();
+                    assert chunkData != null;
                 }
-                renderFurnitureShapeDebug(blockPos, chunkData.getCachedShape(blockPos), camera, poseStack, lineConsumer, debugLevel.isClientSide ? 0xFFFFFF : 0x0000FF);
+            }
+            chunkData.forEach((packedPos, packedLayers) -> {
+                BlockPos blockPos = PackingUtils.unpackChunkLocalPos(chunkPos, packedPos);
+                FurnitureData[] layers = PackingUtils.unpackFurnitureDataLayers(packedLayers);
+                for(int layer = 0; layer < layers.length; layer++) {
+                    renderFurnitureBlockDebug(blockPos, level.getBlockState(blockPos), layers[layer], camera, poseStack, lineConsumer, layer == 0 ? 0xFFFF00 : layer == 1 ? 0xFF00FF : layer == 2 ? 0x00FFFF : 0x00FF00);
+                }
+                renderFurnitureShapeDebug(blockPos, chunkData.getCachedShape(blockPos), camera, poseStack, lineConsumer, 0xFFFFFF);
             });
         });
     }
@@ -102,11 +125,11 @@ public class FurnitureDataDebug {
         }
     }
 
-    private static void renderFurnitureBlockDebug(Level level, BlockPos blockPos, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int packedColor) {
-        Vec3 pos = Vec3.atLowerCornerOf(blockPos);
+    private static void renderFurnitureBlockDebug(BlockPos pos, BlockState state, FurnitureData data, Camera camera, PoseStack poseStack, VertexConsumer lineConsumer, int packedColor) {
+        Vec3 position = Vec3.atLowerCornerOf(pos);
 
         poseStack.pushPose();
-        poseStack.translate(pos.x-camera.getPosition().x, pos.y-camera.getPosition().y, pos.z-camera.getPosition().z);
+        poseStack.translate(position.x-camera.getPosition().x, position.y-camera.getPosition().y, position.z-camera.getPosition().z);
 
         Direction toOriginal = data.getDirectionToOriginal();
 
@@ -115,12 +138,11 @@ public class FurnitureDataDebug {
         float blue = FastColor.ARGB32.blue(packedColor)/255f;
 
         if(data.hasOriginal()) {
-            BlockState state = level.getBlockState(blockPos);
-            if(state.getBlock() instanceof SeatBlock block) {
-                Vec3[] seats = block.getSeats();
-                for(int i = 0; i < seats.length; i++) {
-                    Vec3 position = block.getPositionForSeat(data, blockPos, state, i).subtract(pos);
-                    AABB bounds = AABB.ofSize(position, 0.1, 0.1, 0.1);
+            if(state.getBlock() instanceof FurnitureBlock block) {
+                for(Interaction<?> i : block.getInteractions()) {
+                    Interaction<?> interaction = FurnitureBlock.computePositionedInteraction(pos, state, data, i);
+                    Vec3 interactionPosition = interaction.pos().subtract(position);
+                    AABB bounds = AABB.ofSize(interactionPosition, 0.1, 0.1, 0.1);
                     LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);
                 }
             }

@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.utils;
+package dev.lucaargolo.furniture.registry.minecraft;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import net.minecraft.resources.ResourceLocation;

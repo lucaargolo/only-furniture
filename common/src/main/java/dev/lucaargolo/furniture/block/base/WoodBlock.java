@@ -1,6 +1,6 @@
 package dev.lucaargolo.furniture.block.base;
 
-import dev.lucaargolo.furniture.utils.TintColor;
+import dev.lucaargolo.furniture.utils.ModColorProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,9 +22,9 @@ public interface WoodBlock {
         return BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(wood.name() + "_leaves"));
     }
 
-    static TintColor.Block getLeavesColor(WoodType wood) {
+    static ModColorProvider.Block getLeavesColor(WoodType wood) {
         Optional<Block> leaves = getLeaves(wood);
-        return leaves.map(block -> (TintColor.Block) (blockState, blockAndTintGetter, blockPos, i) -> {
+        return leaves.map(block -> (ModColorProvider.Block) (blockState, blockAndTintGetter, blockPos, i) -> {
             BlockColors colors = Minecraft.getInstance().getBlockColors();
             return colors.getColor(block.defaultBlockState(), blockAndTintGetter, blockPos, i);
         }).orElse(null);

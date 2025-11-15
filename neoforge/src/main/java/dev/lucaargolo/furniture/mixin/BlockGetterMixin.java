@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.mixin;
 
 import dev.lucaargolo.furniture.block.FurnitureBlock;
-import dev.lucaargolo.furniture.utils.FurnitureShape;
+import dev.lucaargolo.furniture.utils.shape.FurnitureShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ClipContext;

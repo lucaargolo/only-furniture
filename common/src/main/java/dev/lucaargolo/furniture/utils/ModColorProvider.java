@@ -6,7 +6,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public interface TintColor {
+public interface ModColorProvider {
 
     @FunctionalInterface
     interface Block {

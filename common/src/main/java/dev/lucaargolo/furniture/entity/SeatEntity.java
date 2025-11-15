@@ -29,7 +29,7 @@
 
 package dev.lucaargolo.furniture.entity;
 
-import dev.lucaargolo.furniture.block.base.SeatBlock;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -67,7 +67,7 @@ public class SeatEntity extends Entity {
     @Override
     public void tick() {
         if (this.level().isClientSide) return;
-        if (this.blockPos != null && this.level().getBlockState(this.blockPos).getBlock() instanceof SeatBlock && isVehicle()) return;
+        if (this.blockPos != null && this.level().getBlockState(this.blockPos).getBlock() instanceof FurnitureBlock && isVehicle()) return;
 
         this.discard();
     }
@@ -77,15 +77,15 @@ public class SeatEntity extends Entity {
 
     @Override
     protected void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        if(this.blockPos != null) {
-            compound.putLong("BlockPos", this.blockPos.asLong());
+        if(compound.contains("BlockPos")) {
+            this.blockPos = BlockPos.of(compound.getLong("BlockPos"));
         }
     }
 
     @Override
     protected void addAdditionalSaveData(@NotNull CompoundTag compound) {
-        if(compound.contains("BlockPos")) {
-            this.blockPos = BlockPos.of(compound.getLong("BlockPos"));
+        if(this.blockPos != null) {
+            compound.putLong("BlockPos", this.blockPos.asLong());
         }
     }
 
