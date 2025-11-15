@@ -1,9 +1,10 @@
-package dev.lucaargolo.furniture.attachment;
+package dev.lucaargolo.furniture.attachment.impl;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.attachment.DataAttachment;
 import dev.lucaargolo.furniture.utils.PackingUtils;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.*;
@@ -18,9 +19,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-public class ChunkFurnitureDataAttachment implements DataAttachment<ChunkFurnitureDataAttachment> {
+public final class ChunkFurnitureDataAttachment implements DataAttachment<ChunkFurnitureDataAttachment> {
 
-    private static final Codec<ChunkFurnitureDataAttachment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<ChunkFurnitureDataAttachment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT_STREAM.fieldOf("pos").forGetter(data -> data.furnitureDataMap.keySet().intStream()),
             Codec.LONG_STREAM.fieldOf("layers").forGetter(data -> data.furnitureDataMap.values().longStream())
     ).apply(instance, (posStream, layersStream) -> {
@@ -34,16 +35,16 @@ public class ChunkFurnitureDataAttachment implements DataAttachment<ChunkFurnitu
         return new ChunkFurnitureDataAttachment(furnitureDataMap);
     }));
 
-    private static final StreamCodec<ByteBuf, ChunkFurnitureDataAttachment> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<ByteBuf, ChunkFurnitureDataAttachment> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(Int2LongOpenHashMap::new, ByteBufCodecs.VAR_INT, ByteBufCodecs.VAR_LONG),
-            ChunkFurnitureDataAttachment::getFurnitureDataMap,
+            ChunkFurnitureDataAttachment::get,
             ChunkFurnitureDataAttachment::new
     );
 
     private final Int2LongMap furnitureDataMap;
     private final Int2ObjectMap<VoxelShape> shapeCacheMap = new Int2ObjectOpenHashMap<>();
 
-    private ChunkFurnitureDataAttachment(Map<Integer, Long> map) {
+    public ChunkFurnitureDataAttachment(Map<Integer, Long> map) {
         if(map instanceof Int2LongMap int2LongMap) {
             this.furnitureDataMap = Int2LongMaps.synchronize(int2LongMap);
         }else{
@@ -52,18 +53,8 @@ public class ChunkFurnitureDataAttachment implements DataAttachment<ChunkFurnitu
         this.furnitureDataMap.defaultReturnValue(FurnitureData.DEFAULT_PACKED_LAYERS);
     }
 
-    public ChunkFurnitureDataAttachment() {
-        this(new Int2LongOpenHashMap());
-    }
-
-    @Override
-    public Codec<ChunkFurnitureDataAttachment> getCodec() {
-        return CODEC;
-    }
-
-    @Override
-    public StreamCodec<ByteBuf, ChunkFurnitureDataAttachment> getStreamCodec() {
-        return STREAM_CODEC;
+    private Int2LongMap get() {
+        return this.furnitureDataMap;
     }
 
     public FurnitureData[] get(BlockPos pos) {
@@ -75,43 +66,40 @@ public class ChunkFurnitureDataAttachment implements DataAttachment<ChunkFurnitu
         return FurnitureData.DEFAULT_LAYERS.clone();
     }
 
-    public void set(BlockPos pos, FurnitureData[] layers) {
+    public ChunkFurnitureDataAttachment set(BlockPos pos, FurnitureData[] layers) {
         int packedPos = PackingUtils.packChunkLocalPos(pos);
-        shapeCacheMap.remove(packedPos);
+        this.shapeCacheMap.remove(packedPos);
 
         long newPackedLayers = PackingUtils.packFurnitureDataLayers(layers);
         boolean isDefault = newPackedLayers == FurnitureData.DEFAULT_PACKED_LAYERS;
 
-        long packedLayers = furnitureDataMap.get(packedPos);
+        long packedLayers = this.furnitureDataMap.get(packedPos);
         if(packedLayers != FurnitureData.DEFAULT_PACKED_LAYERS || !isDefault) {
             packedLayers = newPackedLayers;
             if(packedLayers != FurnitureData.DEFAULT_PACKED_LAYERS) {
-                furnitureDataMap.put(packedPos, packedLayers);
+                this.furnitureDataMap.put(packedPos, packedLayers);
             }else{
-                furnitureDataMap.remove(packedPos);
+                this.furnitureDataMap.remove(packedPos);
             }
         }
+        return this;
     }
 
     public VoxelShape cachedShape(BlockPos pos, Supplier<VoxelShape> shapeSupplier) {
         int packedPos = PackingUtils.packChunkLocalPos(pos);
-        return shapeCacheMap.computeIfAbsent(packedPos, k -> shapeSupplier.get());
+        return this.shapeCacheMap.computeIfAbsent(packedPos, k -> shapeSupplier.get());
     }
 
     @Nullable
     @ApiStatus.Internal
     public VoxelShape getCachedShape(BlockPos pos) {
         int packedPos = PackingUtils.packChunkLocalPos(pos);
-        return shapeCacheMap.get(packedPos);
+        return this.shapeCacheMap.get(packedPos);
     }
 
     @ApiStatus.Internal
     public void forEach(BiConsumer<Integer, Long> consumer) {
-        furnitureDataMap.forEach(consumer);
-    }
-
-    private Int2LongMap getFurnitureDataMap() {
-        return furnitureDataMap;
+        this.furnitureDataMap.forEach(consumer);
     }
 
 }

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
-import dev.lucaargolo.furniture.attachment.ChunkFurnitureDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.interaction.Interaction;
 import dev.lucaargolo.furniture.client.render.RenderHelper;

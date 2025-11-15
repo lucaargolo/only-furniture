@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
-import dev.lucaargolo.furniture.attachment.ChunkFurnitureDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
 import dev.lucaargolo.furniture.utils.PackingUtils;
@@ -193,8 +193,7 @@ public class FurnitureData {
 
     public static void set(Level level, BlockPos pos, FurnitureData[] layers) {
         ChunkFurnitureDataAttachment data = getChunkData(level, new ChunkPos(pos));
-        data.set(pos, layers);
-        setChunkData(level, new ChunkPos(pos), data);
+        setChunkData(level, new ChunkPos(pos), data.set(pos, layers));
     }
 
     public static VoxelShape cachedShape(BlockGetter getter, BlockPos pos, Supplier<VoxelShape> shapeSupplier) {
