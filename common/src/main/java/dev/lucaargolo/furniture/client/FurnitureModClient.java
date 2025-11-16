@@ -44,15 +44,20 @@ import java.util.function.BiConsumer;
 
 public abstract class FurnitureModClient {
 
-    public static FurnitureModClient INSTANCE;
+    private static FurnitureModClient instance;
 
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(128));
 
-    private final ModShaderManager shaderManager = FurnitureMod.INSTANCE.loadPlatformClass(ModShaderManager.class);
-    private final ModRenderTypeManager renderTypeManager = FurnitureMod.INSTANCE.loadPlatformClass(ModRenderTypeManager.class);
+    private final ModShaderManager shaderManager;
+    private final ModRenderTypeManager renderTypeManager;
+
+    public FurnitureModClient() {
+        instance = this;
+        this.shaderManager = FurnitureMod.loadPlatformClass(ModShaderManager.class);
+        this.renderTypeManager = FurnitureMod.loadPlatformClass(ModRenderTypeManager.class);
+    }
 
     protected final void init() {
-        INSTANCE = this;
         shaderManager.init();
     }
 
@@ -187,6 +192,10 @@ public abstract class FurnitureModClient {
         poseStack.popPose();
 
         return true;
+    }
+
+    public static FurnitureModClient getInstance() {
+        return instance;
     }
 
 }

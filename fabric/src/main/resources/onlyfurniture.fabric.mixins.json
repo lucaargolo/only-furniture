@@ -9,7 +9,6 @@
     "FlowerPotBlockAccessor"
   ],
   "client": [
-    "AttachmentChangeMixin",
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
     "ItemBlockRenderTypesMixin",

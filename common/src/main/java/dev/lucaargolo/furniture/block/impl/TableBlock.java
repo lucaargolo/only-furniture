@@ -46,7 +46,7 @@ public class TableBlock extends FurnitureConnectingBlock implements WoodBlock {
     }
 
     @Override
-    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForFurniture(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
         Direction facing = data.getFacing(state);
         int key = 0;
         if (state.getValue(NORTH)) key |= 1;

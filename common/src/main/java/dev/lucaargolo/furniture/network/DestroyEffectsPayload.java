@@ -42,7 +42,6 @@ public record DestroyEffectsPayload(BlockPos blockPos, int state, int packedData
             if(level != null) {
                 spawnDestroyEffects(level, payload.blockPos, Block.stateById(payload.state), new FurnitureData((short) payload.packedData));
             }
-
         });
     }
 
@@ -53,7 +52,7 @@ public record DestroyEffectsPayload(BlockPos blockPos, int state, int packedData
 
     private static void spawnDestroyEffects(ClientLevel level, BlockPos pos, BlockState state, FurnitureData data) {
         if(state.getBlock() instanceof FurnitureBlock block) {
-            VoxelShape shape = block.getShapeForData(level, pos, state, data);
+            VoxelShape shape = block.getShapeForFurniture(level, pos, state, data, -1);
             SoundType soundType = state.getSoundType();
             level.playLocalSound(pos, soundType.getBreakSound(), SoundSource.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
             shape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {

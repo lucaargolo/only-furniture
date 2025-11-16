@@ -67,7 +67,7 @@ public class FurnitureData {
 
     public Type type() {
         int value = packed & 0xFFFF;
-        int type = (value >> 12) & 0b1111;
+        int type = (value >> 12) & 0b111;
         return Type.values()[type];
     }
 

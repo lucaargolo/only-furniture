@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class ModDataAttachments {
 
-    public static ModAttachmentRegistry<?> REGISTRY = FurnitureMod.INSTANCE.attachmentRegistry();
+    public static ModAttachmentRegistry<?> REGISTRY = FurnitureMod.attachmentRegistry();
 
     public static DataAttachmentType<BlockAttachment> BLOCK = REGISTRY.register("block", DataAttachmentType.of(
             BlockAttachment.class,

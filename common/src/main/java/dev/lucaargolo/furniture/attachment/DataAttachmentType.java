@@ -30,15 +30,15 @@ public interface DataAttachmentType<A extends DataAttachment<A>> {
 
     @Nullable
     default A get(Object target) {
-        return FurnitureMod.INSTANCE.getAttachmentManager().get(target, this);
+        return FurnitureMod.getAttachmentManager().get(target, this);
     }
 
     default void set(Object target, A value) {
-        FurnitureMod.INSTANCE.getAttachmentManager().set(target, this, value);
+        FurnitureMod.getAttachmentManager().set(target, this, value);
     }
 
     default A getOrCreate(Object target) {
-        return FurnitureMod.INSTANCE.getAttachmentManager().getOrCreate(target, this);
+        return FurnitureMod.getAttachmentManager().getOrCreate(target, this);
     }
 
     static <A extends DataAttachment<A>> DataAttachmentType<A> of(Class<A> type, Supplier<A> supplier) {

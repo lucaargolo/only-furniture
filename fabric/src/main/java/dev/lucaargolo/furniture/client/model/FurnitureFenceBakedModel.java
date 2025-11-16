@@ -2,7 +2,6 @@ package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureData;
-import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
@@ -48,7 +47,7 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                     BlockPos neighborPos = pos.offset(neighborOffset);
                     BlockState neighborState = blockView.getBlockState(neighborPos);
                     if(neighborState.getBlock() instanceof FurnitureFenceBlock) {
-                        FurnitureData neighborData = FurnitureData.get(blockView, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
+                        FurnitureData neighborData = FurnitureData.getOriginal(blockView, neighborPos);
                         if (neighborData.hasOriginal()) {
                             Vector3f origin = new Vector3f(pos.getX() + 0.5f + data.getX(state), pos.getY() + 0.5f + data.getY(state), pos.getZ() + 0.5f + data.getZ(state));
                             Vector3f destination = new Vector3f(neighborPos.getX() + 0.5f + neighborData.getX(neighborState), neighborPos.getY() + 0.5f + neighborData.getY(neighborState), neighborPos.getZ() + 0.5f + neighborData.getZ(neighborState));

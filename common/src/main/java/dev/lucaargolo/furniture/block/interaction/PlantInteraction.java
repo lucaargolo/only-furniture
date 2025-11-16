@@ -52,7 +52,7 @@ public class PlantInteraction extends Interaction<PlantInteraction> {
             return false;
         }
 
-        Block pottedBlock = FurnitureMod.INSTANCE.getPottedBlock(blockItem.getBlock());
+        Block pottedBlock = FurnitureMod.getInstance().getPottedBlock(blockItem.getBlock());
         if(pottedBlock == Blocks.FLOWER_POT) {
             return false;
         }

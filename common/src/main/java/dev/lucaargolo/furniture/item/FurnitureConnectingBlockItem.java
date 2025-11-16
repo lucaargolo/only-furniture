@@ -79,12 +79,12 @@ public class FurnitureConnectingBlockItem extends FurnitureBlockItem{
     }
 
     @Override
-    protected boolean placeBlock(@NotNull BlockPlaceContext pContext, @NotNull BlockState pState) {
-        boolean placed = super.placeBlock(pContext, pState);
+    protected boolean placeBlock(@NotNull BlockPlaceContext context, @NotNull BlockState state, int layer) {
+        boolean placed = super.placeBlock(context, state, layer);
         if(placed) {
-            Player player = pContext.getPlayer();
-            Level level = pContext.getLevel();
-            BlockPos pos = pContext.getClickedPos();
+            Player player = context.getPlayer();
+            Level level = context.getLevel();
+            BlockPos pos = context.getClickedPos();
             if(player instanceof ServerPlayer serverPlayer) {
                 FurnitureConnectingBlockItem.setLastPosition(serverPlayer, pos);
             }else if(level.isClientSide){

@@ -19,6 +19,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -87,13 +88,18 @@ public class FurnitureBlockItem extends BlockItem {
         }
     }
 
-    private boolean placeBlock(BlockPlaceContext context, BlockState state, int layer) {
-        FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, this.furnitureBlock.getFurnitureDataForPlacement(context));
-        boolean placed = super.placeBlock(context, state);
-        if(!placed) {
-            FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, FurnitureData.DEFAULT);
+    protected boolean placeBlock(BlockPlaceContext context, BlockState state, int layer) {
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        level.setBlock(pos, state, Block.UPDATE_ALL_IMMEDIATE);
+
+        if(level.getBlockState(pos) == state) {
+            FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, this.furnitureBlock.getFurnitureDataForPlacement(context));
+            FurnitureMod.updateBlock(context.getLevel(), context.getClickedPos());
+            return true;
+        }else {
+            return false;
         }
-        return placed;
     }
 
     private Pair<BlockState, Integer> getPlacementStateAndLayer(BlockPlaceContext context) {
@@ -123,7 +129,7 @@ public class FurnitureBlockItem extends BlockItem {
             if(localRotation < 0f) {
                 localRotation += 360.0f;
             }
-            FurnitureMod.INSTANCE.getPacketManager().sendToServer(new FurnitureRotationPayload(localRotation));
+            FurnitureMod.getPacketManager().sendToServer(new FurnitureRotationPayload(localRotation));
             return true;
         }else{
             return false;

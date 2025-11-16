@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public class ModBlocks {
 
-    public static final ModBlockRegistry REGISTRY = FurnitureMod.INSTANCE.blockRegistry();
+    public static final ModBlockRegistry REGISTRY = FurnitureMod.blockRegistry();
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
     public static final Map<WoodType, ModBlockRegistry.BlockEntry<WoodSeatBlock>> CHAIR_MAP = registerForWoodSeat("chair", WoodBlock::getPlanks, WoodSeatBlock::new, new Vec3(0.0, -0.0625, 0.0), ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);

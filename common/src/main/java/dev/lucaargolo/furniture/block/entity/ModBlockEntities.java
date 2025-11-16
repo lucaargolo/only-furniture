@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 public abstract class ModBlockEntities {
 
-    public static final ModBlockEntityRegistry REGISTRY = FurnitureMod.INSTANCE.blockEntityRegistry();
+    public static final ModBlockEntityRegistry REGISTRY = FurnitureMod.blockEntityRegistry();
 
     public static final Supplier<BlockEntityType<PlantHolderBlockEntity>> PLANT_HOLDER = REGISTRY.register("plant_holder", PlantHolderBlockEntity::new, ModBlocks.PLANT_POT);
 

@@ -62,7 +62,7 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
     }
 
     @Override
-    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForFurniture(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
         boolean north = state.getValue(NORTH);
         boolean south = state.getValue(SOUTH);
         boolean outer = state.getValue(OUTER);

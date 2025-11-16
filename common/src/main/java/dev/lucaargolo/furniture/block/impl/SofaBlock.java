@@ -46,7 +46,7 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock {
     }
 
     @Override
-    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForFurniture(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
         boolean north = state.getValue(NORTH);
         boolean south = state.getValue(SOUTH);
         boolean west = state.getValue(WEST);

@@ -23,7 +23,7 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
         this.modBus = modBus;
         this.init();
         if(FMLEnvironment.dist.isClient()) {
-            this.loadPlatformClass(FurnitureModClient.class);
+            loadPlatformClass(FurnitureModClient.class);
         }
     }
 
@@ -45,7 +45,7 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
     }
 
     public static IEventBus getModBus() {
-        return ((NeoForgeFurnitureMod) FurnitureMod.INSTANCE).modBus;
+        return ((NeoForgeFurnitureMod) FurnitureMod.getInstance()).modBus;
     }
 
 }

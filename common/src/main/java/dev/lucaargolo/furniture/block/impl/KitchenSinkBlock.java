@@ -58,10 +58,10 @@ public class KitchenSinkBlock extends FurnitureBlock {
     }
 
     @Override
-    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForFurniture(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
         Direction facing = data.getFacing(state);
         Rotation rotation = data.getRotation();
-        return state.getValue(DROPPED) ? this.droppedShapes.get(Pair.of(facing, rotation)) : super.getShapeForData(level, pos, state, data);
+        return state.getValue(DROPPED) ? this.droppedShapes.get(Pair.of(facing, rotation)) : super.getShapeForFurniture(level, pos, state, data, layer);
     }
 
     public static class Stone extends KitchenSinkBlock implements StoneBlock {

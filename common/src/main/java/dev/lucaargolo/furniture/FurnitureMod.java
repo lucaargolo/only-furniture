@@ -7,12 +7,17 @@ import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
+import dev.lucaargolo.furniture.network.BlockChangedPayload;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.registry.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +29,18 @@ public abstract class FurnitureMod {
     public static final String MOD_NAME = "Only Furniture";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
 
-    public static FurnitureMod INSTANCE;
+    private static FurnitureMod instance;
 
-    private final ModPacketManager packetManager = loadPlatformClass(ModPacketManager.class);
-    private final ModAttachmentManager attachmentManager = loadPlatformClass(ModAttachmentManager.class);
+    private final ModPacketManager packetManager;
+    private final ModAttachmentManager attachmentManager;
+
+    public FurnitureMod() {
+        instance = this;
+        this.packetManager = loadPlatformClass(ModPacketManager.class);
+        this.attachmentManager = loadPlatformClass(ModAttachmentManager.class);
+    }
 
     public final void init() {
-        INSTANCE = this;
         ModBlocks.REGISTRY.init();
         ModBlockEntities.REGISTRY.init();
         ModItems.REGISTRY.init();
@@ -46,37 +56,47 @@ public abstract class FurnitureMod {
 
     public abstract Block getPottedBlock(Block block);
 
-    public final ModPacketManager getPacketManager() {
-        return packetManager;
+    public static FurnitureMod getInstance() {
+        return instance;
     }
 
-    public ModAttachmentManager getAttachmentManager() {
-        return attachmentManager;
+    public static void updateBlock(Level level, BlockPos pos) {
+        if(level instanceof ServerLevel serverLevel) {
+            instance.packetManager.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(pos), new BlockChangedPayload(pos));
+        }
     }
 
-    public final <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
+    public static ModPacketManager getPacketManager() {
+        return instance.packetManager;
+    }
+
+    public static ModAttachmentManager getAttachmentManager() {
+        return instance.attachmentManager;
+    }
+
+    public static <T> ModRegistry<T> registry(ResourceKey<Registry<T>> registryKey) {
         return loadPlatformClass(ModRegistry.class, registryKey);
     }
 
-    public final ModBlockRegistry blockRegistry() {
+    public static ModBlockRegistry blockRegistry() {
         return loadPlatformClass(ModBlockRegistry.class);
     }
 
-    public final ModBlockEntityRegistry blockEntityRegistry() {
+    public static ModBlockEntityRegistry blockEntityRegistry() {
         return loadPlatformClass(ModBlockEntityRegistry.class);
     }
 
-    public final ModItemRegistry itemRegistry() {
+    public static ModItemRegistry itemRegistry() {
         return loadPlatformClass(ModItemRegistry.class);
     }
 
-    public final ModAttachmentRegistry<?> attachmentRegistry() {
+    public static ModAttachmentRegistry<?> attachmentRegistry() {
         return loadPlatformClass(ModAttachmentRegistry.class);
     }
 
-    public final <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
+    public static <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
         String name = clazz.getName();
-        String platformName = name.substring(0, name.lastIndexOf('.')) + "." + getPlatform() + name.substring(name.lastIndexOf('.') + 1);
+        String platformName = name.substring(0, name.lastIndexOf('.')) + "." + instance.getPlatform() + name.substring(name.lastIndexOf('.') + 1);
         Class<?>[] parameterTypes = new Class<?>[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             parameterTypes[i] = parameters[i].getClass();
@@ -91,7 +111,5 @@ public abstract class FurnitureMod {
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
-
-
 
 }

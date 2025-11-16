@@ -11,7 +11,7 @@ import net.minecraft.world.level.block.Block;
 
 public class ModItems {
 
-    public static final ModItemRegistry REGISTRY = FurnitureMod.INSTANCE.itemRegistry();
+    public static final ModItemRegistry REGISTRY = FurnitureMod.itemRegistry();
 
     static {
         ModBlocks.REGISTRY.forEach((entry) -> {

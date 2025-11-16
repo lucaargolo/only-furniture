@@ -76,7 +76,7 @@ public class FurnitureBlock extends Block {
 
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        if (!FurnitureMod.INSTANCE.isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching()) {
+        if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching()) {
             FurnitureData data = FurnitureData.getOriginal(level, pos);
             List<? extends Interaction<?>> interactions = this.getInteractions();
 
@@ -153,7 +153,7 @@ public class FurnitureBlock extends Block {
             state = state.setValue(FACING, context.getHorizontalDirection().getOpposite());
         }
 
-        VoxelShape shape = this.getShapeForDataWithOffset(level, pos, state, data);
+        VoxelShape shape = this.getShapeForFurnitureWithOffset(level, pos, state, data, -1);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pos, shape, Vec3.atLowerCornerOf(pos));
         intersectingPositions.add(pos);
 
@@ -192,7 +192,7 @@ public class FurnitureBlock extends Block {
         FurnitureData data = pair.getFirst();
         int layer = pair.getSecond();
 
-        VoxelShape shape = this.getShapeForDataWithOffset(pLevel, pPos, pState, data);
+        VoxelShape shape = this.getShapeForFurnitureWithOffset(pLevel, pPos, pState, data, layer);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pPos, shape, Vec3.atLowerCornerOf(pPos));
 
         Map<BlockPos, Direction> intersectingDirections = Objects.requireNonNull(calculateIntersectingDirections(pPos, intersectingPositions));
@@ -232,7 +232,7 @@ public class FurnitureBlock extends Block {
     private static void onRemoveLayer(ServerLevel level, BlockPos pos, BlockState state, int layer) {
         FurnitureData data = FurnitureData.get(level, pos, layer);
         if(data.hasOriginal()) {
-            FurnitureMod.INSTANCE.getPacketManager().sendToPlayersTrackingChunk(level, new ChunkPos(pos), new DestroyEffectsPayload(pos, Block.getId(state), data.getPacked()));
+            FurnitureMod.getPacketManager().sendToPlayersTrackingChunk(level, new ChunkPos(pos), new DestroyEffectsPayload(pos, Block.getId(state), data.getPacked()));
             onRemoveOriginalLayer(true, level, pos, layer);
         }else{
             if(data.getDirectionToOriginal() != null) {
@@ -376,7 +376,7 @@ public class FurnitureBlock extends Block {
                 BlockState originalState = pLevel.getBlockState(originalPos);
                 if(originalState.getBlock() instanceof FurnitureBlock originalBlock) {
                     Vec3 toOriginal = Vec3.atLowerCornerOf(pair.getSecond());
-                    VoxelShape originalShape = originalBlock.getShapeForDataWithOffset(pLevel, originalPos, originalState, originalData, toOriginal);
+                    VoxelShape originalShape = originalBlock.getShapeForFurnitureWithOffset(pLevel, originalPos, originalState, originalData, layer, toOriginal);
                     shapes.add(new FurnitureShape(layer, originalData, originalPos, originalState, pair.getSecond(), originalShape));
                 }
             }
@@ -384,17 +384,17 @@ public class FurnitureBlock extends Block {
         return shapes;
     }
 
-    private VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
-        return this.getShapeForDataWithOffset(level, pos, state, data, Vec3.ZERO);
+    private VoxelShape getShapeForFurnitureWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
+        return this.getShapeForFurnitureWithOffset(level, pos, state, data, layer, Vec3.ZERO);
     }
 
     @NotNull
-    private VoxelShape getShapeForDataWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, Vec3 offset) {
+    private VoxelShape getShapeForFurnitureWithOffset(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer, Vec3 offset) {
         offset = offset.add(data.getX(state), data.getY(state), data.getZ(state));
-        return this.getShapeForData(level, pos, state, data).move(offset.x, offset.y, offset.z);
+        return this.getShapeForFurniture(level, pos, state, data, layer).move(offset.x, offset.y, offset.z);
     }
 
-    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
+    public VoxelShape getShapeForFurniture(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
         Direction facing = data.getFacing(state);
         Rotation rotation = data.getRotation();
         return this.shapes.get(Pair.of(facing, rotation));

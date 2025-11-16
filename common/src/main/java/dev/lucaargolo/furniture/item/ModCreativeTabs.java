@@ -31,7 +31,7 @@ public class ModCreativeTabs {
         }
     }).thenComparingInt(ModItemRegistry.ItemEntry::getLocalId);
 
-    public static final ModRegistry<CreativeModeTab> REGISTRY = FurnitureMod.INSTANCE.registry(Registries.CREATIVE_MODE_TAB);
+    public static final ModRegistry<CreativeModeTab> REGISTRY = FurnitureMod.registry(Registries.CREATIVE_MODE_TAB);
 
     public static Supplier<CreativeModeTab> CREATIVE_TAB = REGISTRY.register("creative_tab", () -> CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
             .title(Component.translatable("itemGroup."+FurnitureMod.MOD_ID+".creative_tab"))

@@ -5,7 +5,6 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.FurnitureData;
-import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -112,7 +111,7 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                     BlockPos neighborPos = pos.offset(neighborOffset);
                     BlockState neighborState = level.getBlockState(neighborPos);
                     if(neighborState.getBlock() instanceof FurnitureFenceBlock) {
-                        FurnitureData neighborData = FurnitureData.get(level, neighborPos, neighborState.getValue(FurnitureBlock.LAYER));
+                        FurnitureData neighborData = FurnitureData.getOriginal(level, neighborPos);
                         if (neighborData.hasOriginal()) {
                             neighborDataMap.put(Pair.of(neighborOffset, index), Pair.of(neighborState, neighborData));
                         }

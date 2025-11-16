@@ -35,8 +35,8 @@ public class FurnitureFenceBlock extends FurnitureConnectingBlock {
     }
 
     @Override
-    public VoxelShape getShapeForData(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data) {
-        VoxelShape original = super.getShapeForData(level, pos, state, data);
+    public VoxelShape getShapeForFurniture(BlockGetter level, BlockPos pos, BlockState state, FurnitureData data, int layer) {
+        VoxelShape original = super.getShapeForFurniture(level, pos, state, data, layer);
         List<VoxelShape> shapes = new ArrayList<>();
         shapes.add(original);
         List<Vec3i> offsets = this.getType().getOffsets();
@@ -46,8 +46,8 @@ public class FurnitureFenceBlock extends FurnitureConnectingBlock {
 
             BlockPos connectedPos = pos.offset(offset);
             BlockState connectedState = level.getBlockState(connectedPos);
-            if(connectedState.is(this.getConnecting()) && ((property != null && state.getValue(property)) || (oppositeProperty != null && connectedState.getValue(oppositeProperty)))) {
-                FurnitureData connectedData = FurnitureData.get(level, connectedPos, state.getValue(FurnitureBlock.LAYER));
+            if(layer != -1 && connectedState.is(this.getConnecting()) && ((property != null && state.getValue(property)) || (oppositeProperty != null && connectedState.getValue(oppositeProperty)))) {
+                FurnitureData connectedData = FurnitureData.get(level, connectedPos, layer);
 
                 Vector3f origin = new Vector3f(0f, 0f, 0f);
                 Vector3f destination = new Vector3f(
