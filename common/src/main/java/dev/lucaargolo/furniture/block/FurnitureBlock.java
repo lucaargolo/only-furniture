@@ -34,7 +34,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.AABB;
@@ -53,7 +52,6 @@ import java.util.stream.IntStream;
 
 public class FurnitureBlock extends Block {
 
-    public static final IntegerProperty LAYER = IntegerProperty.create("layer", 0, 3);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     protected final Map<Pair<Direction, Rotation>, VoxelShape> shapes;
@@ -62,7 +60,6 @@ public class FurnitureBlock extends Block {
         super(furnitureProperties(base));
         this.shapes = computeVoxelShapes(shapes, this.isWallBlock());
         BlockState state = this.stateDefinition.any();
-        state = state.setValue(LAYER, 0);
         if(this.isWallBlock()) {
             state = state.setValue(FACING, Direction.NORTH);
         }
@@ -80,7 +77,7 @@ public class FurnitureBlock extends Block {
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         if (!FurnitureMod.INSTANCE.isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching()) {
-            FurnitureData data = FurnitureData.get(level, pos, state.getValue(FurnitureBlock.LAYER));
+            FurnitureData data = FurnitureData.getOriginal(level, pos);
             List<? extends Interaction<?>> interactions = this.getInteractions();
 
             LinkedHashMap<Integer, Interaction<?>> interactionsMap = IntStream.range(0, interactions.size()).boxed()
@@ -98,7 +95,6 @@ public class FurnitureBlock extends Block {
 
     @Override
     public void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
-        builder.add(LAYER);
         if(this.isWallBlock()) {
             builder.add(FACING);
         }
@@ -125,7 +121,7 @@ public class FurnitureBlock extends Block {
 
     @Override
     public final @Nullable BlockState getStateForPlacement(@NotNull BlockPlaceContext pContext) {
-        return getStateForPlacement(pContext, getFurnitureDataForPlacement(pContext));
+        return getStateAndLayerForPlacement(pContext, getFurnitureDataForPlacement(pContext)).getFirst();
     }
 
     public final FurnitureData getFurnitureDataForPlacement(BlockPlaceContext context) {
@@ -146,10 +142,10 @@ public class FurnitureBlock extends Block {
         Direction facing = context.getHorizontalDirection().getOpposite();
         float x = this.isWallBlock() && facing.getAxis() == Direction.Axis.X ? oy : ox;
         float z = this.isWallBlock() && facing.getAxis() == Direction.Axis.Z ? oy : oz;
-        return new FurnitureData(x, z, FurnitureBlockItem.getRotation(player), null, true);
+        return new FurnitureData(x, z, FurnitureBlockItem.getRotation(player), FurnitureData.Type.ORIGINAL);
     }
 
-    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context, FurnitureData data) {
+    public Pair<BlockState, Integer> getStateAndLayerForPlacement(BlockPlaceContext context, FurnitureData data) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockState state = this.defaultBlockState();
@@ -164,7 +160,7 @@ public class FurnitureBlock extends Block {
         for(BlockPos intersectingPos: intersectingPositions) {
             BlockState intersectingState = level.getBlockState(intersectingPos);
             if(!intersectingState.canBeReplaced(context)) {
-                return null;
+                return Pair.of(null, -1);
             }else if(intersectingState.getBlock() instanceof FurnitureBlock) {
                 VoxelShape intersectingShape = intersectingState.getShape(level, intersectingPos).move(
                         intersectingPos.getX()-pos.getX(),
@@ -173,33 +169,35 @@ public class FurnitureBlock extends Block {
                 );
                 boolean collides = Shapes.joinIsNotEmpty(shape, intersectingShape, BooleanOp.AND);
                 if(collides) {
-                    return null;
+                    return Pair.of(null, -1);
                 }
             }
         }
 
         int layer = calculateAvailableLayer(level, pos, intersectingPositions);
         if(layer == -1) {
-            return null;
+            return Pair.of(null, -1);
         }
 
         if(calculateIntersectingDirections(pos, intersectingPositions) != null) {
-            return computeStateForData(level, pos, state, data, context).setValue(LAYER, layer);
+            return Pair.of(computeStateForData(level, pos, state, data, context), layer);
         }else {
-            return null;
+            return Pair.of(null, -1);
         }
     }
 
     @Override
     public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, @Nullable LivingEntity pPlacer, @NotNull ItemStack pStack) {
-        int layer = pState.getValue(LAYER);
-        FurnitureData data = FurnitureData.get(pLevel, pPos, layer);
+        Pair<FurnitureData, Integer> pair = FurnitureData.getOriginalAndLayer(pLevel, pPos);
+        FurnitureData data = pair.getFirst();
+        int layer = pair.getSecond();
+
         VoxelShape shape = this.getShapeForDataWithOffset(pLevel, pPos, pState, data);
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsFromShape(pPos, shape, Vec3.atLowerCornerOf(pPos));
 
         Map<BlockPos, Direction> intersectingDirections = Objects.requireNonNull(calculateIntersectingDirections(pPos, intersectingPositions));
         for(BlockPos intersectingPos: intersectingPositions) {
-            FurnitureData intersectingData = new FurnitureData(data.x(), data.z(), data.rotation(), intersectingDirections.get(intersectingPos), false);
+            FurnitureData intersectingData = new FurnitureData(data.x(), data.z(), data.rotation(), intersectingDirections.get(intersectingPos));
             FurnitureData.set(pLevel, intersectingPos, layer, intersectingData);
             BlockState intersectingState = pLevel.getBlockState(intersectingPos);
             if(!(intersectingState.getBlock() instanceof FurnitureBlock)) {
@@ -304,9 +302,8 @@ public class FurnitureBlock extends Block {
         if(level instanceof Level) {
             FurnitureData.clearShapeCache((Level) level, pos);
         }
-        int layer = state.getValue(LAYER);
-        FurnitureData data = FurnitureData.get(level, pos, layer);
-        return computeStateForData(level, pos, state, data, null);
+        Pair<FurnitureData, Integer> pair = FurnitureData.getOriginalAndLayer(level, pos);
+        return computeStateForData(level, pos, state, pair.getFirst(), null);
     }
 
     protected BlockState computeStateForData(LevelAccessor level, BlockPos pos, BlockState state, FurnitureData data, @Nullable BlockPlaceContext context) {

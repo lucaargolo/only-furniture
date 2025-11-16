@@ -105,15 +105,20 @@ public abstract class FurnitureModClient {
                 BlockState placingState = level.getBlockState(placingPos);
 
                 FurnitureData data = block.getFurnitureDataForPlacement(context);
-                BlockState state = block.getStateForPlacement(context, data);
+                Pair<BlockState, Integer> pair = block.getStateAndLayerForPlacement(context, data);
+
                 boolean isValidPlacement = true;
-                if(state == null) {
+                BlockState state;
+                if(pair.getFirst() == null || pair.getSecond() == -1) {
                     isValidPlacement = false;
                     state = block.defaultBlockState();
                     if(block.isWallBlock()) {
                         state = state.setValue(FurnitureBlock.FACING, context.getHorizontalDirection().getOpposite());
                     }
+                }else{
+                    state = pair.getFirst();
                 }
+
                 int color = !isValidPlacement || !placingState.canBeReplaced(context) ? 0xda3e44 : 0x5865f2;
                 int packedColor = FastColor.ARGB32.color(120, color);
 
@@ -122,7 +127,7 @@ public abstract class FurnitureModClient {
                     if(lastPosition != null) {
                         BlockState lastState = level.getBlockState(lastPosition);
                         if (lastState.getBlock() instanceof FurnitureConnectingBlock lastBlock && lastBlock.getType().isDependentOnLastPosition()) {
-                            FurnitureData lastData = FurnitureData.get(level, lastPosition, lastState.getValue(FurnitureBlock.LAYER));
+                            FurnitureData lastData = FurnitureData.getOriginal(level, lastPosition);
 
                             BooleanProperty propertyToManuallyConnect = connectingBlockItem.manuallyConnectNeighbors(level, lastPosition, clickedPos, clickedState);
                             boolean isManuallyConnecting = !player.isShiftKeyDown() && propertyToManuallyConnect != null;

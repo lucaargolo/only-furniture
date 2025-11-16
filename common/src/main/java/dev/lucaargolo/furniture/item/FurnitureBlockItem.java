@@ -4,16 +4,24 @@ import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.mixin.BlockItemAccessor;
 import dev.lucaargolo.furniture.network.FurnitureRotationPayload;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,18 +41,65 @@ public class FurnitureBlockItem extends BlockItem {
         this.furnitureBlock = block;
     }
 
+    public FurnitureBlock getFurnitureBlock() {
+        return furnitureBlock;
+    }
+
     @Override
-    protected boolean placeBlock(@NotNull BlockPlaceContext pContext, @NotNull BlockState pState) {
-        FurnitureData.set(pContext.getLevel(), pContext.getClickedPos(), pState.getValue(FurnitureBlock.LAYER), this.furnitureBlock.getFurnitureDataForPlacement(pContext));
-        boolean placed = super.placeBlock(pContext, pState);
+    public @NotNull InteractionResult place(BlockPlaceContext context) {
+        if (!this.getBlock().isEnabled(context.getLevel().enabledFeatures())) {
+            return InteractionResult.FAIL;
+        } else if (!context.canPlace()) {
+            return InteractionResult.FAIL;
+        } else {
+            BlockPlaceContext updatedContext = this.updatePlacementContext(context);
+            if (updatedContext == null) {
+                return InteractionResult.FAIL;
+            } else {
+                Pair<BlockState, Integer> pair = this.getPlacementStateAndLayer(updatedContext);
+                if (pair.getFirst() == null || pair.getSecond() == -1) {
+                    return InteractionResult.FAIL;
+                } else if (!this.placeBlock(updatedContext, pair.getFirst(), pair.getSecond())) {
+                    return InteractionResult.FAIL;
+                } else {
+                    BlockPos pos = updatedContext.getClickedPos();
+                    Level level = updatedContext.getLevel();
+                    Player player = updatedContext.getPlayer();
+                    ItemStack stack = updatedContext.getItemInHand();
+                    BlockState state = level.getBlockState(pos);
+                    if (state.is(pair.getFirst().getBlock())) {
+                        state = ((BlockItemAccessor) this).invokeUpdateBlockStateFromTag(pos, level, stack, state);
+                        this.updateCustomBlockEntityTag(pos, level, player, stack, state);
+                        BlockItemAccessor.invokeUpdateBlockEntityComponents(level, pos, stack);
+                        state.getBlock().setPlacedBy(level, pos, state, player, stack);
+                        if (player instanceof ServerPlayer) {
+                            CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer)player, pos, stack);
+                        }
+                    }
+
+                    SoundType soundtype = state.getSoundType();
+                    level.playSound(player, pos, this.getPlaceSound(state), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+                    level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(player, state));
+                    stack.consume(1, player);
+                    return InteractionResult.sidedSuccess(level.isClientSide);
+                }
+            }
+        }
+    }
+
+    private boolean placeBlock(BlockPlaceContext context, BlockState state, int layer) {
+        FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, this.furnitureBlock.getFurnitureDataForPlacement(context));
+        boolean placed = super.placeBlock(context, state);
         if(!placed) {
-            FurnitureData.set(pContext.getLevel(), pContext.getClickedPos(), pState.getValue(FurnitureBlock.LAYER), FurnitureData.DEFAULT);
+            FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, FurnitureData.DEFAULT);
         }
         return placed;
     }
 
-    public FurnitureBlock getFurnitureBlock() {
-        return furnitureBlock;
+    private Pair<BlockState, Integer> getPlacementStateAndLayer(BlockPlaceContext context) {
+        FurnitureData data = this.getFurnitureBlock().getFurnitureDataForPlacement(context);
+        Pair<BlockState, Integer> pair = this.getFurnitureBlock().getStateAndLayerForPlacement(context, data);
+        return pair.getFirst() != null && this.canPlace(context, pair.getFirst()) ? pair : Pair.of(null, -1);
     }
 
     public static float getRotation(@Nullable Player player) {

@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 public class FurnitureData {
 
-    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f, null, false);
+    public static FurnitureData DEFAULT = new FurnitureData(0.5f, 0.5f, 0f, Type.EMPTY);
     public static FurnitureData[] DEFAULT_LAYERS = new FurnitureData[] {DEFAULT, DEFAULT, DEFAULT, DEFAULT};
     public static long DEFAULT_PACKED_LAYERS = PackingUtils.packFurnitureDataLayers(DEFAULT_LAYERS);
 
@@ -38,13 +38,15 @@ public class FurnitureData {
         this.packed = packed;
     }
 
-    public FurnitureData(float x, float z, float rotation, @Nullable Direction toOriginal, boolean hasOriginal) {
+    public FurnitureData(float x, float z, float rotation, Type type) {
         int ofx = Mth.clamp(Mth.floor(x * 16f), 0, 15);
         int ofz = Mth.clamp(Mth.floor(z * 16f), 0, 15);
         int rot = Mth.floor(Math.min(rotation, 359f) / 22.5f);
-        int dir = (toOriginal == null ? 0 : toOriginal.ordinal() + 1);
-        int origBit = hasOriginal ? 1 : 0;
-        this.packed = (short) ((origBit << 15) | (dir << 12) | (rot << 8) | (ofz << 4) | ofx);
+        this.packed = (short) ((type.ordinal() << 12) | (rot << 8) | (ofz << 4) | ofx);
+    }
+
+    public FurnitureData(float x, float z, float rotation, Direction direction) {
+        this(x, z, rotation, Type.fromDirection(direction));
     }
 
     public float x() {
@@ -61,6 +63,12 @@ public class FurnitureData {
         int value = packed & 0xFFFF;
         int rotationIndex = (value >> 8) & 0b1111;
         return rotationIndex * 22.5f;
+    }
+
+    public Type type() {
+        int value = packed & 0xFFFF;
+        int type = (value >> 12) & 0b1111;
+        return Type.values()[type];
     }
 
     public Rotation getRotation() {
@@ -115,17 +123,13 @@ public class FurnitureData {
         return getOffset(Direction.Axis.Z, state);
     }
 
-
     @Nullable
     public Direction getDirectionToOriginal() {
-        int value = packed & 0xFFFF;
-        int dir = (value >> 12) & 0b111;
-        return dir == 0 ? null : Direction.values()[dir - 1];
+        return type().getDirectionToOriginal();
     }
 
     public boolean hasOriginal() {
-        int value = packed & 0xFFFF;
-        return ((value >> 15) & 0b1) != 0;
+        return type().isOriginal();
     }
 
     public short getPacked() {
@@ -173,6 +177,21 @@ public class FurnitureData {
         return Pair.of(data, toOriginal);
     }
 
+    public static FurnitureData getOriginal(BlockGetter getter, BlockPos pos) {
+        return getOriginalAndLayer(getter, pos).getFirst();
+    }
+
+    public static Pair<FurnitureData, Integer> getOriginalAndLayer(BlockGetter getter, BlockPos pos) {
+        FurnitureData[] layers = FurnitureData.get(getter, pos);
+        for(int i = 0; i < layers.length; ++i) {
+            FurnitureData data = layers[i];
+            if(data.hasOriginal()) {
+                return Pair.of(data, i);
+            }
+        }
+        return Pair.of(FurnitureData.DEFAULT, 0);
+    }
+
     public static FurnitureData get(BlockGetter getter, BlockPos pos, int layer) {
         return FurnitureData.get(getter, pos)[layer];
     }
@@ -207,6 +226,53 @@ public class FurnitureData {
     public static void clearShapeCache(Level level, BlockPos pos) {
         FurnitureData[] layers = FurnitureData.get(level, pos);
         FurnitureData.set(level, pos, layers);
+    }
+
+    public enum Type {
+        EMPTY,
+        DOWN(Direction.DOWN),
+        UP(Direction.UP),
+        NORTH(Direction.NORTH),
+        SOUTH(Direction.SOUTH),
+        WEST(Direction.WEST),
+        EAST(Direction.EAST),
+        ORIGINAL;
+
+        @Nullable
+        private final Direction toOriginal;
+
+        Type(@Nullable Direction toOriginal) {
+            this.toOriginal = toOriginal;
+        }
+
+        Type() {
+            this(null);
+        }
+
+        public boolean isEmpty() {
+            return this == EMPTY;
+        }
+
+        public boolean isOriginal() {
+            return this == ORIGINAL;
+        }
+
+        @Nullable
+        public Direction getDirectionToOriginal() {
+            return this.toOriginal;
+        }
+
+        public static Type fromDirection(Direction direction) {
+            return switch (direction) {
+                case DOWN -> Type.DOWN;
+                case UP -> Type.UP;
+                case NORTH -> Type.NORTH;
+                case SOUTH -> Type.SOUTH;
+                case WEST -> Type.WEST;
+                case EAST -> Type.EAST;
+            };
+        }
+
     }
 
 }

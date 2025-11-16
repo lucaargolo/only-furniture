@@ -26,8 +26,7 @@ public class DebugScreenOverlayMixin {
     public void furniture$addFurnitureDataInformation(CallbackInfoReturnable<List<String>> cir, long maxMemory, long totalMemory, long freeMemory, long usedMemory, List<String> list, BlockPos blockPos, BlockState state) {
         assert minecraft.level != null;
         if(state.getBlock() instanceof FurnitureBlock) {
-            int layer = state.getValue(FurnitureBlock.LAYER);
-            FurnitureData data = FurnitureData.get(minecraft.level, blockPos, layer);
+            FurnitureData data = FurnitureData.getOriginal(minecraft.level, blockPos);
             if(data.hasOriginal()) {
                 list.add("furniture/x: " + data.getX(state));
                 list.add("furniture/y: " + data.getY(state));

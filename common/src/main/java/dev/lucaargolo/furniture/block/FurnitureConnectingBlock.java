@@ -110,7 +110,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
             BlockState neighborState = level.getBlockState(neighborPos);
 
             if (neighborState.is(this.getConnecting())) {
-                FurnitureData neighborData = FurnitureData.get(level, neighborPos, neighborState.getValue(LAYER));
+                FurnitureData neighborData = FurnitureData.getOriginal(level, neighborPos);
                 neighbors.put(neighborOffset, neighborData);
             }
         }
@@ -184,7 +184,6 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
         if (this.getType().isOuterProvider()) {
             state = state.setValue(OUTER, north.getSecond() || east.getSecond() || south.getSecond() || west.getSecond());
         }
-
 
         return state;
     }

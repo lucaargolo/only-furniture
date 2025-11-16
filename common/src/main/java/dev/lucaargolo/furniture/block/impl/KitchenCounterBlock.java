@@ -54,7 +54,7 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
         BlockPos upPos = pos.above();
         BlockState upState = level.getBlockState(upPos);
         if(upState.is(ModBlockTags.TOP_FOR_KITCHEN_COUNTER)) {
-            FurnitureData upData = FurnitureData.get(level, upPos, upState.getValue(LAYER));
+            FurnitureData upData = FurnitureData.getOriginal(level, upPos);
             return computed.setValue(HOLLOW, data.equals(upData));
         }else{
             return computed.setValue(HOLLOW, false);
