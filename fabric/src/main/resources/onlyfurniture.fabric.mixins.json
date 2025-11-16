@@ -5,9 +5,11 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BlockGetterMixin"
+    "BlockGetterMixin",
+    "FlowerPotBlockAccessor"
   ],
   "client": [
+    "AttachmentChangeMixin",
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
     "ItemBlockRenderTypesMixin",

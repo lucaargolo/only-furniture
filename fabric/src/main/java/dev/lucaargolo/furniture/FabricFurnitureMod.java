@@ -1,10 +1,13 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.mixin.FlowerPotBlockAccessor;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
 
@@ -23,13 +26,18 @@ public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
     }
 
     @Override
+    public String getPlatform() {
+        return "Fabric";
+    }
+
+    @Override
     public boolean isFakePlayer(Player player) {
         return player instanceof FakePlayer;
     }
 
     @Override
-    public String getPlatform() {
-        return "Fabric";
+    public Block getPottedBlock(Block block) {
+        return FlowerPotBlockAccessor.getPottedByContentMap().getOrDefault(block, Blocks.FLOWER_POT);
     }
 
 }

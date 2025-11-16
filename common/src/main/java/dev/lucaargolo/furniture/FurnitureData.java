@@ -2,6 +2,7 @@ package dev.lucaargolo.furniture;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
+import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
@@ -151,11 +152,11 @@ public class FurnitureData {
     }
 
     public static ChunkFurnitureDataAttachment getChunkData(LevelReader level, ChunkPos pos) {
-        return FurnitureMod.INSTANCE.getAttachmentManager().getOrCreate(level.getChunk(pos.x, pos.z), ChunkFurnitureDataAttachment.class);
+        return ModDataAttachments.CHUNK_FURNITURE_DATA.get(level.getChunk(pos.x, pos.z));
     }
 
     public static void setChunkData(LevelReader level, ChunkPos pos, ChunkFurnitureDataAttachment chunkData) {
-        FurnitureMod.INSTANCE.getAttachmentManager().set(level.getChunk(pos.x, pos.z), chunkData);
+        ModDataAttachments.CHUNK_FURNITURE_DATA.set(level.getChunk(pos.x, pos.z), chunkData);
     }
 
     public static Pair<FurnitureData, Vec3i> getOriginal(BlockGetter level, BlockPos pos, int layer) {

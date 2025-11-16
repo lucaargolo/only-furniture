@@ -12,12 +12,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.Arrays;
 import java.util.List;
 
-public class WoodSeatFurnitureBlock extends FurnitureBlock implements WoodBlock {
+public class WoodSeatBlock extends FurnitureBlock implements WoodBlock {
 
     private final WoodType wood;
     private final List<? extends Interaction<?>> interactions;
 
-    public WoodSeatFurnitureBlock(Block base, WoodType wood, VoxelShape[] shapes, Vec3... seats) {
+    public WoodSeatBlock(Block base, WoodType wood, VoxelShape[] shapes, Vec3... seats) {
         super(base, shapes);
         this.wood = wood;
         this.interactions = Arrays.stream(seats).map(SeatInteraction::new).toList();

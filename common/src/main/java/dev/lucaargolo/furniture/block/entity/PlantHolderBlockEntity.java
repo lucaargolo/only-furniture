@@ -4,10 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PlantableBlockEntity extends BlockEntity {
+public class PlantHolderBlockEntity extends BlockEntity {
 
-    public PlantableBlockEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.PLANT_POT.get(), pos, blockState);
+    public PlantHolderBlockEntity(BlockPos pos, BlockState blockState) {
+        super(ModBlockEntities.PLANT_HOLDER.get(), pos, blockState);
     }
 
 }

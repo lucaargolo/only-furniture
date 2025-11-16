@@ -19,19 +19,17 @@ import java.util.function.Supplier;
 public class ModCreativeTabs {
 
     private static final List<WoodType> WOOD_TYPES = WoodType.values().toList();
-    private static final Comparator<ModItemRegistry.ItemEntry<?>> COMPARATOR =
-            Comparator.comparing((ModItemRegistry.ItemEntry<?> entry) -> {
-                return (entry.get() instanceof BlockItem bi && bi.getBlock() instanceof WoodBlock) ? 0 : 1;
-            })
-            .thenComparing(entry -> {
-                if (entry.get() instanceof BlockItem bi && bi.getBlock() instanceof WoodBlock wb && !(bi.getBlock() instanceof WoodBlock.LeafBlock)) {
-                    int idx = WOOD_TYPES.indexOf(wb.getWood());
-                    return idx >= 0 ? idx : Integer.MAX_VALUE;
-                } else {
-                    return Integer.MAX_VALUE;
-                }
-            })
-            .thenComparingInt(ModItemRegistry.ItemEntry::getLocalId);
+
+    private static final Comparator<ModItemRegistry.ItemEntry<?>> COMPARATOR = Comparator.comparing((ModItemRegistry.ItemEntry<?> entry) -> {
+        return (entry.get() instanceof BlockItem bi && bi.getBlock() instanceof WoodBlock) ? 0 : 1;
+    }).thenComparing(entry -> {
+        if (entry.get() instanceof BlockItem bi && bi.getBlock() instanceof WoodBlock wb && !(bi.getBlock() instanceof WoodBlock.LeafBlock)) {
+            int idx = WOOD_TYPES.indexOf(wb.getWood());
+            return idx >= 0 ? idx : Integer.MAX_VALUE;
+        } else {
+            return Integer.MAX_VALUE;
+        }
+    }).thenComparingInt(ModItemRegistry.ItemEntry::getLocalId);
 
     public static final ModRegistry<CreativeModeTab> REGISTRY = FurnitureMod.INSTANCE.registry(Registries.CREATIVE_MODE_TAB);
 

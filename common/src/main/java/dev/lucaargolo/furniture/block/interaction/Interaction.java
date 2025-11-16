@@ -5,12 +5,34 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
-public interface Interaction<I extends Interaction<I>> {
+import java.util.Objects;
 
-    Vec3 pos();
+public abstract class Interaction<I extends Interaction<I>> {
 
-    I positioned(Vec3 pos);
+    protected final Vec3 pos;
 
-    boolean interact(Level level, Player player, BlockHitResult hitResult);
+    public Interaction(Vec3 pos) {
+        this.pos = pos;
+    }
+
+    public Vec3 pos() {
+        return pos;
+    }
+
+    public abstract I positioned(Vec3 pos);
+
+    public abstract boolean interact(Level level, Player player, BlockHitResult hitResult);
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) return false;
+        Interaction<?> that = (Interaction<?>) object;
+        return Objects.equals(pos, that.pos);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(pos);
+    }
 
 }

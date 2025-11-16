@@ -7,7 +7,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class OutdoorBenchBlock extends WoodSeatFurnitureBlock implements MetalBlock {
+public class OutdoorBenchBlock extends WoodSeatBlock implements MetalBlock {
 
     private final MetalType metal;
     private final WeatheringCopper.WeatherState state;

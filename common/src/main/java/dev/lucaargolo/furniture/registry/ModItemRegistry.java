@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.registry;
 
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftRegistry;
-import dev.lucaargolo.furniture.utils.ModColorProvider;
+import dev.lucaargolo.furniture.utils.ColorProvider;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.BlockItem;
@@ -29,22 +29,22 @@ public abstract class ModItemRegistry extends MinecraftRegistry<Item, ModItemReg
     public static class ItemEntry<E extends Item> extends MinecraftEntry<E> {
 
         @Nullable
-        private ModColorProvider.Item tintColor = null;
+        private ColorProvider.Item tintColor = null;
 
         protected ItemEntry(int localId, String path, Supplier<E> supplier, TagKey<?>... tags) {
             super(localId, path, supplier, tags);
         }
 
-        public @Nullable ModColorProvider.Item getTintColor() {
+        public @Nullable ColorProvider.Item getTintColor() {
             return tintColor;
         }
 
-        public ItemEntry<E> withTintColor(ModColorProvider.Item itemColor) {
+        public ItemEntry<E> withTintColor(ColorProvider.Item itemColor) {
             this.tintColor = itemColor;
             return this;
         }
 
-        public ItemEntry<E> withTintColor(ModColorProvider.Block blockColor) {
+        public ItemEntry<E> withTintColor(ColorProvider.Block blockColor) {
             this.tintColor = (stack, tintIndex) -> {
                 Item item = stack.getItem();
                 if(item instanceof BlockItem blockItem) {

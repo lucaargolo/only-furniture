@@ -4,7 +4,6 @@
 	"parent": "block/block",
 	"textures": {
 		"0": "block/terracotta",
-		"1": "block/farmland_moist",
 		"particle": "block/terracotta"
 	},
 	"elements": [
@@ -67,10 +66,10 @@
 		},
 		{
 			"from": [6, 0, 6],
-			"to": [10, 7, 10],
+			"to": [10, 1, 10],
 			"rotation": {"angle": 0, "axis": "y", "origin": [7, 0, 7]},
 			"faces": {
-				"up": {"uv": [6, 6, 10, 10], "texture": "#1"},
+				"up": {"uv": [2, 2, 6, 6], "texture": "#0"},
 				"down": {"uv": [2, 2, 6, 6], "texture": "#0"}
 			}
 		},
@@ -153,6 +152,5 @@
 				"down": {"uv": [1, 0, 7, 1], "texture": "#0"}
 			}
 		}
-	],
-	"display": {}
+	]
 }

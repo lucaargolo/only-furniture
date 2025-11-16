@@ -11,6 +11,6 @@ public abstract class ModBlockEntities {
 
     public static final ModBlockEntityRegistry REGISTRY = FurnitureMod.INSTANCE.blockEntityRegistry();
 
-    public static Supplier<BlockEntityType<PlantableBlockEntity>> PLANT_POT = REGISTRY.register("plant_pot", PlantableBlockEntity::new, ModBlocks.PLANT_POT);
+    public static final Supplier<BlockEntityType<PlantHolderBlockEntity>> PLANT_HOLDER = REGISTRY.register("plant_holder", PlantHolderBlockEntity::new, ModBlocks.PLANT_POT);
 
 }

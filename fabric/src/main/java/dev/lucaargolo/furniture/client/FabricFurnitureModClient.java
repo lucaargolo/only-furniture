@@ -7,13 +7,16 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.impl.PlantHolderBlock;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
+import dev.lucaargolo.furniture.client.model.PlantHolderBakedModel;
 import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -22,6 +25,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
@@ -51,6 +55,12 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
             if (entry.getTintColor() != null)
                 ColorProviderRegistry.ITEM.register(entry.getTintColor()::getColor, entry.get());
         });
+        //TODO: Figure it out if its possible to use FAPI to render other render types in the baked model.
+        ModBlocks.REGISTRY.forEach(entry -> {
+            if(entry.get() instanceof PlantHolderBlock) {
+                BlockRenderLayerMap.INSTANCE.putBlock(entry.get(), RenderType.cutout());
+            }
+        });
     }
 
     @Override
@@ -77,6 +87,8 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                     if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
                         ModBlockRegistry.BlockEntry<?> entry = ModBlocks.REGISTRY.get(path);
                         if(entry != null) {
+                            if(entry.get() instanceof PlantHolderBlock)
+                                return new PlantHolderBakedModel(model);
                             if(entry.get() instanceof FurnitureFenceBlock)
                                 return new FurnitureFenceBakedModel(model);
                             if(entry.get() instanceof FurnitureBlock)

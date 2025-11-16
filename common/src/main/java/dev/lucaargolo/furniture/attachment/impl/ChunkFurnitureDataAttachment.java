@@ -5,6 +5,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.attachment.DataAttachment;
+import dev.lucaargolo.furniture.attachment.DataAttachmentType;
+import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.utils.PackingUtils;
 import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.*;
@@ -100,6 +102,11 @@ public final class ChunkFurnitureDataAttachment implements DataAttachment<ChunkF
     @ApiStatus.Internal
     public void forEach(BiConsumer<Integer, Long> consumer) {
         this.furnitureDataMap.forEach(consumer);
+    }
+
+    @Override
+    public DataAttachmentType<ChunkFurnitureDataAttachment> getType() {
+        return ModDataAttachments.CHUNK_FURNITURE_DATA;
     }
 
 }

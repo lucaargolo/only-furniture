@@ -14,7 +14,11 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 import java.util.Optional;
 
-public record SeatInteraction(Vec3 pos) implements Interaction<SeatInteraction> {
+public class SeatInteraction extends Interaction<SeatInteraction> {
+
+    public SeatInteraction(Vec3 pos) {
+        super(pos);
+    }
 
     @Override
     public SeatInteraction positioned(Vec3 pos) {
@@ -23,7 +27,7 @@ public record SeatInteraction(Vec3 pos) implements Interaction<SeatInteraction> 
 
     @Override
     public boolean interact(Level level, Player player, BlockHitResult hitResult) {
-        List<SeatEntity> seatEntities = level.getEntitiesOfClass(SeatEntity.class, AABB.ofSize(pos, 0.1, 0.1, 0.1));
+        List<SeatEntity> seatEntities = level.getEntitiesOfClass(SeatEntity.class, AABB.ofSize(this.pos, 0.1, 0.1, 0.1));
         boolean isSeatFree = seatEntities.isEmpty();
         if(!isSeatFree) {
             isSeatFree = ejectSeatedExceptPlayer(level, seatEntities.getFirst());
@@ -33,7 +37,7 @@ public record SeatInteraction(Vec3 pos) implements Interaction<SeatInteraction> 
         }
 
         if (!level.isClientSide) {
-            SeatEntity seat = new SeatEntity(level, pos, hitResult.getBlockPos());
+            SeatEntity seat = new SeatEntity(level, this.pos, hitResult.getBlockPos());
             level.addFreshEntity(seat);
 
             Entity entity = getLeashed(player).orElse(player);

@@ -3,6 +3,8 @@ package dev.lucaargolo.furniture.attachment.impl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.lucaargolo.furniture.attachment.DataAttachment;
+import dev.lucaargolo.furniture.attachment.DataAttachmentType;
+import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -34,6 +36,11 @@ public final class BlockAttachment implements DataAttachment<BlockAttachment> {
     public BlockAttachment set(Block block) {
         this.block = block;
         return this;
+    }
+
+    @Override
+    public DataAttachmentType<BlockAttachment> getType() {
+        return ModDataAttachments.BLOCK;
     }
 
 }

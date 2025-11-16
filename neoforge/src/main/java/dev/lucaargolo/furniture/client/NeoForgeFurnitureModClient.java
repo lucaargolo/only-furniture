@@ -8,8 +8,10 @@ import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
+import dev.lucaargolo.furniture.block.impl.PlantHolderBlock;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
+import dev.lucaargolo.furniture.client.model.PlantHolderBakedModel;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
@@ -104,7 +106,9 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
             if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
                 ModBlockRegistry.BlockEntry<?> entry = ModBlocks.REGISTRY.get(path);
                 if(entry != null) {
-                    if(entry.get() instanceof FurnitureFenceBlock) {
+                    if(entry.get() instanceof PlantHolderBlock) {
+                        mapEntry.setValue(new PlantHolderBakedModel(mapEntry.getValue()));
+                    }else if(entry.get() instanceof FurnitureFenceBlock) {
                         mapEntry.setValue(new FurnitureFenceBakedModel(mapEntry.getValue()));
                     }else if(entry.get() instanceof FurnitureBlock) {
                         mapEntry.setValue(new FurnitureBakedModel(mapEntry.getValue()));

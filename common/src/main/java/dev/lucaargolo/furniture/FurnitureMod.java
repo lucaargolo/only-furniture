@@ -1,20 +1,19 @@
 package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.attachment.ModAttachmentManager;
+import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.network.ModPacketManager;
-import dev.lucaargolo.furniture.registry.ModBlockEntityRegistry;
-import dev.lucaargolo.furniture.registry.ModBlockRegistry;
-import dev.lucaargolo.furniture.registry.ModItemRegistry;
-import dev.lucaargolo.furniture.registry.ModRegistry;
+import dev.lucaargolo.furniture.registry.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,19 +36,21 @@ public abstract class FurnitureMod {
         ModItems.REGISTRY.init();
         ModCreativeTabs.REGISTRY.init();
         ModEntityTypes.REGISTRY.init();
+        ModDataAttachments.REGISTRY.init();
         this.packetManager.init();
-        this.attachmentManager.init();
     }
+
+    public abstract String getPlatform();
 
     public abstract boolean isFakePlayer(Player player);
 
-    public abstract String getPlatform();
+    public abstract Block getPottedBlock(Block block);
 
     public final ModPacketManager getPacketManager() {
         return packetManager;
     }
 
-    public final ModAttachmentManager getAttachmentManager() {
+    public ModAttachmentManager getAttachmentManager() {
         return attachmentManager;
     }
 
@@ -69,6 +70,10 @@ public abstract class FurnitureMod {
         return loadPlatformClass(ModItemRegistry.class);
     }
 
+    public final ModAttachmentRegistry<?> attachmentRegistry() {
+        return loadPlatformClass(ModAttachmentRegistry.class);
+    }
+
     public final <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
         String name = clazz.getName();
         String platformName = name.substring(0, name.lastIndexOf('.')) + "." + getPlatform() + name.substring(name.lastIndexOf('.') + 1);
@@ -86,6 +91,7 @@ public abstract class FurnitureMod {
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
+
 
 
 }
