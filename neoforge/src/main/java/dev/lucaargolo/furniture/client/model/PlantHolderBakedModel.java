@@ -4,8 +4,10 @@ import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
 import dev.lucaargolo.furniture.block.entity.PlantHolderBlockEntity;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -15,7 +17,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.QuadTransformers;
@@ -28,7 +33,6 @@ import org.joml.Matrix4f;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class PlantHolderBakedModel extends FurnitureBakedModel {
 
@@ -44,8 +48,14 @@ public class PlantHolderBakedModel extends FurnitureBakedModel {
         BlockPos pos = modelData.get(POS_PROPERTY);
         FurnitureData data = modelData.get(DATA_PROPERTY);
         PlantHolderDataAttachment plantData = modelData.get(PLANT_HOLDER_DATA);
-        if(state != null && pos != null && data != null && plantData != null && renderType != null) {
-            plantData.forEach((plantPos, plantBlock) -> {
+        if(state != null && pos != null && data != null && plantData != null && renderType != null && state.getBlock() instanceof FurnitureBlock furniture) {
+            for(int index = 0; index < plantData.size(); index++) {
+                List<? extends Interaction<?>> interactions = furniture.getInteractions();
+                Vec3 plantPos = index < interactions.size() ? interactions.get(index).pos() : Vec3.ZERO;
+                Block plantBlock = plantData.getBlock(index);
+                if(plantBlock == Blocks.FLOWER_POT)
+                    continue;
+
                 BlockState plantState = plantBlock.defaultBlockState();
                 BakedModel plantModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(plantState);
                 ChunkRenderTypeSet plantRenderTypes = plantModel.getRenderTypes(plantState, rand, modelData);
@@ -68,24 +78,28 @@ public class PlantHolderBakedModel extends FurnitureBakedModel {
                         }
                     });
                 }
-            });
+            }
         }
         return quads;
     }
 
     @Override
     public @NotNull ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData modelData) {
-        AtomicReference<ChunkRenderTypeSet> renderTypes = new AtomicReference<>(super.getRenderTypes(state, rand, modelData));
+        ChunkRenderTypeSet renderTypes = super.getRenderTypes(state, rand, modelData);
         PlantHolderDataAttachment plantData = modelData.get(PLANT_HOLDER_DATA);
         if(plantData != null) {
-            plantData.forEach((plantPos, plantBlock) -> {
+            for(int index = 0; index < plantData.size(); index++) {
+                Block plantBlock = plantData.getBlock(index);
+                if(plantBlock == Blocks.FLOWER_POT)
+                    continue;
+
                 BlockState plantState = plantBlock.defaultBlockState();
                 BakedModel plantModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(plantState);
                 ChunkRenderTypeSet plantRenderTypes = plantModel.getRenderTypes(plantState, rand, modelData);
-                renderTypes.set(ChunkRenderTypeSet.union(renderTypes.get(), plantRenderTypes));
-            });
+                renderTypes = ChunkRenderTypeSet.union(renderTypes, plantRenderTypes);
+            }
         }
-        return renderTypes.get();
+        return renderTypes;
     }
 
     @Override

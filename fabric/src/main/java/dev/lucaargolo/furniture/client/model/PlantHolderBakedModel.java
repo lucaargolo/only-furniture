@@ -3,8 +3,10 @@ package dev.lucaargolo.furniture.client.model;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
 import dev.lucaargolo.furniture.block.entity.PlantHolderBlockEntity;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
@@ -17,7 +19,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -41,9 +46,15 @@ public class PlantHolderBakedModel extends FurnitureBakedModel {
         Renderer renderer = RendererAccess.INSTANCE.getRenderer();
         assert renderer != null;
         Optional<PlantHolderBlockEntity> optional = blockView.getBlockEntity(pos, ModBlockEntities.PLANT_HOLDER.get());
-        if (optional.isPresent()) {
+        if (optional.isPresent() && state.getBlock() instanceof FurnitureBlock furniture) {
             PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(optional.get());
-            plantData.forEach((plantPos, plantBlock) -> {
+            for(int index = 0; index < plantData.size(); index++) {
+                List<? extends Interaction<?>> interactions = furniture.getInteractions();
+                Vec3 plantPos = index < interactions.size() ? interactions.get(index).pos() : Vec3.ZERO;
+                Block plantBlock = plantData.getBlock(index);
+                if(plantPos == null || plantBlock == Blocks.FLOWER_POT)
+                    continue;
+
                 BlockState plantState = plantBlock.defaultBlockState();
                 BakedModel plantModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(plantState);
 
@@ -83,7 +94,7 @@ public class PlantHolderBakedModel extends FurnitureBakedModel {
                 });
 
                 context.popTransform();
-            });
+            }
         }
     }
 

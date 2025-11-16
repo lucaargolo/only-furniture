@@ -48,6 +48,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector4f;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class FurnitureBlock extends Block {
 
@@ -79,14 +81,14 @@ public class FurnitureBlock extends Block {
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         if (!FurnitureMod.INSTANCE.isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching()) {
             FurnitureData data = FurnitureData.get(level, pos, state.getValue(FurnitureBlock.LAYER));
+            List<? extends Interaction<?>> interactions = this.getInteractions();
 
-            List<? extends Interaction<?>> interactions = this.getInteractions().stream()
-                    .map(i -> computePositionedInteraction(pos, state, data, i))
-                    .sorted(Comparator.comparingDouble(i -> i.pos().distanceToSqr(hitResult.getLocation())))
-                    .toList();
+            LinkedHashMap<Integer, Interaction<?>> interactionsMap = IntStream.range(0, interactions.size()).boxed()
+                    .sorted(Comparator.comparingDouble(i -> interactions.get(i).pos().distanceToSqr(hitResult.getLocation())))
+                    .collect(Collectors.toMap(i -> i, i -> computePositionedInteraction(pos, state, data, interactions.get(i)), (a, b) -> a, LinkedHashMap::new));
 
-            for(Interaction<?> interaction : interactions) {
-                if(interaction.interact(level, player, hitResult)) {
+            for(Map.Entry<Integer, Interaction<?>> entry : interactionsMap.sequencedEntrySet()) {
+                if(entry.getValue().interact(entry.getKey(), level, player, hitResult)) {
                     return InteractionResult.SUCCESS;
                 }
             }
@@ -440,7 +442,7 @@ public class FurnitureBlock extends Block {
     }
 
     public static Interaction<?> computePositionedInteraction(BlockPos pos, BlockState state, FurnitureData data, Interaction<?> interaction) {
-        Vec3 position = Vec3.atBottomCenterOf(pos).add(data.getX(state), data.getY(state), data.getZ(state));
+        Vec3 position = Vec3.atCenterOf(pos).add(data.getX(state), data.getY(state), data.getZ(state));
         Quaternionf rotation = data.getRotation(state);
         Matrix4f transform = new Matrix4f().rotate(rotation);
         Vector4f offset = new Vector4f(interaction.pos().toVector3f(), 1f);

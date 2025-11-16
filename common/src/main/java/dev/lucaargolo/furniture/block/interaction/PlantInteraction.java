@@ -20,24 +20,17 @@ import java.util.Optional;
 
 public class PlantInteraction extends Interaction<PlantInteraction> {
 
-    private final Vec3 original;
-
-    public PlantInteraction(Vec3 original, Vec3 pos) {
-        super(pos);
-        this.original = original;
-    }
-
     public PlantInteraction(Vec3 pos) {
-        this(pos, pos);
+        super(pos);
     }
 
     @Override
     public PlantInteraction positioned(Vec3 pos) {
-        return new PlantInteraction(this.original, pos);
+        return new PlantInteraction(pos);
     }
 
     @Override
-    public boolean interact(Level level, Player player, BlockHitResult hitResult) {
+    public boolean interact(int index, Level level, Player player, BlockHitResult hitResult) {
         BlockPos pos = hitResult.getBlockPos();
         Optional<PlantHolderBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.PLANT_HOLDER.get());
         if(optional.isEmpty()) {
@@ -46,12 +39,11 @@ public class PlantInteraction extends Interaction<PlantInteraction> {
 
         PlantHolderBlockEntity blockEntity = optional.get();
         PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(blockEntity);
-        if(plantData.get(this.original) instanceof FlowerPotBlock potBlock) {
+        if(plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
             Block pottedBlock = potBlock.getPotted();
             ItemStack pottedStack = pottedBlock.asItem().getDefaultInstance();
-            if(!player.isCreative())
-                player.getInventory().placeItemBackInInventory(pottedStack);
-            ModDataAttachments.PLANT_HOLDER_DATA.set(blockEntity, plantData.remove(this.original));
+            player.getInventory().placeItemBackInInventory(pottedStack);
+            ModDataAttachments.PLANT_HOLDER_DATA.set(blockEntity, plantData.set(index, Blocks.FLOWER_POT));
             return true;
         }
 
@@ -67,7 +59,7 @@ public class PlantInteraction extends Interaction<PlantInteraction> {
 
         if(!player.isCreative())
             stack.shrink(1);
-        ModDataAttachments.PLANT_HOLDER_DATA.set(blockEntity, plantData.set(this.original, pottedBlock));
+        ModDataAttachments.PLANT_HOLDER_DATA.set(blockEntity, plantData.set(index, pottedBlock));
         return true;
     }
 

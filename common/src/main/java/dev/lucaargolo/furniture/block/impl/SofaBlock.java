@@ -24,7 +24,7 @@ import java.util.Map;
 public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock {
 
     private static final List<? extends Interaction<?>> INTERACTIONS = List.of(
-        new SeatInteraction(new Vec3(0.0, 0.5, 0.0))
+        new SeatInteraction(Vec3.ZERO)
     );
 
     private static final Map<Pair<Direction, Rotation>, VoxelShape> CENTER_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_CENTER, false);

@@ -26,7 +26,7 @@ public class SeatInteraction extends Interaction<SeatInteraction> {
     }
 
     @Override
-    public boolean interact(Level level, Player player, BlockHitResult hitResult) {
+    public boolean interact(int index, Level level, Player player, BlockHitResult hitResult) {
         List<SeatEntity> seatEntities = level.getEntitiesOfClass(SeatEntity.class, AABB.ofSize(this.pos, 0.1, 0.1, 0.1));
         boolean isSeatFree = seatEntities.isEmpty();
         if(!isSeatFree) {

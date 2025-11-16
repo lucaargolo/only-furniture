@@ -152,7 +152,7 @@ public class FurnitureData {
     }
 
     public static ChunkFurnitureDataAttachment getChunkData(LevelReader level, ChunkPos pos) {
-        return ModDataAttachments.CHUNK_FURNITURE_DATA.get(level.getChunk(pos.x, pos.z));
+        return ModDataAttachments.CHUNK_FURNITURE_DATA.getOrCreate(level.getChunk(pos.x, pos.z));
     }
 
     public static void setChunkData(LevelReader level, ChunkPos pos, ChunkFurnitureDataAttachment chunkData) {

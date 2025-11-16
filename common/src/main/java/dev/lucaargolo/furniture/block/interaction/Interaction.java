@@ -21,7 +21,7 @@ public abstract class Interaction<I extends Interaction<I>> {
 
     public abstract I positioned(Vec3 pos);
 
-    public abstract boolean interact(Level level, Player player, BlockHitResult hitResult);
+    public abstract boolean interact(int index, Level level, Player player, BlockHitResult hitResult);
 
     @Override
     public boolean equals(Object object) {

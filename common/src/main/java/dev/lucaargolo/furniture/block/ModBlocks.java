@@ -32,17 +32,17 @@ public class ModBlocks {
     public static final ModBlockRegistry REGISTRY = FurnitureMod.INSTANCE.blockRegistry();
     public static final List<WeatheringEntry> WEATHERING_ENTRIES = new ArrayList<>();
 
-    public static final Map<WoodType, ModBlockRegistry.BlockEntry<WoodSeatBlock>> CHAIR_MAP = registerForWoodSeat("chair", WoodBlock::getPlanks, WoodSeatBlock::new, new Vec3(0.0, 0.4375, 0.0), ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, ModBlockRegistry.BlockEntry<WoodSeatBlock>> CHAIR_MAP = registerForWoodSeat("chair", WoodBlock::getPlanks, WoodSeatBlock::new, new Vec3(0.0, -0.0625, 0.0), ModBlockShapes.CHAIR, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, ModBlockRegistry.BlockEntry<TableBlock>> TABLE_MAP = registerForTable("table", TableBlock::new, ModBlockShapes.TABLE_FOOT, ModBlockShapes.TABLE_TOP, ModBlockShapes.EMPTY, ModBlockTags.CONNECTING_TABLE, BlockTags.MINEABLE_WITH_AXE);
 
     public static final Map<WoodType, ModBlockRegistry.BlockEntry<TableBlock>> COFFEE_TABLE_MAP = registerForTable("coffee_table", TableBlock::new, ModBlockShapes.COFFEE_TABLE_FOOT, ModBlockShapes.COFFEE_TABLE_TOP, ModBlockShapes.COFFEE_TABLE_SIDE, ModBlockTags.CONNECTING_COFFEE_TABLE, BlockTags.MINEABLE_WITH_AXE);
-    public static final Map<WoodType, ModBlockRegistry.BlockEntry<WoodSeatBlock>> SMALL_STOOL_MAP = registerForWoodSeat("small_stool", WoodBlock::getPlanks, WoodSeatBlock::new, new Vec3(0.0, 0.25, 0.0), ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
+    public static final Map<WoodType, ModBlockRegistry.BlockEntry<WoodSeatBlock>> SMALL_STOOL_MAP = registerForWoodSeat("small_stool", WoodBlock::getPlanks, WoodSeatBlock::new, new Vec3(0.0, -0.25, 0.0), ModBlockShapes.SMALL_STOOL, BlockTags.MINEABLE_WITH_AXE);
 
     public static final Map<WoodType, ModBlockRegistry.BlockEntry<OutdoorBenchBlock>> OUTDOOR_BENCH_MAP = registerForWood("outdoor_bench", WoodBlock::getPlanks, (base, wood, shapes) -> {
-        return new OutdoorBenchBlock(base, MetalBlock.MetalType.CAST_IRON, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes, new Vec3(-0.5, 0.5, 0.0), new Vec3(0.5, 0.5, 0.0));
+        return new OutdoorBenchBlock(base, MetalBlock.MetalType.CAST_IRON, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes, new Vec3(-0.5, 0.0, 0.0), new Vec3(0.5, 0.0, 0.0));
     }, ModBlockShapes.OUTDOOR_BENCH, BlockTags.MINEABLE_WITH_AXE);
     public static final Map<WoodType, ModBlockRegistry.BlockEntry<WoodSeatBlock>> PICNIC_BENCH_MAP = registerForWood("picnic_bench", WoodBlock::getPlanks, (base, wood, shapes) -> {
-        return new WoodSeatBlock(base, wood, shapes, new Vec3(-1.0, 0.5, 1.0), new Vec3(0.0, 0.5, 1.0), new Vec3(1.0, 0.5, 1.0), new Vec3(-1.0, 0.5, -1.0), new Vec3(0.0, 0.5, -1.0), new Vec3(1.0, 0.5, -1.0));
+        return new WoodSeatBlock(base, wood, shapes, new Vec3(-1.0, 0.0, 1.0), new Vec3(0.0, 0.0, 1.0), new Vec3(1.0, 0.0, 1.0), new Vec3(-1.0, 0.0, -1.0), new Vec3(0.0, 0.0, -1.0), new Vec3(1.0, 0.0, -1.0));
     }, ModBlockShapes.PICNIC_BENCH, BlockTags.MINEABLE_WITH_AXE);
 
     public static final ModBlockRegistry.BlockEntry<MetalLampBlock> LAMP_POST = REGISTRY.register("cast_iron_lamp_post", () -> new MetalLampBlock(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.LAMP_POST), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
@@ -67,7 +67,7 @@ public class ModBlocks {
 
     public static final ModBlockRegistry.BlockEntry<MetalLampBlock.Wall> WALL_LAMP = REGISTRY.register("cast_iron_wall_lamp", () -> new MetalLampBlock.Wall(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.WALL_LAMP), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static final ModBlockRegistry.BlockEntry<PlantHolderBlock> PLANT_POT = REGISTRY.register("plant_pot", () -> new PlantHolderBlock(Blocks.FLOWER_POT, ModBlockShapes.FLOWER_POT, new Vec3(0.0, 2.0/16.0, 0.0)));
+    public static final ModBlockRegistry.BlockEntry<PlantHolderBlock> PLANT_POT = REGISTRY.register("plant_pot", () -> new PlantHolderBlock(Blocks.FLOWER_POT, ModBlockShapes.FLOWER_POT, new Vec3(0.0, 0.125, 0.0)));
 
     private static <T extends Block> Map<WoodType, ModBlockRegistry.BlockEntry<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], VoxelShape[], T> furnitureConstructor, VoxelShape[] footShapes, VoxelShape[] centerShapes, VoxelShape[] sideShapes, TagKey<?>... tags) {
         return registerForWood(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, footShapes, centerShapes, sideShapes), null, tags);
