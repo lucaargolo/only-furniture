@@ -3,9 +3,7 @@ package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.client.FurnitureModClient;
 import dev.lucaargolo.furniture.registry.ModMenuTypeRegistry;
-import io.netty.buffer.Unpooled;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,11 +16,9 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.OptionalInt;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 @Mod(FurnitureMod.MOD_ID)
@@ -56,10 +52,8 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
     }
 
     @Override
-    @Nullable
-    @SuppressWarnings("unchecked")
-    public <M extends AbstractContainerMenu, D> M openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data) {
-        OptionalInt optional = player.openMenu(new MenuProvider() {
+    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, BiFunction<Integer, Inventory, M> constructor, Player player, D data, Component title) {
+        player.openMenu(new MenuProvider() {
             @Override
             public @NotNull Component getDisplayName() {
                 return title;
@@ -67,12 +61,9 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
 
             @Override
             public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-                RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess(), ConnectionType.NEOFORGE);
-                entry.getStreamCodec().encode(buf, data);
-                return entry.get().create(containerId, playerInventory, buf);
+                return constructor.apply(containerId, playerInventory);
             }
         }, buf -> entry.getStreamCodec().encode(buf, data));
-        return optional.isPresent() ? (M) player.containerMenu : null;
     }
 
     public static IEventBus getModBus() {

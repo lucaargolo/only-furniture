@@ -1,8 +1,8 @@
 package dev.lucaargolo.furniture.menu;
 
-import dev.lucaargolo.furniture.utils.WrappedContainer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -15,26 +15,29 @@ public class StorageMenu extends AbstractContainerMenu {
     private final int rows;
     private final int cols;
 
-    private final WrappedContainer container;
-    private final Player player;
+    private final Container container;
 
     public StorageMenu(int containerId, Inventory playerInventory, int slots) {
-        super(ModMenuTypes.STORAGE.get(), containerId);
-        this.container = new WrappedContainer(slots);
-        this.player = playerInventory.player;
+        this(containerId, playerInventory, new SimpleContainer(slots));
+    }
 
-        int cols = Math.min(slots, 9);
+    public StorageMenu(int containerId, Inventory playerInventory, Container container) {
+        super(ModMenuTypes.STORAGE.get(), containerId);
+        this.container = container;
+        this.container.startOpen(playerInventory.player);
+
+        int cols = Math.min(container.getContainerSize(), 9);
         for (int c = cols; c >= 1; c--) {
-            if (slots % c == 0 || c == 1) {
+            if (container.getContainerSize() % c == 0 || c == 1) {
                 cols = c;
                 break;
             }
         }
 
-        int rows = Mth.ceil((float) slots / cols);
+        int rows = Mth.ceil((float) container.getContainerSize() / cols);
         if(rows > 9) {
-            cols = Math.min(slots, 9);
-            rows = Mth.ceil((float) slots / cols);
+            cols = Math.min(container.getContainerSize(), 9);
+            rows = Mth.ceil((float) container.getContainerSize() / cols);
         }
 
         this.rows = rows;
@@ -56,10 +59,6 @@ public class StorageMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 58 + offset));
         }
-    }
-
-    public void wrap(Container container) {
-        this.container.setWrapped(this.player, container);
     }
 
     public int getRows() {
@@ -96,7 +95,7 @@ public class StorageMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return true;
+        return this.container.stillValid(player);
     }
 
 

@@ -41,13 +41,10 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
             storage = NonNullList.withSize(this.size, ItemStack.EMPTY);
             ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, storage));
         }
-        StorageMenu menu = FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, player, Component.literal("Storage"), this.size);
-        if(menu != null) {
-            SimpleContainer container = new SimpleContainer(this.size);
-            ((SimpleContainerAccessor) container).setItems(storage);
-            container.addListener(c -> ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, container.getItems())));
-            menu.wrap(container);
-        }
+        SimpleContainer container = new SimpleContainer(this.size);
+        ((SimpleContainerAccessor) container).setItems(storage);
+        container.addListener(c -> ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, container.getItems())));
+        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, this.size, Component.literal("Storage"));
         return true;
     }
 

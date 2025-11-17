@@ -11,27 +11,26 @@ import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.network.BlockChangedPayload;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.registry.*;
-import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.OptionalInt;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("unchecked")
 public abstract class FurnitureMod {
@@ -68,12 +67,18 @@ public abstract class FurnitureMod {
 
     public abstract Block getPottedBlock(Block block);
 
-    @Nullable
-    public abstract  <M extends AbstractContainerMenu, D> M openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data);
+    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, TriFunction<Integer, Inventory, Container, M> constructor, Player player, Container container, D data, Component title) {
+        this.openMenu(entry, (syncId, inventory) -> constructor.apply(syncId, inventory, container), player, data, title);
+    }
 
-    @Nullable
-    public <M extends AbstractContainerMenu> M openMenu(MinecraftEntry<MenuType<M>> entry, Player player, Component title) {
-        OptionalInt optional = player.openMenu(new MenuProvider() {
+    public abstract <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, BiFunction<Integer, Inventory, M> constructor, Player player, D data, Component title);
+
+    public <M extends AbstractContainerMenu> void openMenu(TriFunction<Integer, Inventory, Container, M> constructor, Player player, Container container, Component title) {
+        this.openMenu((syncId, inventory) -> constructor.apply(syncId, inventory, container), player, title);
+    }
+
+    public <M extends AbstractContainerMenu> void openMenu(BiFunction<Integer, Inventory, M> constructor, Player player, Component title) {
+        player.openMenu(new MenuProvider() {
             @Override
             public @NotNull Component getDisplayName() {
                 return title;
@@ -81,10 +86,9 @@ public abstract class FurnitureMod {
 
             @Override
             public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-                return entry.get().create(containerId, playerInventory);
+                return constructor.apply(containerId, playerInventory);
             }
         });
-        return optional.isPresent() ? (M) player.containerMenu : null;
     };
 
     public static FurnitureMod getInstance() {
