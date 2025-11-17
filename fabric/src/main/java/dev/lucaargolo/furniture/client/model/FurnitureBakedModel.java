@@ -85,7 +85,7 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
                 });
 
                 if(behaviour instanceof PlantBehaviour && optional.isPresent()) {
-                    PlantBehaviourBakedModel.emitBehaviourQuads(optional.get(), index, randomSupplier, context);
+                    PlantBehaviourBakedModel.emitBehaviourQuads(optional.get(), index, blockView, pos, randomSupplier, context);
                 }
 
                 context.popTransform();
