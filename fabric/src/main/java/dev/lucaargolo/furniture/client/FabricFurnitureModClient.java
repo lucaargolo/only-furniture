@@ -56,7 +56,7 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         });
         //TODO: Figure it out if its possible to use FAPI to render other render types in the baked model.
         ModBlocks.REGISTRY.getEntries().forEach(entry -> {
-            if(entry.get() instanceof FurnitureBlock furniture && furniture.getInteractions(PlantBehaviour.class).length > 0) {
+            if(entry.get() instanceof FurnitureBlock furniture && furniture.getBehaviours(PlantBehaviour.class).length > 0) {
                 BlockRenderLayerMap.INSTANCE.putBlock(entry.get(), RenderType.cutout());
             }
         });

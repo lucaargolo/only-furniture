@@ -26,7 +26,7 @@ public abstract class Behaviour<I extends Behaviour<I>> {
 
     public abstract boolean interact(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index);
 
-    public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
+    public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, int index) {
 
     }
 

@@ -76,17 +76,24 @@ public class FurnitureBlock extends Block implements EntityBlock {
         this(base, shapes, new Behaviour[0]);
     }
 
+    @Override
+    public void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
+        if(this.isWallBlock()) {
+            builder.add(FACING);
+        }
+    }
+
     public boolean isWallBlock() {
         return false;
     }
 
-    public final Behaviour<?>[] getInteractions() {
+    public final Behaviour<?>[] getBehaviours() {
         return this.behaviours;
     }
 
     @SuppressWarnings("unchecked")
-    public final <I extends Behaviour<I>> I[] getInteractions(Class<I> type) {
-        return Arrays.stream(this.getInteractions())
+    public final <I extends Behaviour<I>> I[] getBehaviours(Class<I> type) {
+        return Arrays.stream(this.getBehaviours())
                 .filter(type::isInstance)
                 .map(type::cast)
                 .toArray(size -> (I[]) Array.newInstance(type, size));
@@ -105,13 +112,13 @@ public class FurnitureBlock extends Block implements EntityBlock {
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         FurnitureData data = FurnitureData.getOriginal(level, pos);
         if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching() && data.hasOriginal()) {
-            List<Pair<Integer, Behaviour<?>>> sortedInteractions = IntStream.range(0, this.behaviours.length).boxed()
-                    .map(i -> Pair.<Integer, Behaviour<?>>of(i, computePositionedInteraction(pos, state, data, this.behaviours[i])))
+            List<Pair<Integer, Behaviour<?>>> sortedBehaviours = IntStream.range(0, this.behaviours.length).boxed()
+                    .map(i -> Pair.<Integer, Behaviour<?>>of(i, computePositionedBehaviour(pos, state, data, this.behaviours[i])))
                     .sorted(Comparator.comparingDouble(i -> i.getSecond().pos().distanceToSqr(hitResult.getLocation())))
                     .toList();
 
             Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
-            for(Pair<Integer, Behaviour<?>> pair : sortedInteractions) {
+            for(Pair<Integer, Behaviour<?>> pair : sortedBehaviours) {
                 int index = pair.getFirst();
                 Behaviour<?> behaviour = pair.getSecond();
                 if((optional.isPresent() || !behaviour.isBlockEntityNeeded()) && behaviour.interact(level, pos, state, optional.orElse(null), player, index)) {
@@ -120,13 +127,6 @@ public class FurnitureBlock extends Block implements EntityBlock {
             }
         }
         return InteractionResult.PASS;
-    }
-
-    @Override
-    public void createBlockStateDefinition(StateDefinition.@NotNull Builder<Block, BlockState> builder) {
-        if(this.isWallBlock()) {
-            builder.add(FACING);
-        }
     }
 
     @Override
@@ -174,7 +174,7 @@ public class FurnitureBlock extends Block implements EntityBlock {
         return new FurnitureData(x, z, FurnitureBlockItem.getRotation(player), FurnitureData.Type.ORIGINAL);
     }
 
-    public Pair<BlockState, Integer> getStateAndLayerForPlacement(BlockPlaceContext context, FurnitureData data) {
+    public final Pair<BlockState, Integer> getStateAndLayerForPlacement(BlockPlaceContext context, FurnitureData data) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockState state = this.defaultBlockState();
@@ -247,26 +247,27 @@ public class FurnitureBlock extends Block implements EntityBlock {
                 toOriginal = toOriginal == null && data.getDirectionToOriginal() != null ? data.getDirectionToOriginal() : toOriginal;
             }
             if(originalLayer != -1 && toOriginal != null) {
-                onRemoveLayer((ServerLevel) pLevel, pPos, pState, originalLayer);
+                this.onRemoveLayer((ServerLevel) pLevel, pPos, pState, originalLayer);
                 pLevel.setBlockAndUpdate(pPos, pLevel.getBlockState(pPos.relative(toOriginal)));
             }else {
                 for (int layer = 0; layer < 4; layer++) {
-                    onRemoveLayer((ServerLevel) pLevel, pPos, pState, layer);
+                    this.onRemoveLayer((ServerLevel) pLevel, pPos, pState, layer);
                 }
             }
         }
         super.onRemove(pState, pLevel, pPos, pNewState, pMovedByPiston);
     }
 
-    private static void onRemoveLayer(ServerLevel level, BlockPos pos, BlockState state, int layer) {
+    private void onRemoveLayer(ServerLevel level, BlockPos pos, BlockState state, int layer) {
         FurnitureData data = FurnitureData.get(level, pos, layer);
         if(data.hasOriginal()) {
             FurnitureMod.getPacketManager().sendToPlayersTrackingChunk(level, new ChunkPos(pos), new DestroyEffectsPayload(pos, Block.getId(state), data.getPacked()));
-            onRemoveOriginalLayer(true, level, pos, layer);
+            this.onRemoveOriginalLayer(true, level, pos, state, layer);
         }else{
             if(data.getDirectionToOriginal() != null) {
                 Pair<FurnitureData, Vec3i> pair = FurnitureData.getOriginal(level, pos, layer);
                 BlockPos originalPos = pos.offset(pair.getSecond());
+                BlockState originalState = level.getBlockState(originalPos);
                 FurnitureData[] originalLayers = FurnitureData.get(level, originalPos);
                 boolean hasAnother = false;
                 for (int intersectingLayer = 0; intersectingLayer < originalLayers.length; intersectingLayer++) {
@@ -278,7 +279,7 @@ public class FurnitureBlock extends Block implements EntityBlock {
                 if(!hasAnother) {
                     level.setBlockAndUpdate(originalPos, Blocks.AIR.defaultBlockState());
                 }else{
-                    onRemoveOriginalLayer(false, level, originalPos, layer);
+                    this.onRemoveOriginalLayer(false, level, originalPos, originalState, layer);
                     FurnitureData.set(level, originalPos, layer, FurnitureData.DEFAULT);
                 }
             }
@@ -286,7 +287,15 @@ public class FurnitureBlock extends Block implements EntityBlock {
         FurnitureData.set(level, pos, layer, FurnitureData.DEFAULT);
     }
 
-    private static void onRemoveOriginalLayer(boolean alreadyRemoved, Level level, BlockPos pos, int layer) {
+    private void onRemoveOriginalLayer(boolean alreadyRemoved, Level level, BlockPos pos, BlockState state, int layer) {
+        Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
+        Behaviour<?>[] behaviours = this.getBehaviours();
+        for(int index = 0; index < behaviours.length; index++) {
+            Behaviour<?> behaviour = behaviours[index];
+            if(optional.isPresent() || !behaviour.isBlockEntityNeeded()) {
+                behaviour.remove(level, pos, state, optional.orElse(null), index);
+            }
+        }
         List<BlockPos> intersectingPositions = calculateIntersectingPositionsInLevel(level, pos, layer);
         if(!alreadyRemoved) {
             intersectingPositions.add(pos);
@@ -467,7 +476,7 @@ public class FurnitureBlock extends Block implements EntityBlock {
         return builder.build();
     }
 
-    public static Behaviour<?> computePositionedInteraction(BlockPos pos, BlockState state, FurnitureData data, Behaviour<?> behaviour) {
+    public static Behaviour<?> computePositionedBehaviour(BlockPos pos, BlockState state, FurnitureData data, Behaviour<?> behaviour) {
         Vec3 position = Vec3.atCenterOf(pos).add(data.getX(state), data.getY(state), data.getZ(state));
         Quaternionf rotation = data.getRotation(state);
         Matrix4f transform = new Matrix4f().rotate(rotation);

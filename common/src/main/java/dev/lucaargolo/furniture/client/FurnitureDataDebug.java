@@ -139,8 +139,8 @@ public class FurnitureDataDebug {
 
         if(data.hasOriginal()) {
             if(state.getBlock() instanceof FurnitureBlock block) {
-                for(Behaviour<?> i : block.getInteractions()) {
-                    Behaviour<?> behaviour = FurnitureBlock.computePositionedInteraction(pos, state, data, i);
+                for(Behaviour<?> i : block.getBehaviours()) {
+                    Behaviour<?> behaviour = FurnitureBlock.computePositionedBehaviour(pos, state, data, i);
                     Vec3 behaviourPosition = behaviour.pos().subtract(position);
                     AABB bounds = AABB.ofSize(behaviourPosition, 0.1, 0.1, 0.1);
                     LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);

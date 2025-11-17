@@ -62,7 +62,7 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
             Optional<FurnitureBlockEntity> optional = Optional.ofNullable(modelData.get(BLOCK_ENTITY_PROPERTY));
             if(state.getBlock() instanceof FurnitureBlock furniture) {
-                Behaviour<?>[] behaviours = furniture.getInteractions();
+                Behaviour<?>[] behaviours = furniture.getBehaviours();
                 for(int index = 0; index < behaviours.length; index++) {
                     Behaviour<?> behaviour = behaviours[index];
 
@@ -92,7 +92,7 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
         ChunkRenderTypeSet renderTypes = super.getRenderTypes(state, rand, modelData);
         Optional<FurnitureBlockEntity> optional = Optional.ofNullable(modelData.get(BLOCK_ENTITY_PROPERTY));
         if(state.getBlock() instanceof FurnitureBlock furniture) {
-            Behaviour<?>[] behaviours = furniture.getInteractions();
+            Behaviour<?>[] behaviours = furniture.getBehaviours();
             for (int index = 0; index < behaviours.length; index++) {
                 Behaviour<?> behaviour = behaviours[index];
 

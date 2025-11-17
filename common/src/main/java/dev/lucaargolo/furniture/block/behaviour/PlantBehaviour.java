@@ -5,6 +5,7 @@ import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -59,8 +60,13 @@ public class PlantBehaviour extends Behaviour<PlantBehaviour> {
     }
 
     @Override
-    public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
-
+    public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, int index) {
+        PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.get(blockEntity);
+        if (plantData != null && plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
+            Block pottedBlock = potBlock.getPotted();
+            ItemStack pottedStack = pottedBlock.asItem().getDefaultInstance();
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), pottedStack);
+        }
     }
 
     @Override

@@ -73,7 +73,7 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
 
         Optional<FurnitureBlockEntity> optional = blockView.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
         if(state.getBlock() instanceof FurnitureBlock furniture) {
-            Behaviour<?>[] behaviours = furniture.getInteractions();
+            Behaviour<?>[] behaviours = furniture.getBehaviours();
             for(int index = 0; index < behaviours.length; index++) {
                 Behaviour<?> behaviour = behaviours[index];
 

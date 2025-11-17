@@ -17,7 +17,7 @@ public abstract class ModBlockEntities {
     private static final Supplier<Block[]> FURNITURE_BLOCKS = () -> ModBlocks.REGISTRY.getEntries()
             .stream()
             .map(MinecraftEntry::get)
-            .filter(block -> block instanceof FurnitureBlock furniture && Arrays.stream(furniture.getInteractions()).anyMatch(Behaviour::isBlockEntityNeeded))
+            .filter(block -> block instanceof FurnitureBlock furniture && Arrays.stream(furniture.getBehaviours()).anyMatch(Behaviour::isBlockEntityNeeded))
             .toArray(Block[]::new);
 
     public static final ModBlockEntityRegistry REGISTRY = FurnitureMod.blockEntityRegistry();
