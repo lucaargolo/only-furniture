@@ -7,7 +7,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.LightBlock;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
-import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
 import dev.lucaargolo.furniture.utils.Rotation;
@@ -117,7 +117,7 @@ public class FurnitureBlock extends Block implements EntityBlock {
                     .sorted(Comparator.comparingDouble(i -> i.getSecond().pos().distanceToSqr(hitResult.getLocation())))
                     .toList();
 
-            Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
+            Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntityTypes.FURNITURE.get());
             for(Pair<Integer, Behaviour<?>> pair : sortedBehaviours) {
                 int index = pair.getFirst();
                 Behaviour<?> behaviour = pair.getSecond();
@@ -288,7 +288,7 @@ public class FurnitureBlock extends Block implements EntityBlock {
     }
 
     private void onRemoveOriginalLayer(boolean alreadyRemoved, Level level, BlockPos pos, BlockState state, int layer) {
-        Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
+        Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntityTypes.FURNITURE.get());
         Behaviour<?>[] behaviours = this.getBehaviours();
         for(int index = 0; index < behaviours.length; index++) {
             Behaviour<?> behaviour = behaviours[index];

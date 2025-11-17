@@ -10,14 +10,19 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
+import dev.lucaargolo.furniture.client.screen.StorageMenuScreen;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
+import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import dev.lucaargolo.furniture.utils.shape.FurnitureShape;
 import dev.lucaargolo.furniture.utils.shape.RotatedShape;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -25,10 +30,15 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -39,8 +49,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import java.util.function.BiConsumer;
+import org.apache.commons.lang3.function.TriFunction;
 
 public abstract class FurnitureModClient {
 
@@ -58,12 +67,16 @@ public abstract class FurnitureModClient {
     }
 
     protected final void init() {
-        shaderManager.init();
+        this.shaderManager.init();
+        this.registerMenuScreen(ModMenuTypes.STORAGE, StorageMenuScreen::new);
+        this.registerEntityRenderer(ModEntityTypes.SEAT, NoopRenderer::new);
     }
 
-    public final void onRegisterEntityRenderers(BiConsumer<EntityType<?>, EntityRendererProvider<?>> consumer) {
-        consumer.accept(ModEntityTypes.SEAT.get(), NoopRenderer::new);
-    }
+    protected abstract <M extends AbstractContainerMenu, P extends Screen & MenuAccess<M>> void registerMenuScreen(MinecraftEntry<MenuType<M>> type, TriFunction<M, Inventory, Component, P> factory);
+
+    protected abstract <E extends Entity, P extends EntityRendererProvider<E>> void registerEntityRenderer(MinecraftEntry<EntityType<E>> type, P provider);
+
+    protected abstract void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor);
 
     public final boolean onMouseScroll(double deltaX, double deltaY) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -87,8 +100,6 @@ public abstract class FurnitureModClient {
         this.renderFurniturePreview(levelRenderer.getLevel(), camera, poseStack, bufferSource);
         bufferSource.endBatch();
     }
-
-    protected abstract void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor);
 
     private void renderFurniturePreview(Level level, Camera camera, PoseStack poseStack, MultiBufferSource bufferSource) {
         Minecraft minecraft = Minecraft.getInstance();

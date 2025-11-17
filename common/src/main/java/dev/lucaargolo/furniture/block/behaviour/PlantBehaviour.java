@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.block.behaviour;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
-import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.PlantDataAttachment;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Containers;
@@ -34,12 +34,12 @@ public class PlantBehaviour extends Behaviour<PlantBehaviour> {
 
     @Override
     public boolean interact(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
-        PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(blockEntity);
+        PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.getOrCreate(blockEntity);
         if(plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
             Block pottedBlock = potBlock.getPotted();
             ItemStack pottedStack = pottedBlock.asItem().getDefaultInstance();
             player.getInventory().placeItemBackInInventory(pottedStack);
-            ModDataAttachments.PLANT_HOLDER_DATA.set(blockEntity, plantData.set(index, Blocks.FLOWER_POT));
+            ModDataAttachments.PLANT_DATA.set(blockEntity, plantData.set(index, Blocks.FLOWER_POT));
             return true;
         }
 
@@ -55,13 +55,13 @@ public class PlantBehaviour extends Behaviour<PlantBehaviour> {
 
         if(!player.isCreative())
             stack.shrink(1);
-        ModDataAttachments.PLANT_HOLDER_DATA.set(blockEntity, plantData.set(index, pottedBlock));
+        ModDataAttachments.PLANT_DATA.set(blockEntity, plantData.set(index, pottedBlock));
         return true;
     }
 
     @Override
     public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, int index) {
-        PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.get(blockEntity);
+        PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.get(blockEntity);
         if (plantData != null && plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
             Block pottedBlock = potBlock.getPotted();
             ItemStack pottedStack = pottedBlock.asItem().getDefaultInstance();

@@ -4,7 +4,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
-import dev.lucaargolo.furniture.registry.ModBlockEntityRegistry;
+import dev.lucaargolo.furniture.registry.ModBlockEntityTypeRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-public abstract class ModBlockEntities {
+public class ModBlockEntityTypes {
 
     private static final Supplier<Block[]> FURNITURE_BLOCKS = () -> ModBlocks.REGISTRY.getEntries()
             .stream()
@@ -20,7 +20,7 @@ public abstract class ModBlockEntities {
             .filter(block -> block instanceof FurnitureBlock furniture && Arrays.stream(furniture.getBehaviours()).anyMatch(Behaviour::isBlockEntityNeeded))
             .toArray(Block[]::new);
 
-    public static final ModBlockEntityRegistry REGISTRY = FurnitureMod.blockEntityRegistry();
+    public static final ModBlockEntityTypeRegistry REGISTRY = FurnitureMod.blockEntityTypeRegistry();
 
     public static final Supplier<BlockEntityType<FurnitureBlockEntity>> FURNITURE = REGISTRY.register("plant_holder", FurnitureBlockEntity::new, FURNITURE_BLOCKS);
 

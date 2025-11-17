@@ -13,9 +13,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public abstract class ModBlockEntityRegistry extends MinecraftRegistry<BlockEntityType<?>, MinecraftEntry<? extends BlockEntityType<?>>> {
+public abstract class ModBlockEntityTypeRegistry extends MinecraftRegistry<BlockEntityType<?>, MinecraftEntry<? extends BlockEntityType<?>>> {
 
-    public ModBlockEntityRegistry() {
+    public ModBlockEntityTypeRegistry() {
         super(Registries.BLOCK_ENTITY_TYPE);
     }
 

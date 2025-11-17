@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.client.model.behaviour;
 
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
-import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.PlantDataAttachment;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -24,7 +24,7 @@ public class PlantBehaviourBakedModel {
 
     public static List<BakedQuad> getBehaviourQuads(FurnitureBlockEntity blockEntity, int index, @Nullable Direction side, RandomSource rand, ModelData modelData, @Nullable RenderType renderType) {
         List<BakedQuad> quads = new ArrayList<>();
-        PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(blockEntity);
+        PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.getOrCreate(blockEntity);
         Block plantBlock = plantData.getBlock(index);
         if(plantBlock != Blocks.FLOWER_POT) {
             BlockState plantState = plantBlock.defaultBlockState();
@@ -45,7 +45,7 @@ public class PlantBehaviourBakedModel {
     }
 
     public static ChunkRenderTypeSet getRenderTypes(FurnitureBlockEntity blockEntity, int index, RandomSource rand, ModelData modelData) {
-        PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(blockEntity);
+        PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.getOrCreate(blockEntity);
         Block plantBlock = plantData.getBlock(index);
         if(plantBlock != Blocks.FLOWER_POT) {
             BlockState plantState = plantBlock.defaultBlockState();

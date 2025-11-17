@@ -1,7 +1,7 @@
 package dev.lucaargolo.furniture.client.model.behaviour;
 
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
-import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.PlantDataAttachment;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 public class PlantBehaviourBakedModel {
 
     public static void emitBehaviourQuads(FurnitureBlockEntity blockEntity, int index, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(blockEntity);
+        PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.getOrCreate(blockEntity);
         Block plantBlock = plantData.getBlock(index);
         if(plantBlock != Blocks.FLOWER_POT) {
             BlockState plantState = plantBlock.defaultBlockState();

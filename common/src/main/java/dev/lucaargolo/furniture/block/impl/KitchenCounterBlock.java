@@ -7,6 +7,8 @@ import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.ModBlockTags;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
+import dev.lucaargolo.furniture.block.behaviour.Behaviour;
+import dev.lucaargolo.furniture.block.behaviour.StorageBehaviour;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +39,9 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
     private final WoodType wood;
 
     public KitchenCounterBlock(Block base, TagKey<Block> connecting, StoneType stone, WoodType wood) {
-        super(base, ModBlockShapes.KITCHEN_COUNTER, connecting);
+        super(base, ModBlockShapes.KITCHEN_COUNTER, new Behaviour[] {
+                new StorageBehaviour(Vec3.ZERO, 9)
+        }, connecting);
         this.registerDefaultState(this.defaultBlockState().setValue(HOLLOW, false));
         this.stone = stone;
         this.wood = wood;

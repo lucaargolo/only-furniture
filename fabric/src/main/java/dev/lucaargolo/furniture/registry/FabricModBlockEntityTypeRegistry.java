@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public class FabricModBlockEntityRegistry extends ModBlockEntityRegistry {
+public class FabricModBlockEntityTypeRegistry extends ModBlockEntityTypeRegistry {
 
     @Override
     public void init() {

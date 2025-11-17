@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.attachment;
 
 import com.mojang.serialization.Codec;
 import dev.lucaargolo.furniture.FurnitureMod;
-import io.netty.buffer.ByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ public interface DataAttachmentType<A extends DataAttachment<A>> {
     Codec<A> getCodec();
 
     @Nullable
-    StreamCodec<ByteBuf, A> getStreamCodec();
+    StreamCodec<RegistryFriendlyByteBuf, A> getStreamCodec();
 
     default boolean isSerializable() {
         return this.getCodec() != null;
@@ -49,11 +49,11 @@ public interface DataAttachmentType<A extends DataAttachment<A>> {
         return of(type, supplier, codec, null);
     }
 
-    static <A extends DataAttachment<A>> DataAttachmentType<A> of(Class<A> type, Supplier<A> supplier, @Nullable StreamCodec<ByteBuf, A> streamCodec) {
+    static <A extends DataAttachment<A>> DataAttachmentType<A> of(Class<A> type, Supplier<A> supplier, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> streamCodec) {
         return of(type, supplier, null, streamCodec);
     }
 
-    static <A extends DataAttachment<A>> DataAttachmentType<A> of(Class<A> type, Supplier<A> supplier, @Nullable Codec<A> codec, @Nullable StreamCodec<ByteBuf, A> streamCodec) {
+    static <A extends DataAttachment<A>> DataAttachmentType<A> of(Class<A> type, Supplier<A> supplier, @Nullable Codec<A> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> streamCodec) {
         return new DataAttachmentType<>() {
             @Override
             public A create() {
@@ -71,7 +71,7 @@ public interface DataAttachmentType<A extends DataAttachment<A>> {
             }
 
             @Override
-            public @Nullable StreamCodec<ByteBuf, A> getStreamCodec() {
+            public @Nullable StreamCodec<RegistryFriendlyByteBuf, A> getStreamCodec() {
                 return streamCodec;
             }
         };

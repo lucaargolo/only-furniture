@@ -3,10 +3,11 @@ package dev.lucaargolo.furniture;
 import dev.lucaargolo.furniture.attachment.ModAttachmentManager;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.ModCreativeTabs;
 import dev.lucaargolo.furniture.item.ModItems;
+import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.network.BlockChangedPayload;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.registry.*;
@@ -42,10 +43,11 @@ public abstract class FurnitureMod {
 
     public final void init() {
         ModBlocks.REGISTRY.init();
-        ModBlockEntities.REGISTRY.init();
+        ModBlockEntityTypes.REGISTRY.init();
         ModItems.REGISTRY.init();
         ModCreativeTabs.REGISTRY.init();
         ModEntityTypes.REGISTRY.init();
+        ModMenuTypes.REGISTRY.init();
         ModDataAttachments.REGISTRY.init();
         this.packetManager.init();
     }
@@ -82,13 +84,15 @@ public abstract class FurnitureMod {
         return loadPlatformClass(ModBlockRegistry.class);
     }
 
-    public static ModBlockEntityRegistry blockEntityRegistry() {
-        return loadPlatformClass(ModBlockEntityRegistry.class);
+    public static ModBlockEntityTypeRegistry blockEntityTypeRegistry() {
+        return loadPlatformClass(ModBlockEntityTypeRegistry.class);
     }
 
     public static ModItemRegistry itemRegistry() {
         return loadPlatformClass(ModItemRegistry.class);
     }
+
+    public static ModMenuTypeRegistry menuTypeRegistry() { return loadPlatformClass(ModMenuTypeRegistry.class); }
 
     public static ModAttachmentRegistry<?> attachmentRegistry() {
         return loadPlatformClass(ModAttachmentRegistry.class);

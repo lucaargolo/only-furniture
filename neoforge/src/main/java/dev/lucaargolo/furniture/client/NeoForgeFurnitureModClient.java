@@ -13,7 +13,11 @@ import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -23,22 +27,35 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
+import org.apache.commons.lang3.function.TriFunction;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
-    private static final RandomSource random = RandomSource.create();
+    private final RandomSource random = RandomSource.create();
+
+    @SuppressWarnings("rawtypes")
+    private final Map<Supplier<MenuType>, MenuScreens.ScreenConstructor> menus = new HashMap<>();
+    @SuppressWarnings("rawtypes")
+    private final Map<Supplier<EntityType>, EntityRendererProvider> entities = new HashMap<>();
 
     public NeoForgeFurnitureModClient() {
         this.init();
@@ -46,9 +63,21 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
         NeoForgeFurnitureMod.getModBus().addListener(this::onItemColorsRegister);
         NeoForgeFurnitureMod.getModBus().addListener(this::onModelRegister);
         NeoForgeFurnitureMod.getModBus().addListener(this::onRenderersRegister);
+        NeoForgeFurnitureMod.getModBus().addListener(this::onMenuScreensRegister);
         NeoForge.EVENT_BUS.addListener(this::onMouseScrolling);
         NeoForge.EVENT_BUS.addListener(this::onDrawBlockHighlight);
         NeoForge.EVENT_BUS.addListener(this::onRenderLevelStage);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void registerMenuScreen(MinecraftEntry<MenuType<M>> type, TriFunction<M, Inventory, Component, U> factory) {
+        menus.put(type::get, (menu, inventory, title) -> factory.apply((M) menu, inventory, title));
+    }
+
+    @Override
+    protected <E extends Entity, P extends EntityRendererProvider<E>> void registerEntityRenderer(MinecraftEntry<EntityType<E>> type, P provider) {
+        entities.put(type::get, provider);
     }
 
     @Override
@@ -115,10 +144,18 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @SubscribeEvent
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     public void onRenderersRegister(EntityRenderersEvent.RegisterRenderers event) {
-        this.onRegisterEntityRenderers((entityType, entityRendererProvider) -> {
-            event.registerEntityRenderer((EntityType) entityType, (EntityRendererProvider) entityRendererProvider);
+        this.entities.forEach((type, provider) -> {
+            event.registerEntityRenderer(type.get(), provider);
+        });
+    }
+
+    @SubscribeEvent
+    @SuppressWarnings("unchecked")
+    public void onMenuScreensRegister(RegisterMenuScreensEvent event) {
+        this.menus.forEach((type, factory) -> {
+            event.register(type.get(), factory);
         });
     }
 

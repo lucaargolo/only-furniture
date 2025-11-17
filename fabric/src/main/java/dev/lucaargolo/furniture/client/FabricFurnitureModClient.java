@@ -14,6 +14,7 @@ import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -23,6 +24,9 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -30,20 +34,25 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.function.TriFunction;
 
 public class FabricFurnitureModClient extends FurnitureModClient implements ClientModInitializer {
 
-    private static final RandomSource random = RandomSource.create();
+    private final RandomSource random = RandomSource.create();
 
     @Override
     public void onInitializeClient() {
         this.init();
         this.registerModelPlugins();
-        this.registerEntityRenderers();
         WorldRenderEvents.BLOCK_OUTLINE.register(this::onBlockOutline);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(this::onAfterTranslucent);
         ModBlocks.REGISTRY.getEntries().forEach(entry -> {
@@ -60,6 +69,16 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                 BlockRenderLayerMap.INSTANCE.putBlock(entry.get(), RenderType.cutout());
             }
         });
+    }
+
+    @Override
+    protected <M extends AbstractContainerMenu, U extends Screen & MenuAccess<M>> void registerMenuScreen(MinecraftEntry<MenuType<M>> type, TriFunction<M, Inventory, Component, U> factory) {
+        MenuScreens.register(type.get(), factory::apply);
+    }
+
+    @Override
+    protected <E extends Entity, P extends EntityRendererProvider<E>> void registerEntityRenderer(MinecraftEntry<EntityType<E>> type, P provider) {
+        EntityRendererRegistry.register(type.get(), provider);
     }
 
     @Override
@@ -95,13 +114,6 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                 }
                 return model;
             });
-        });
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void registerEntityRenderers() {
-        this.onRegisterEntityRenderers((entityType, entityRendererProvider) -> {
-            EntityRendererRegistry.register((EntityType) entityType, (EntityRendererProvider) entityRendererProvider);
         });
     }
 

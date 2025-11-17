@@ -5,6 +5,7 @@ import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.registry.ModItemRegistry;
 import dev.lucaargolo.furniture.registry.ModRegistry;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
@@ -14,7 +15,6 @@ import org.apache.commons.lang3.stream.Streams;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class ModCreativeTabs {
 
@@ -33,7 +33,7 @@ public class ModCreativeTabs {
 
     public static final ModRegistry<CreativeModeTab> REGISTRY = FurnitureMod.registry(Registries.CREATIVE_MODE_TAB);
 
-    public static Supplier<CreativeModeTab> CREATIVE_TAB = REGISTRY.register("creative_tab", () -> CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
+    public static MinecraftEntry<CreativeModeTab> CREATIVE_TAB = REGISTRY.register("creative_tab", () -> CreativeModeTab.builder(CreativeModeTab.Row.TOP, 0)
             .title(Component.translatable("itemGroup."+FurnitureMod.MOD_ID+".creative_tab"))
             .icon(ModBlocks.OUTDOOR_BENCH_MAP.get(WoodType.OAK).get().asItem()::getDefaultInstance)
             .displayItems(((parameters, output) -> {

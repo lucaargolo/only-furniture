@@ -15,7 +15,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public class NeoForgeModBlockEntityRegistry extends ModBlockEntityRegistry {
+public class NeoForgeModBlockEntityTypeRegistry extends ModBlockEntityTypeRegistry {
 
     private final DeferredRegister<BlockEntityType<?>> registry = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, FurnitureMod.MOD_ID);
 

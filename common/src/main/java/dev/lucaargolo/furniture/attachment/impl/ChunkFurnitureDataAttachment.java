@@ -8,9 +8,9 @@ import dev.lucaargolo.furniture.attachment.DataAttachment;
 import dev.lucaargolo.furniture.attachment.DataAttachmentType;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.utils.PackingUtils;
-import io.netty.buffer.ByteBuf;
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -37,7 +37,7 @@ public final class ChunkFurnitureDataAttachment implements DataAttachment<ChunkF
         return new ChunkFurnitureDataAttachment(furnitureDataMap);
     }));
 
-    public static final StreamCodec<ByteBuf, ChunkFurnitureDataAttachment> STREAM_CODEC = StreamCodec.composite(
+    public static final StreamCodec<RegistryFriendlyByteBuf, ChunkFurnitureDataAttachment> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.map(Int2LongOpenHashMap::new, ByteBufCodecs.VAR_INT, ByteBufCodecs.VAR_LONG),
             ChunkFurnitureDataAttachment::get,
             ChunkFurnitureDataAttachment::new

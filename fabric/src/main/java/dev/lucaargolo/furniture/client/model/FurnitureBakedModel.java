@@ -5,7 +5,7 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
-import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
 import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -71,7 +71,7 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             return true;
         });
 
-        Optional<FurnitureBlockEntity> optional = blockView.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
+        Optional<FurnitureBlockEntity> optional = blockView.getBlockEntity(pos, ModBlockEntityTypes.FURNITURE.get());
         if(state.getBlock() instanceof FurnitureBlock furniture) {
             Behaviour<?>[] behaviours = furniture.getBehaviours();
             for(int index = 0; index < behaviours.length; index++) {

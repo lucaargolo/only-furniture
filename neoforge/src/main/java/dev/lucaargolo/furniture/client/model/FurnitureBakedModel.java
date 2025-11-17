@@ -6,7 +6,7 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
-import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
 import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -122,7 +122,7 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
         }
         ModelData.Builder builder = modelData.derive();
         builder.with(POS_PROPERTY, pos);
-        level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get()).ifPresent(blockEntity -> {
+        level.getBlockEntity(pos, ModBlockEntityTypes.FURNITURE.get()).ifPresent(blockEntity -> {
             builder.with(BLOCK_ENTITY_PROPERTY, blockEntity);
         });
         if(data != null && !modelData.has(DATA_PROPERTY)) {

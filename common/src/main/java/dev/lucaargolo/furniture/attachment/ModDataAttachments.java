@@ -1,37 +1,36 @@
 package dev.lucaargolo.furniture.attachment;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.attachment.impl.BlockAttachment;
 import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
-import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.PlantDataAttachment;
+import dev.lucaargolo.furniture.attachment.impl.StorageDataAttachment;
 import dev.lucaargolo.furniture.registry.ModAttachmentRegistry;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.Map;
 
 public class ModDataAttachments {
 
-    public static ModAttachmentRegistry<?> REGISTRY = FurnitureMod.attachmentRegistry();
+    public static final ModAttachmentRegistry<?> REGISTRY = FurnitureMod.attachmentRegistry();
 
-    public static DataAttachmentType<BlockAttachment> BLOCK = REGISTRY.register("block", DataAttachmentType.of(
-            BlockAttachment.class,
-            () -> new BlockAttachment(Blocks.AIR),
-            BlockAttachment.CODEC,
-            BlockAttachment.STREAM_CODEC
-    ));
-
-    public static DataAttachmentType<ChunkFurnitureDataAttachment> CHUNK_FURNITURE_DATA = REGISTRY.register("chunk_furniture_data", DataAttachmentType.of(
+    public static final DataAttachmentType<ChunkFurnitureDataAttachment> CHUNK_FURNITURE_DATA = REGISTRY.register("chunk_furniture_data", DataAttachmentType.of(
             ChunkFurnitureDataAttachment.class,
             () -> new ChunkFurnitureDataAttachment(Map.of()),
             ChunkFurnitureDataAttachment.CODEC,
             ChunkFurnitureDataAttachment.STREAM_CODEC
     ));
 
-    public static DataAttachmentType<PlantHolderDataAttachment> PLANT_HOLDER_DATA = REGISTRY.register("plant_holder_data", DataAttachmentType.of(
-            PlantHolderDataAttachment.class,
-            () -> new PlantHolderDataAttachment(Map.of()),
-            PlantHolderDataAttachment.CODEC,
-            PlantHolderDataAttachment.STREAM_CODEC
+    public static final DataAttachmentType<PlantDataAttachment> PLANT_DATA = REGISTRY.register("plant_data", DataAttachmentType.of(
+            PlantDataAttachment.class,
+            () -> new PlantDataAttachment(Map.of()),
+            PlantDataAttachment.CODEC,
+            PlantDataAttachment.STREAM_CODEC
     ));
+
+    public static final DataAttachmentType<StorageDataAttachment> STORAGE_DATA = REGISTRY.register("storage_data", DataAttachmentType.of(
+            StorageDataAttachment.class,
+            () -> new StorageDataAttachment(Map.of()),
+            StorageDataAttachment.CODEC
+    ));
+
 
 }

@@ -9,7 +9,7 @@ public interface TextureSlotAccessor {
 
     @Invoker
     static TextureSlot invokeCreate(String id) {
-        throw new AssertionError();
+        throw new UnsupportedOperationException("Implemented via mixin");
     }
 
 }
