@@ -3,10 +3,10 @@ package dev.lucaargolo.furniture.client.model;
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.behaviour.Behaviour;
+import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
-import dev.lucaargolo.furniture.block.interaction.Interaction;
-import dev.lucaargolo.furniture.block.interaction.PlantInteraction;
 import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -62,20 +62,20 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
             Optional<FurnitureBlockEntity> optional = Optional.ofNullable(modelData.get(BLOCK_ENTITY_PROPERTY));
             if(state.getBlock() instanceof FurnitureBlock furniture) {
-                Interaction<?>[] interactions = furniture.getInteractions();
-                for(int index = 0; index < interactions.length; index++) {
-                    Interaction<?> interaction = interactions[index];
+                Behaviour<?>[] behaviours = furniture.getInteractions();
+                for(int index = 0; index < behaviours.length; index++) {
+                    Behaviour<?> behaviour = behaviours[index];
 
-                    Transformation interactionTransformation = new Transformation(interaction.pos().toVector3f(), null, null, null);
-                    IQuadTransformer interactionTransformer = QuadTransformers.applying(interactionTransformation);
+                    Transformation behaviourTransformation = new Transformation(behaviour.pos().toVector3f(), null, null, null);
+                    IQuadTransformer behaviourTransformer = QuadTransformers.applying(behaviourTransformation);
 
-                    List<BakedQuad> interactionQuads = new ArrayList<>();
+                    List<BakedQuad> behaviourQuads = new ArrayList<>();
 
-                    if(interaction instanceof PlantInteraction && optional.isPresent()) {
-                        interactionQuads.addAll(PlantBehaviourBakedModel.getBehaviourQuads(optional.get(), index, side, rand, modelData, renderType));
+                    if(behaviour instanceof PlantBehaviour && optional.isPresent()) {
+                        behaviourQuads.addAll(PlantBehaviourBakedModel.getBehaviourQuads(optional.get(), index, side, rand, modelData, renderType));
                     }
 
-                    quads.addAll(interactionTransformer.process(interactionQuads));
+                    quads.addAll(behaviourTransformer.process(behaviourQuads));
                 }
             }
 
@@ -92,11 +92,11 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
         ChunkRenderTypeSet renderTypes = super.getRenderTypes(state, rand, modelData);
         Optional<FurnitureBlockEntity> optional = Optional.ofNullable(modelData.get(BLOCK_ENTITY_PROPERTY));
         if(state.getBlock() instanceof FurnitureBlock furniture) {
-            Interaction<?>[] interactions = furniture.getInteractions();
-            for (int index = 0; index < interactions.length; index++) {
-                Interaction<?> interaction = interactions[index];
+            Behaviour<?>[] behaviours = furniture.getInteractions();
+            for (int index = 0; index < behaviours.length; index++) {
+                Behaviour<?> behaviour = behaviours[index];
 
-                if(interaction instanceof PlantInteraction && optional.isPresent()) {
+                if(behaviour instanceof PlantBehaviour && optional.isPresent()) {
                     renderTypes = ChunkRenderTypeSet.union(renderTypes, PlantBehaviourBakedModel.getRenderTypes(optional.get(), index, rand, modelData));
                 }
             }

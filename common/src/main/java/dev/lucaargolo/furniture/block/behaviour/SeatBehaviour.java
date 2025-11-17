@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.block.interaction;
+package dev.lucaargolo.furniture.block.behaviour;
 
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.entity.SeatEntity;
@@ -17,15 +17,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class SeatInteraction extends Interaction<SeatInteraction> {
+public class SeatBehaviour extends Behaviour<SeatBehaviour> {
 
-    public SeatInteraction(Vec3 pos) {
+    public SeatBehaviour(Vec3 pos) {
         super(pos);
     }
 
     @Override
-    public SeatInteraction positioned(Vec3 pos) {
-        return new SeatInteraction(pos);
+    public SeatBehaviour positioned(Vec3 pos) {
+        return new SeatBehaviour(pos);
     }
 
     @Override

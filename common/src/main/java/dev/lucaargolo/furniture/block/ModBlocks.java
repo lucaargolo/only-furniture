@@ -5,8 +5,8 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
+import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.block.impl.*;
-import dev.lucaargolo.furniture.block.interaction.PlantInteraction;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.utils.ColorProvider;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -68,7 +68,7 @@ public class ModBlocks {
 
     public static final ModBlockRegistry.BlockEntry<MetalLampBlock> WALL_LAMP = REGISTRY.register("cast_iron_wall_lamp", () -> new MetalLampBlock.Wall(MetalBlock.MetalType.CAST_IRON, ModBlockShapes.WALL_LAMP), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> PLANT_POT = REGISTRY.register("plant_pot", () -> new FurnitureBlock(Blocks.FLOWER_POT, ModBlockShapes.FLOWER_POT, new PlantInteraction(0.0, 0.125, 0.0)));
+    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> PLANT_POT = REGISTRY.register("plant_pot", () -> new FurnitureBlock(Blocks.FLOWER_POT, ModBlockShapes.FLOWER_POT, new PlantBehaviour(0.0, 0.125, 0.0)));
 
     private static <T extends Block> Map<WoodType, ModBlockRegistry.BlockEntry<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], VoxelShape[], T> furnitureConstructor, VoxelShape[] footShapes, VoxelShape[] centerShapes, VoxelShape[] sideShapes, TagKey<?>... tags) {
         return registerForWood(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, footShapes, centerShapes, sideShapes), null, tags);

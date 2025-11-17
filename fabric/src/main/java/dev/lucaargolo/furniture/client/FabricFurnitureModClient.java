@@ -7,7 +7,7 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.block.interaction.PlantInteraction;
+import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
 import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
@@ -56,7 +56,7 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         });
         //TODO: Figure it out if its possible to use FAPI to render other render types in the baked model.
         ModBlocks.REGISTRY.getEntries().forEach(entry -> {
-            if(entry.get() instanceof FurnitureBlock furniture && furniture.getInteractions(PlantInteraction.class).length > 0) {
+            if(entry.get() instanceof FurnitureBlock furniture && furniture.getInteractions(PlantBehaviour.class).length > 0) {
                 BlockRenderLayerMap.INSTANCE.putBlock(entry.get(), RenderType.cutout());
             }
         });

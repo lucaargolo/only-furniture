@@ -5,9 +5,9 @@ import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.LightBlock;
+import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
-import dev.lucaargolo.furniture.block.interaction.Interaction;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
 import dev.lucaargolo.furniture.utils.Rotation;
@@ -59,12 +59,12 @@ public class FurnitureBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     protected final Map<Pair<Direction, Rotation>, VoxelShape> shapes;
-    protected final Interaction<?>[] interactions;
+    protected final Behaviour<?>[] behaviours;
 
-    public FurnitureBlock(Block base, VoxelShape[] shapes, Interaction<?>... interactions) {
+    public FurnitureBlock(Block base, VoxelShape[] shapes, Behaviour<?>... behaviours) {
         super(furnitureProperties(base));
         this.shapes = computeVoxelShapes(shapes, this.isWallBlock());
-        this.interactions = interactions;
+        this.behaviours = behaviours;
         BlockState state = this.stateDefinition.any();
         if(this.isWallBlock()) {
             state = state.setValue(FACING, Direction.NORTH);
@@ -73,19 +73,19 @@ public class FurnitureBlock extends Block implements EntityBlock {
     }
 
     public FurnitureBlock(Block base, VoxelShape[] shapes) {
-        this(base, shapes, new Interaction[0]);
+        this(base, shapes, new Behaviour[0]);
     }
 
     public boolean isWallBlock() {
         return false;
     }
 
-    public final Interaction<?>[] getInteractions() {
-        return this.interactions;
+    public final Behaviour<?>[] getInteractions() {
+        return this.behaviours;
     }
 
     @SuppressWarnings("unchecked")
-    public final <I extends Interaction<I>> I[] getInteractions(Class<I> type) {
+    public final <I extends Behaviour<I>> I[] getInteractions(Class<I> type) {
         return Arrays.stream(this.getInteractions())
                 .filter(type::isInstance)
                 .map(type::cast)
@@ -94,7 +94,7 @@ public class FurnitureBlock extends Block implements EntityBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        if(Arrays.stream(this.interactions).anyMatch(Interaction::isBlockEntityNeeded)) {
+        if(Arrays.stream(this.behaviours).anyMatch(Behaviour::isBlockEntityNeeded)) {
             return new FurnitureBlockEntity(pos, state);
         }else {
             return null;
@@ -105,16 +105,16 @@ public class FurnitureBlock extends Block implements EntityBlock {
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         FurnitureData data = FurnitureData.getOriginal(level, pos);
         if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching() && data.hasOriginal()) {
-            List<Pair<Integer, Interaction<?>>> sortedInteractions = IntStream.range(0, this.interactions.length).boxed()
-                    .map(i -> Pair.<Integer, Interaction<?>>of(i, computePositionedInteraction(pos, state, data, this.interactions[i])))
+            List<Pair<Integer, Behaviour<?>>> sortedInteractions = IntStream.range(0, this.behaviours.length).boxed()
+                    .map(i -> Pair.<Integer, Behaviour<?>>of(i, computePositionedInteraction(pos, state, data, this.behaviours[i])))
                     .sorted(Comparator.comparingDouble(i -> i.getSecond().pos().distanceToSqr(hitResult.getLocation())))
                     .toList();
 
             Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
-            for(Pair<Integer, Interaction<?>> pair : sortedInteractions) {
+            for(Pair<Integer, Behaviour<?>> pair : sortedInteractions) {
                 int index = pair.getFirst();
-                Interaction<?> interaction = pair.getSecond();
-                if((optional.isPresent() || !interaction.isBlockEntityNeeded()) && interaction.interact(level, pos, state, optional.orElse(null), player, index)) {
+                Behaviour<?> behaviour = pair.getSecond();
+                if((optional.isPresent() || !behaviour.isBlockEntityNeeded()) && behaviour.interact(level, pos, state, optional.orElse(null), player, index)) {
                     return InteractionResult.SUCCESS;
                 }
             }
@@ -467,13 +467,13 @@ public class FurnitureBlock extends Block implements EntityBlock {
         return builder.build();
     }
 
-    public static Interaction<?> computePositionedInteraction(BlockPos pos, BlockState state, FurnitureData data, Interaction<?> interaction) {
+    public static Behaviour<?> computePositionedInteraction(BlockPos pos, BlockState state, FurnitureData data, Behaviour<?> behaviour) {
         Vec3 position = Vec3.atCenterOf(pos).add(data.getX(state), data.getY(state), data.getZ(state));
         Quaternionf rotation = data.getRotation(state);
         Matrix4f transform = new Matrix4f().rotate(rotation);
-        Vector4f offset = new Vector4f(interaction.pos().toVector3f(), 1f);
+        Vector4f offset = new Vector4f(behaviour.pos().toVector3f(), 1f);
         offset.mul(transform);
-        return interaction.positioned(position.add(offset.x, offset.y, offset.z));
+        return behaviour.positioned(position.add(offset.x, offset.y, offset.z));
     }
 
     private static List<BlockPos> calculateIntersectingPositionsInLevel(Level level, BlockPos originalPos, int layer) {

@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.block.interaction;
+package dev.lucaargolo.furniture.block.behaviour;
 
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -10,11 +10,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public abstract class Interaction<I extends Interaction<I>> {
+public abstract class Behaviour<I extends Behaviour<I>> {
 
     protected final Vec3 pos;
 
-    public Interaction(Vec3 pos) {
+    public Behaviour(Vec3 pos) {
         this.pos = pos;
     }
 
@@ -37,7 +37,7 @@ public abstract class Interaction<I extends Interaction<I>> {
     @Override
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) return false;
-        Interaction<?> that = (Interaction<?>) object;
+        Behaviour<?> that = (Behaviour<?>) object;
         return Objects.equals(pos, that.pos);
     }
 

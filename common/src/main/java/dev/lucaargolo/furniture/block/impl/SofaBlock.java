@@ -5,8 +5,8 @@ import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.base.ColorBlock;
-import dev.lucaargolo.furniture.block.interaction.Interaction;
-import dev.lucaargolo.furniture.block.interaction.SeatInteraction;
+import dev.lucaargolo.furniture.block.behaviour.Behaviour;
+import dev.lucaargolo.furniture.block.behaviour.SeatBehaviour;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,8 +31,8 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock {
     private final DyeColor color;
 
     public SofaBlock(Block base, TagKey<Block> connecting, DyeColor color) {
-        super(base, ModBlockShapes.SOFA, new Interaction[] {
-            new SeatInteraction(Vec3.ZERO)
+        super(base, ModBlockShapes.SOFA, new Behaviour[] {
+            new SeatBehaviour(Vec3.ZERO)
         }, connecting);
         this.color = color;
     }

@@ -6,7 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
-import dev.lucaargolo.furniture.block.interaction.Interaction;
+import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.client.render.RenderHelper;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
@@ -139,10 +139,10 @@ public class FurnitureDataDebug {
 
         if(data.hasOriginal()) {
             if(state.getBlock() instanceof FurnitureBlock block) {
-                for(Interaction<?> i : block.getInteractions()) {
-                    Interaction<?> interaction = FurnitureBlock.computePositionedInteraction(pos, state, data, i);
-                    Vec3 interactionPosition = interaction.pos().subtract(position);
-                    AABB bounds = AABB.ofSize(interactionPosition, 0.1, 0.1, 0.1);
+                for(Behaviour<?> i : block.getInteractions()) {
+                    Behaviour<?> behaviour = FurnitureBlock.computePositionedInteraction(pos, state, data, i);
+                    Vec3 behaviourPosition = behaviour.pos().subtract(position);
+                    AABB bounds = AABB.ofSize(behaviourPosition, 0.1, 0.1, 0.1);
                     LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);
                 }
             }

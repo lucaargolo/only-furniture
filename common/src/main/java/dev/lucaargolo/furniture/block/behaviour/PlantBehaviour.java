@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.block.interaction;
+package dev.lucaargolo.furniture.block.behaviour;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
@@ -16,19 +16,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class PlantInteraction extends Interaction<PlantInteraction> {
+public class PlantBehaviour extends Behaviour<PlantBehaviour> {
 
-    public PlantInteraction(Vec3 pos) {
+    public PlantBehaviour(Vec3 pos) {
         super(pos);
     }
 
-    public PlantInteraction(double x, double y, double z) {
+    public PlantBehaviour(double x, double y, double z) {
         this(new Vec3(x, y, z));
     }
 
     @Override
-    public PlantInteraction positioned(Vec3 pos) {
-        return new PlantInteraction(pos);
+    public PlantBehaviour positioned(Vec3 pos) {
+        return new PlantBehaviour(pos);
     }
 
     @Override
