@@ -5,10 +5,13 @@ import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.StorageDataAttachment;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.menu.ModMenuTypes;
+import dev.lucaargolo.furniture.menu.StorageMenu;
+import dev.lucaargolo.furniture.mixin.SimpleContainerAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -38,7 +41,13 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
             storage = NonNullList.withSize(this.size, ItemStack.EMPTY);
             ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, storage));
         }
-        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, player, Component.empty(), this.size);
+        StorageMenu menu = FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, player, Component.literal("Storage"), this.size);
+        if(menu != null) {
+            SimpleContainer container = new SimpleContainer(this.size);
+            ((SimpleContainerAccessor) container).setItems(storage);
+            container.addListener(c -> ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, container.getItems())));
+            menu.wrap(container);
+        }
         return true;
     }
 

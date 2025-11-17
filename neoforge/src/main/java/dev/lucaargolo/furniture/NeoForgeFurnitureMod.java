@@ -20,7 +20,9 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 @Mod(FurnitureMod.MOD_ID)
@@ -54,8 +56,10 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
     }
 
     @Override
-    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data) {
-        player.openMenu(new MenuProvider() {
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <M extends AbstractContainerMenu, D> M openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data) {
+        OptionalInt optional = player.openMenu(new MenuProvider() {
             @Override
             public @NotNull Component getDisplayName() {
                 return title;
@@ -68,6 +72,7 @@ public class NeoForgeFurnitureMod extends FurnitureMod {
                 return entry.get().create(containerId, playerInventory, buf);
             }
         }, buf -> entry.getStreamCodec().encode(buf, data));
+        return optional.isPresent() ? (M) player.containerMenu : null;
     }
 
     public static IEventBus getModBus() {

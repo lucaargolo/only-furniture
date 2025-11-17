@@ -18,6 +18,8 @@ import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.OptionalInt;
+
 public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
 
     @Override
@@ -50,9 +52,11 @@ public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
     }
 
     @Override
-    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data) {
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <M extends AbstractContainerMenu, D> M openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data) {
         ExtendedScreenHandlerType<M, D> type = (ExtendedScreenHandlerType<M, D>) entry.get();
-        player.openMenu(new ExtendedScreenHandlerFactory<D>() {
+        OptionalInt optional = player.openMenu(new ExtendedScreenHandlerFactory<D>() {
             @Override
             public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
                 return type.create(i, inventory, data);
@@ -68,5 +72,6 @@ public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
                 return data;
             }
         });
+        return optional.isPresent() ? (M) player.containerMenu : null;
     }
 }

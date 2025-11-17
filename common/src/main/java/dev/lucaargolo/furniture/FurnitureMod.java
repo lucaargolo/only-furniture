@@ -27,8 +27,11 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.OptionalInt;
 
 @SuppressWarnings("unchecked")
 public abstract class FurnitureMod {
@@ -65,10 +68,12 @@ public abstract class FurnitureMod {
 
     public abstract Block getPottedBlock(Block block);
 
-    public abstract  <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data);
+    @Nullable
+    public abstract  <M extends AbstractContainerMenu, D> M openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data);
 
-    public <M extends AbstractContainerMenu> void openMenu(MinecraftEntry<MenuType<M>> entry, Player player, Component title) {
-        player.openMenu(new MenuProvider() {
+    @Nullable
+    public <M extends AbstractContainerMenu> M openMenu(MinecraftEntry<MenuType<M>> entry, Player player, Component title) {
+        OptionalInt optional = player.openMenu(new MenuProvider() {
             @Override
             public @NotNull Component getDisplayName() {
                 return title;
@@ -79,6 +84,7 @@ public abstract class FurnitureMod {
                 return entry.get().create(containerId, playerInventory);
             }
         });
+        return optional.isPresent() ? (M) player.containerMenu : null;
     };
 
     public static FurnitureMod getInstance() {
