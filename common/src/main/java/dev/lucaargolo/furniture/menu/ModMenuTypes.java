@@ -2,13 +2,12 @@ package dev.lucaargolo.furniture.menu;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.registry.ModMenuTypeRegistry;
-import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
-import net.minecraft.world.inventory.MenuType;
+import net.minecraft.network.codec.ByteBufCodecs;
 
 public class ModMenuTypes {
 
     public static final ModMenuTypeRegistry REGISTRY = FurnitureMod.menuTypeRegistry();
 
-    public static final MinecraftEntry<MenuType<StorageMenu>> STORAGE = REGISTRY.register("storage", StorageMenu::new);
+    public static final ModMenuTypeRegistry.AdvancedMenuTypeEntry<StorageMenu, Integer> STORAGE = REGISTRY.register("storage", StorageMenu::new, ByteBufCodecs.INT);
 
 }

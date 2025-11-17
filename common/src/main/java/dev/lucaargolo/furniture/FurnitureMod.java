@@ -11,15 +11,22 @@ import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.network.BlockChangedPayload;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.registry.*;
+import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +64,22 @@ public abstract class FurnitureMod {
     public abstract boolean isFakePlayer(Player player);
 
     public abstract Block getPottedBlock(Block block);
+
+    public abstract  <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data);
+
+    public <M extends AbstractContainerMenu> void openMenu(MinecraftEntry<MenuType<M>> entry, Player player, Component title) {
+        player.openMenu(new MenuProvider() {
+            @Override
+            public @NotNull Component getDisplayName() {
+                return title;
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
+                return entry.get().create(containerId, playerInventory);
+            }
+        });
+    };
 
     public static FurnitureMod getInstance() {
         return instance;

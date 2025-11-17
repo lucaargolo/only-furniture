@@ -4,12 +4,16 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
+import net.neoforged.neoforge.network.IContainerFactory;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -21,6 +25,15 @@ public class NeoForgeModMenuTypeRegistry extends ModMenuTypeRegistry {
     @Override
     public void init() {
         this.registry.register(NeoForgeFurnitureMod.getModBus());
+    }
+
+    @Override
+    public <M extends AbstractContainerMenu, D> AdvancedMenuTypeEntry<M, D> register(String path, TriFunction<Integer, Inventory, D, M> factory, StreamCodec<? super RegistryFriendlyByteBuf, D> streamCodec, TagKey<?>... tags) {
+        IContainerFactory<M> advancedFactory = (windowId, inv, data) -> factory.apply(windowId, inv, streamCodec.decode(data));
+        Supplier<MenuType<M>> supplier = () -> new MenuType<>(advancedFactory, FeatureFlags.VANILLA_SET);
+        AdvancedMenuTypeEntry<M, D> entry = new AdvancedMenuTypeEntry<>(id++, path, this.registry.register(path, supplier), streamCodec, tags);
+        entries.put(path, entry);
+        return entry;
     }
 
     @Override

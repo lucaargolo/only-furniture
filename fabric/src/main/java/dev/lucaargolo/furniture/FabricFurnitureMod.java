@@ -2,12 +2,21 @@ package dev.lucaargolo.furniture;
 
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.mixin.FlowerPotBlockAccessor;
+import dev.lucaargolo.furniture.registry.ModMenuTypeRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.registry.OxidizableBlocksRegistry;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
 
@@ -40,4 +49,24 @@ public class FabricFurnitureMod extends FurnitureMod implements ModInitializer {
         return FlowerPotBlockAccessor.getPottedByContentMap().getOrDefault(block, Blocks.FLOWER_POT);
     }
 
+    @Override
+    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, Player player, Component title, D data) {
+        ExtendedScreenHandlerType<M, D> type = (ExtendedScreenHandlerType<M, D>) entry.get();
+        player.openMenu(new ExtendedScreenHandlerFactory<D>() {
+            @Override
+            public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
+                return type.create(i, inventory, data);
+            }
+
+            @Override
+            public @NotNull Component getDisplayName() {
+                return title;
+            }
+
+            @Override
+            public D getScreenOpeningData(ServerPlayer serverPlayer) {
+                return data;
+            }
+        });
+    }
 }

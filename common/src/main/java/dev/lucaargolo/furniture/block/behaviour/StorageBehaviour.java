@@ -1,22 +1,19 @@
 package dev.lucaargolo.furniture.block.behaviour;
 
+import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.StorageDataAttachment;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
-import dev.lucaargolo.furniture.menu.StorageMenu;
+import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Containers;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class StorageBehaviour extends Behaviour<StorageBehaviour> {
@@ -41,17 +38,7 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
             storage = NonNullList.withSize(this.size, ItemStack.EMPTY);
             ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, storage));
         }
-        player.openMenu(new MenuProvider() {
-            @Override
-            public @NotNull Component getDisplayName() {
-                return Component.empty();
-            }
-
-            @Override
-            public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-                return new StorageMenu(containerId, playerInventory);
-            }
-        });
+        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, player, Component.empty(), this.size);
         return true;
     }
 
