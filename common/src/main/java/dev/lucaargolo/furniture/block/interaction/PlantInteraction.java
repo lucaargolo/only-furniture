@@ -3,8 +3,7 @@ package dev.lucaargolo.furniture.block.interaction;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
-import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
-import dev.lucaargolo.furniture.block.entity.PlantHolderBlockEntity;
+import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -13,15 +12,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerPotBlock;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 public class PlantInteraction extends Interaction<PlantInteraction> {
 
     public PlantInteraction(Vec3 pos) {
         super(pos);
+    }
+
+    public PlantInteraction(double x, double y, double z) {
+        this(new Vec3(x, y, z));
     }
 
     @Override
@@ -30,14 +32,7 @@ public class PlantInteraction extends Interaction<PlantInteraction> {
     }
 
     @Override
-    public boolean interact(int index, Level level, Player player, BlockHitResult hitResult) {
-        BlockPos pos = hitResult.getBlockPos();
-        Optional<PlantHolderBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.PLANT_HOLDER.get());
-        if(optional.isEmpty()) {
-            return false;
-        }
-
-        PlantHolderBlockEntity blockEntity = optional.get();
+    public boolean interact(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
         PlantHolderDataAttachment plantData = ModDataAttachments.PLANT_HOLDER_DATA.getOrCreate(blockEntity);
         if(plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
             Block pottedBlock = potBlock.getPotted();
@@ -63,4 +58,13 @@ public class PlantInteraction extends Interaction<PlantInteraction> {
         return true;
     }
 
+    @Override
+    public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
+
+    }
+
+    @Override
+    public boolean isBlockEntityNeeded() {
+        return true;
+    }
 }

@@ -17,15 +17,11 @@ public class MetalStoneFurnitureBlock extends StoneFurnitureBlock implements Met
     }
 
     public MetalStoneFurnitureBlock(MetalBlock.MetalType metal, WeatheringCopper.WeatherState state, StoneType stone, VoxelShape[] shapes) {
-        super(metal.get(state), stone, shapes);
-        this.metal = metal;
-        this.state = state;
+        this(metal.get(state), metal, state, stone, shapes);
     }
 
     public MetalStoneFurnitureBlock(MetalBlock.MetalType metal, StoneType stone, VoxelShape[] shapes) {
-        super(metal.getBase(), stone, shapes);
-        this.metal = metal;
-        this.state = WeatheringCopper.WeatherState.UNAFFECTED;
+        this(metal, WeatheringCopper.WeatherState.UNAFFECTED, stone, shapes);
     }
 
     @Override

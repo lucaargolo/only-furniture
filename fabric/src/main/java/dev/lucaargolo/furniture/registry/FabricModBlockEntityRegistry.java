@@ -9,10 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -21,11 +18,6 @@ public class FabricModBlockEntityRegistry extends ModBlockEntityRegistry {
     @Override
     public void init() {
         entries.forEach(this::registerEntry);
-    }
-
-    @Override
-    public @Nullable MinecraftEntry<? extends BlockEntityType<?>> get(String path) {
-        return entries.get(path);
     }
 
     @Override
@@ -40,6 +32,13 @@ public class FabricModBlockEntityRegistry extends ModBlockEntityRegistry {
     }
 
     @Override
+    public <B extends BlockEntity> MinecraftEntry<BlockEntityType<B>> register(String path, BiFunction<BlockPos, BlockState, B> factory, Supplier<Block[]> blocks) {
+        return register(path, () -> {
+            return BlockEntityType.Builder.of(factory::apply, blocks.get()).build();
+        });
+    }
+
+    @Override
     public <E extends BlockEntityType<?>> MinecraftEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
         MinecraftEntry<E> entry = this.entry(path, supplier, tags);
         entries.put(path, entry);
@@ -49,11 +48,5 @@ public class FabricModBlockEntityRegistry extends ModBlockEntityRegistry {
     private <E extends BlockEntityType<?>> void registerEntry(String path, MinecraftEntry<E> entry) {
         entry.set(Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, entry.key(), entry.get()));
     }
-
-    @Override
-    public @NotNull Iterator<MinecraftEntry<? extends BlockEntityType<?>>> iterator() {
-        return entries.values().iterator();
-    }
-
 
 }

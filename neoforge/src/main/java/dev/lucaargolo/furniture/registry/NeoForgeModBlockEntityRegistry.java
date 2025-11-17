@@ -11,10 +11,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -25,11 +22,6 @@ public class NeoForgeModBlockEntityRegistry extends ModBlockEntityRegistry {
     @Override
     public void init() {
         this.registry.register(NeoForgeFurnitureMod.getModBus());
-    }
-
-    @Override
-    public @Nullable MinecraftEntry<? extends BlockEntityType<?>> get(String path) {
-        return entries.get(path);
     }
 
     @Override
@@ -45,15 +37,17 @@ public class NeoForgeModBlockEntityRegistry extends ModBlockEntityRegistry {
     }
 
     @Override
+    public <B extends BlockEntity> MinecraftEntry<BlockEntityType<B>> register(String path, BiFunction<BlockPos, BlockState, B> factory, Supplier<Block[]> blocks) {
+        return register(path, () -> {
+            return BlockEntityType.Builder.of(factory::apply, blocks.get()).build(null);
+        });
+    }
+
+    @Override
     public <E extends BlockEntityType<?>> MinecraftEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
         MinecraftEntry<E> entry = this.entry(path, this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
-    }
-
-    @Override
-    public @NotNull Iterator<MinecraftEntry<? extends BlockEntityType<?>>> iterator() {
-        return entries.values().iterator();
     }
 
 }

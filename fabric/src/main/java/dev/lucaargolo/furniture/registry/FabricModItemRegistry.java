@@ -5,10 +5,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.function.Supplier;
 
 public class FabricModItemRegistry extends ModItemRegistry {
@@ -16,11 +13,6 @@ public class FabricModItemRegistry extends ModItemRegistry {
     @Override
     public void init() {
         entries.forEach(this::registerEntry);
-    }
-
-    @Override
-    public @Nullable ModItemRegistry.ItemEntry<?> get(String path) {
-        return entries.get(path);
     }
 
     @Override
@@ -32,11 +24,6 @@ public class FabricModItemRegistry extends ModItemRegistry {
 
     private <E extends Item> void registerEntry(String path, MinecraftEntry<E> entry) {
         entry.set(Registry.register(BuiltInRegistries.ITEM, entry.key(), entry.get()));
-    }
-
-    @Override
-    public @NotNull Iterator<ItemEntry<?>> iterator() {
-        return entries.values().iterator();
     }
 
 }

@@ -18,15 +18,11 @@ public class MetalWoodFurnitureBlock extends WoodFurnitureBlock implements Metal
     }
 
     public MetalWoodFurnitureBlock(MetalType metal, WeatheringCopper.WeatherState state, WoodType wood, VoxelShape[] shapes) {
-        super(metal.get(state), wood, shapes);
-        this.metal = metal;
-        this.state = state;
+        this(metal.get(state), metal, state, wood, shapes);
     }
 
     public MetalWoodFurnitureBlock(MetalType metal, WoodType wood, VoxelShape[] shapes) {
-        super(metal.getBase(), wood, shapes);
-        this.metal = metal;
-        this.state = WeatheringCopper.WeatherState.UNAFFECTED;
+        this(metal, WeatheringCopper.WeatherState.UNAFFECTED, wood, shapes);
     }
 
     @Override

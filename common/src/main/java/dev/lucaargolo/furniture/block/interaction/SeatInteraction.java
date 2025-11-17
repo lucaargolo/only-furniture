@@ -1,15 +1,18 @@
 package dev.lucaargolo.furniture.block.interaction;
 
+import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.entity.SeatEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +29,7 @@ public class SeatInteraction extends Interaction<SeatInteraction> {
     }
 
     @Override
-    public boolean interact(int index, Level level, Player player, BlockHitResult hitResult) {
+    public boolean interact(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
         List<SeatEntity> seatEntities = level.getEntitiesOfClass(SeatEntity.class, AABB.ofSize(this.pos, 0.1, 0.1, 0.1));
         boolean isSeatFree = seatEntities.isEmpty();
         if(!isSeatFree) {
@@ -37,7 +40,7 @@ public class SeatInteraction extends Interaction<SeatInteraction> {
         }
 
         if (!level.isClientSide) {
-            SeatEntity seat = new SeatEntity(level, this.pos, hitResult.getBlockPos());
+            SeatEntity seat = new SeatEntity(level, this.pos, pos);
             level.addFreshEntity(seat);
 
             Entity entity = getLeashed(player).orElse(player);

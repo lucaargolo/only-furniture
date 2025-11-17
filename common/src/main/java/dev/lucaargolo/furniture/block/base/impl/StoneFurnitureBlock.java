@@ -15,8 +15,7 @@ public class StoneFurnitureBlock extends FurnitureBlock implements StoneBlock {
     }
 
     public StoneFurnitureBlock(StoneBlock.StoneType stone, VoxelShape[] shapes) {
-        super(stone.getBase(), shapes);
-        this.stone = stone;
+        this(stone.getBase(), stone, shapes);
     }
 
     @Override

@@ -5,10 +5,7 @@ import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.function.Supplier;
 
 public class NeoForgeModBlockRegistry extends ModBlockRegistry {
@@ -21,21 +18,10 @@ public class NeoForgeModBlockRegistry extends ModBlockRegistry {
     }
 
     @Override
-    @Nullable
-    public BlockEntry<?> get(String path) {
-        return entries.get(path);
-    }
-
-    @Override
     public <E extends Block> BlockEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
         BlockEntry<E> entry = this.entry(path, this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
-    }
-
-    @Override
-    public @NotNull Iterator<BlockEntry<?>> iterator() {
-        return entries.values().iterator();
     }
 
 }

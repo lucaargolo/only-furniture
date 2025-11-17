@@ -7,10 +7,9 @@ import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
-import dev.lucaargolo.furniture.block.impl.PlantHolderBlock;
+import dev.lucaargolo.furniture.block.interaction.PlantInteraction;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
-import dev.lucaargolo.furniture.client.model.PlantHolderBakedModel;
 import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
@@ -47,17 +46,17 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
         this.registerEntityRenderers();
         WorldRenderEvents.BLOCK_OUTLINE.register(this::onBlockOutline);
         WorldRenderEvents.AFTER_TRANSLUCENT.register(this::onAfterTranslucent);
-        ModBlocks.REGISTRY.forEach(entry -> {
+        ModBlocks.REGISTRY.getEntries().forEach(entry -> {
             if (entry.getTintColor() != null)
                 ColorProviderRegistry.BLOCK.register(entry.getTintColor()::getColor, entry.get());
         });
-        ModItems.REGISTRY.forEach(entry -> {
+        ModItems.REGISTRY.getEntries().forEach(entry -> {
             if (entry.getTintColor() != null)
                 ColorProviderRegistry.ITEM.register(entry.getTintColor()::getColor, entry.get());
         });
         //TODO: Figure it out if its possible to use FAPI to render other render types in the baked model.
-        ModBlocks.REGISTRY.forEach(entry -> {
-            if(entry.get() instanceof PlantHolderBlock) {
+        ModBlocks.REGISTRY.getEntries().forEach(entry -> {
+            if(entry.get() instanceof FurnitureBlock furniture && furniture.getInteractions(PlantInteraction.class).length > 0) {
                 BlockRenderLayerMap.INSTANCE.putBlock(entry.get(), RenderType.cutout());
             }
         });
@@ -87,8 +86,6 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
                     if(namespace.equals(FurnitureMod.MOD_ID) && !variant.equals("inventory")) {
                         ModBlockRegistry.BlockEntry<?> entry = ModBlocks.REGISTRY.get(path);
                         if(entry != null) {
-                            if(entry.get() instanceof PlantHolderBlock)
-                                return new PlantHolderBakedModel(model);
                             if(entry.get() instanceof FurnitureFenceBlock)
                                 return new FurnitureFenceBakedModel(model);
                             if(entry.get() instanceof FurnitureBlock)

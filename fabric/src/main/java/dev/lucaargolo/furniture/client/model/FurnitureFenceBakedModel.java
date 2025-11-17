@@ -3,8 +3,6 @@ package dev.lucaargolo.furniture.client.model;
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
-import net.fabricmc.fabric.api.renderer.v1.Renderer;
-import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -34,11 +32,6 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
     @Override
     public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data) {
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
-        if(!RendererAccess.INSTANCE.hasRenderer()) {
-            return;
-        }
-        Renderer renderer = RendererAccess.INSTANCE.getRenderer();
-        assert renderer != null;
         if(state.getBlock() instanceof FurnitureFenceBlock furniture) {
             List<Vec3i> offsets = furniture.getType().getOffsets();
             for (int index = 0; index < offsets.size(); index++) {

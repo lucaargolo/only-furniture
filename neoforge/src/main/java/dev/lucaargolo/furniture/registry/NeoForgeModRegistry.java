@@ -7,10 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
 import java.util.function.Supplier;
 
 public class NeoForgeModRegistry<T> extends ModRegistry<T> {
@@ -28,21 +25,10 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     }
 
     @Override
-    @Nullable
-    public MinecraftEntry<? extends T> get(String path) {
-        return entries.get(path);
-    }
-
-    @Override
     public <E extends T> MinecraftEntry<E> register(String path, Supplier<E> supplier, TagKey<?>... tags) {
         MinecraftEntry<E> entry = this.entry(path, this.registry.register(path, supplier), tags);
         entries.put(path, entry);
         return entry;
-    }
-
-    @Override
-    public @NotNull Iterator<MinecraftEntry<? extends T>> iterator() {
-        return entries.values().iterator();
     }
 
 }

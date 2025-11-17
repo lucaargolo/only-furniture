@@ -14,7 +14,7 @@ public class ModItems {
     public static final ModItemRegistry REGISTRY = FurnitureMod.itemRegistry();
 
     static {
-        ModBlocks.REGISTRY.forEach((entry) -> {
+        ModBlocks.REGISTRY.getEntries().forEach((entry) -> {
             REGISTRY.register(entry.path(), () -> getBlockItem(entry.get(), new Item.Properties()), entry.getTags()).withTintColor(entry.getTintColor());
         });
     }

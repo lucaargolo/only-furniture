@@ -49,7 +49,7 @@ public class ModBlockModelProvider {
     private static final TextureSlot PILLOW = TextureSlotAccessor.invokeCreate("pillow");
 
     public static void generate(BlockModelGenerators generators) {
-        ModBlocks.REGISTRY.forEach((entry) -> {
+        ModBlocks.REGISTRY.getEntries().forEach((entry) -> {
             switch (entry.get()) {
                 case TableBlock table -> createTableBlockState(generators, entry, table.isSimple());
                 case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);

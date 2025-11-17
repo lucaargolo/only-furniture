@@ -7,7 +7,6 @@ import dev.lucaargolo.furniture.attachment.impl.PlantHolderDataAttachment;
 import dev.lucaargolo.furniture.registry.ModAttachmentRegistry;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.List;
 import java.util.Map;
 
 public class ModDataAttachments {
@@ -30,7 +29,7 @@ public class ModDataAttachments {
 
     public static DataAttachmentType<PlantHolderDataAttachment> PLANT_HOLDER_DATA = REGISTRY.register("plant_holder_data", DataAttachmentType.of(
             PlantHolderDataAttachment.class,
-            () -> new PlantHolderDataAttachment(List.of()),
+            () -> new PlantHolderDataAttachment(Map.of()),
             PlantHolderDataAttachment.CODEC,
             PlantHolderDataAttachment.STREAM_CODEC
     ));

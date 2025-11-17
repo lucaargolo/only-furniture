@@ -12,46 +12,38 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PlantHolderDataAttachment implements DataAttachment<PlantHolderDataAttachment> {
 
     public static final Codec<PlantHolderDataAttachment> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.list(BuiltInRegistries.BLOCK.byNameCodec()).fieldOf("data").forGetter(PlantHolderDataAttachment::get)
+            Codec.unboundedMap(Codec.STRING.xmap(Integer::valueOf, Object::toString), BuiltInRegistries.BLOCK.byNameCodec()).fieldOf("data").forGetter(PlantHolderDataAttachment::get)
     ).apply(instance, PlantHolderDataAttachment::new));
 
     public static final StreamCodec<ByteBuf, PlantHolderDataAttachment> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.collection(ArrayList::new, ByteBufCodecs.fromCodec(BuiltInRegistries.BLOCK.byNameCodec())),
+            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.INT, ByteBufCodecs.fromCodec(BuiltInRegistries.BLOCK.byNameCodec())),
             PlantHolderDataAttachment::get,
             PlantHolderDataAttachment::new
     );
 
-    private final List<Block> data;
+    private final Map<Integer, Block> data;
 
-    public PlantHolderDataAttachment(List<Block> data) {
-        this.data = new ArrayList<>(data);
+    public PlantHolderDataAttachment(Map<Integer, Block> data) {
+        this.data = new HashMap<>(data);
     }
 
-    private List<Block> get() {
-        return data;
+    private Map<Integer, Block> get() {
+        return this.data;
     }
 
     public Block getBlock(int index) {
-        return (index >= 0 && index < data.size()) ? data.get(index) : Blocks.FLOWER_POT;
+        return data.getOrDefault(index, Blocks.FLOWER_POT);
     }
 
     public PlantHolderDataAttachment set(int index, Block block) {
-        if(index == data.size()) {
-            data.add(block);
-        }else if(index < data.size()) {
-            data.set(index, block);
-        }
+        data.put(index, block);
         return this;
-    }
-
-    public int size() {
-        return data.size();
     }
 
     @Override

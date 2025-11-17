@@ -5,11 +5,12 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public abstract class MinecraftRegistry<T, M extends MinecraftEntry<? extends T>> implements Iterable<M> {
+public abstract class MinecraftRegistry<T, M extends MinecraftEntry<? extends T>> {
 
     protected final ResourceKey<Registry<T>> registryKey;
     protected final Map<String, M> entries = new LinkedHashMap<>();
@@ -23,7 +24,13 @@ public abstract class MinecraftRegistry<T, M extends MinecraftEntry<? extends T>
     public abstract void init();
 
     @Nullable
-    public abstract M get(String path);
+    public M get(String path) {
+        return entries.get(path);
+    }
+
+    public Collection<M> getEntries() {
+        return entries.values();
+    }
 
     public abstract <E extends T> M register(String path, Supplier<E> supplier, TagKey<?>... tags);
 

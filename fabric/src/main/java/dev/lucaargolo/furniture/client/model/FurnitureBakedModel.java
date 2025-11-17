@@ -1,6 +1,12 @@
 package dev.lucaargolo.furniture.client.model;
 
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
+import dev.lucaargolo.furniture.block.interaction.PlantInteraction;
+import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.resources.model.BakedModel;
@@ -11,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class FurnitureBakedModel extends ForwardingBakedModel {
@@ -63,6 +70,27 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             }
             return true;
         });
+
+        Optional<FurnitureBlockEntity> optional = blockView.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
+        if(state.getBlock() instanceof FurnitureBlock furniture) {
+            Interaction<?>[] interactions = furniture.getInteractions();
+            for(int index = 0; index < interactions.length; index++) {
+                Interaction<?> interaction = interactions[index];
+
+                context.pushTransform((quad) -> {
+                    for (int i = 0; i < 4; i++) {
+                        quad.pos(i, (float) (quad.x(i) + interaction.pos().x()), (float) (quad.y(i) + interaction.pos().y()), (float) (quad.z(i) + interaction.pos().z()));
+                    }
+                    return true;
+                });
+
+                if(interaction instanceof PlantInteraction && optional.isPresent()) {
+                    PlantBehaviourBakedModel.emitBehaviourQuads(optional.get(), index, randomSupplier, context);
+                }
+
+                context.popTransform();
+            }
+        }
 
         this.wrapped.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 

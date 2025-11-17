@@ -37,7 +37,7 @@ public class ModCreativeTabs {
             .title(Component.translatable("itemGroup."+FurnitureMod.MOD_ID+".creative_tab"))
             .icon(ModBlocks.OUTDOOR_BENCH_MAP.get(WoodType.OAK).get().asItem()::getDefaultInstance)
             .displayItems(((parameters, output) -> {
-                Streams.of(ModItems.REGISTRY).sorted(COMPARATOR).map(ModItemRegistry.ItemEntry::get).forEach(output::accept);
+                Streams.of(ModItems.REGISTRY.getEntries()).sorted(COMPARATOR).map(ModItemRegistry.ItemEntry::get).forEach(output::accept);
             }))
             .build()
     );

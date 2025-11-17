@@ -24,7 +24,7 @@ public class FurnitureFenceBlock extends FurnitureConnectingBlock {
     private final float size;
 
     public FurnitureFenceBlock(Block base, TagKey<Block> connecting, float size) {
-        super(base, new VoxelShape[]{
+        super(base, new VoxelShape[] {
             Block.box(8.0-(size/2.0), 0, 8.0-(size/2.0), 8.0+(size/2.0), 16, 8.0+(size/2.0))
         }, connecting);
         this.size = size;

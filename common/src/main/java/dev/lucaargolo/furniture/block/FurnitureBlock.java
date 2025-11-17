@@ -5,6 +5,8 @@ import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.base.LightBlock;
+import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
 import dev.lucaargolo.furniture.block.interaction.Interaction;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
@@ -29,6 +31,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -46,19 +50,21 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector4f;
 
+import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class FurnitureBlock extends Block {
+public class FurnitureBlock extends Block implements EntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     protected final Map<Pair<Direction, Rotation>, VoxelShape> shapes;
+    protected final Interaction<?>[] interactions;
 
-    public FurnitureBlock(Block base, VoxelShape[] shapes) {
+    public FurnitureBlock(Block base, VoxelShape[] shapes, Interaction<?>... interactions) {
         super(furnitureProperties(base));
         this.shapes = computeVoxelShapes(shapes, this.isWallBlock());
+        this.interactions = interactions;
         BlockState state = this.stateDefinition.any();
         if(this.isWallBlock()) {
             state = state.setValue(FACING, Direction.NORTH);
@@ -66,26 +72,49 @@ public class FurnitureBlock extends Block {
         this.registerDefaultState(state);
     }
 
+    public FurnitureBlock(Block base, VoxelShape[] shapes) {
+        this(base, shapes, new Interaction[0]);
+    }
+
     public boolean isWallBlock() {
         return false;
     }
 
-    public List<? extends Interaction<?>> getInteractions() {
-        return List.of();
+    public final Interaction<?>[] getInteractions() {
+        return this.interactions;
+    }
+
+    @SuppressWarnings("unchecked")
+    public final <I extends Interaction<I>> I[] getInteractions(Class<I> type) {
+        return Arrays.stream(this.getInteractions())
+                .filter(type::isInstance)
+                .map(type::cast)
+                .toArray(size -> (I[]) Array.newInstance(type, size));
+    }
+
+    @Override
+    public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
+        if(Arrays.stream(this.interactions).anyMatch(Interaction::isBlockEntityNeeded)) {
+            return new FurnitureBlockEntity(pos, state);
+        }else {
+            return null;
+        }
     }
 
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
-        if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching()) {
-            FurnitureData data = FurnitureData.getOriginal(level, pos);
-            List<? extends Interaction<?>> interactions = this.getInteractions();
+        FurnitureData data = FurnitureData.getOriginal(level, pos);
+        if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching() && data.hasOriginal()) {
+            List<Pair<Integer, Interaction<?>>> sortedInteractions = IntStream.range(0, this.interactions.length).boxed()
+                    .map(i -> Pair.<Integer, Interaction<?>>of(i, computePositionedInteraction(pos, state, data, this.interactions[i])))
+                    .sorted(Comparator.comparingDouble(i -> i.getSecond().pos().distanceToSqr(hitResult.getLocation())))
+                    .toList();
 
-            LinkedHashMap<Integer, Interaction<?>> interactionsMap = IntStream.range(0, interactions.size()).boxed()
-                    .sorted(Comparator.comparingDouble(i -> interactions.get(i).pos().distanceToSqr(hitResult.getLocation())))
-                    .collect(Collectors.toMap(i -> i, i -> computePositionedInteraction(pos, state, data, interactions.get(i)), (a, b) -> a, LinkedHashMap::new));
-
-            for(Map.Entry<Integer, Interaction<?>> entry : interactionsMap.sequencedEntrySet()) {
-                if(entry.getValue().interact(entry.getKey(), level, player, hitResult)) {
+            Optional<FurnitureBlockEntity> optional = level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get());
+            for(Pair<Integer, Interaction<?>> pair : sortedInteractions) {
+                int index = pair.getFirst();
+                Interaction<?> interaction = pair.getSecond();
+                if((optional.isPresent() || !interaction.isBlockEntityNeeded()) && interaction.interact(level, pos, state, optional.orElse(null), player, index)) {
                     return InteractionResult.SUCCESS;
                 }
             }

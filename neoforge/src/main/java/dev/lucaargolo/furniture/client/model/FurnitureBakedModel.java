@@ -2,6 +2,12 @@ package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
+import dev.lucaargolo.furniture.block.entity.ModBlockEntities;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
+import dev.lucaargolo.furniture.block.interaction.PlantInteraction;
+import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
@@ -10,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.model.BakedModelWrapper;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.QuadTransformers;
@@ -19,13 +26,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
 
     public static final ModelProperty<BlockPos> POS_PROPERTY = new ModelProperty<>();
     public static final ModelProperty<FurnitureData> DATA_PROPERTY = new ModelProperty<>();
     public static final ModelProperty<Boolean> HAS_DATA_PROPERTY = new ModelProperty<>();
+    public static final ModelProperty<FurnitureBlockEntity> BLOCK_ENTITY_PROPERTY = new ModelProperty<>();
     public static final ModelProperty<Integer> COLOR = new ModelProperty<>();
 
     public FurnitureBakedModel(BakedModel originalModel) {
@@ -47,12 +57,51 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
                     .translate(-0.5f, -0.5f, -0.5f);
             Transformation transformation = new Transformation(transform);
             IQuadTransformer transformer = QuadTransformers.applying(transformation);
-            return transformer.process(super.getQuads(state, side, rand, modelData, renderType));
+
+            List<BakedQuad> quads = new ArrayList<>(super.getQuads(state, side, rand, modelData, renderType));
+
+            Optional<FurnitureBlockEntity> optional = Optional.ofNullable(modelData.get(BLOCK_ENTITY_PROPERTY));
+            if(state.getBlock() instanceof FurnitureBlock furniture) {
+                Interaction<?>[] interactions = furniture.getInteractions();
+                for(int index = 0; index < interactions.length; index++) {
+                    Interaction<?> interaction = interactions[index];
+
+                    Transformation interactionTransformation = new Transformation(interaction.pos().toVector3f(), null, null, null);
+                    IQuadTransformer interactionTransformer = QuadTransformers.applying(interactionTransformation);
+
+                    List<BakedQuad> interactionQuads = new ArrayList<>();
+
+                    if(interaction instanceof PlantInteraction && optional.isPresent()) {
+                        interactionQuads.addAll(PlantBehaviourBakedModel.getBehaviourQuads(optional.get(), index, side, rand, modelData, renderType));
+                    }
+
+                    quads.addAll(interactionTransformer.process(interactionQuads));
+                }
+            }
+
+            return transformer.process(quads);
         }else if(hasData != Boolean.TRUE) {
             return super.getQuads(state, side, rand, modelData, renderType);
         }else{
             return List.of();
         }
+    }
+
+    @Override
+    public @NotNull ChunkRenderTypeSet getRenderTypes(@NotNull BlockState state, @NotNull RandomSource rand, @NotNull ModelData modelData) {
+        ChunkRenderTypeSet renderTypes = super.getRenderTypes(state, rand, modelData);
+        Optional<FurnitureBlockEntity> optional = Optional.ofNullable(modelData.get(BLOCK_ENTITY_PROPERTY));
+        if(state.getBlock() instanceof FurnitureBlock furniture) {
+            Interaction<?>[] interactions = furniture.getInteractions();
+            for (int index = 0; index < interactions.length; index++) {
+                Interaction<?> interaction = interactions[index];
+
+                if(interaction instanceof PlantInteraction && optional.isPresent()) {
+                    renderTypes = ChunkRenderTypeSet.union(renderTypes, PlantBehaviourBakedModel.getRenderTypes(optional.get(), index, rand, modelData));
+                }
+            }
+        }
+        return renderTypes;
     }
 
     @Override
@@ -71,12 +120,17 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
                 data = null;
             }
         }
+        ModelData.Builder builder = modelData.derive();
+        builder.with(POS_PROPERTY, pos);
+        level.getBlockEntity(pos, ModBlockEntities.FURNITURE.get()).ifPresent(blockEntity -> {
+            builder.with(BLOCK_ENTITY_PROPERTY, blockEntity);
+        });
         if(data != null && !modelData.has(DATA_PROPERTY)) {
-            return modelData.derive().with(POS_PROPERTY, pos).with(DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
+            return builder.with(DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
         }else if(hasData && !modelData.has(HAS_DATA_PROPERTY)) {
-            return modelData.derive().with(POS_PROPERTY, pos).with(HAS_DATA_PROPERTY, true).build();
+            return builder.with(HAS_DATA_PROPERTY, true).build();
         }else{
-            return modelData.derive().with(POS_PROPERTY, pos).build();
+            return builder.build();
         }
     }
 

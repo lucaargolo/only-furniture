@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.block;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.block.interaction.Interaction;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,8 +42,8 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
 
     private final TagKey<Block> connecting;
 
-    public FurnitureConnectingBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting) {
-        super(base, shapes);
+    public FurnitureConnectingBlock(Block base, VoxelShape[] shapes, Interaction<?>[] interactions, TagKey<Block> connecting) {
+        super(base, shapes, interactions);
         BlockState state = this.defaultBlockState();
         state = state.setValue(NORTH, false);
         state = state.setValue(EAST, false);
@@ -59,6 +60,10 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
         }
         this.registerDefaultState(state);
         this.connecting = connecting;
+    }
+
+    public FurnitureConnectingBlock(Block base, VoxelShape[] shapes, TagKey<Block> connecting) {
+        this(base, shapes, new Interaction[0], connecting);
     }
 
     public abstract ConnectionType getType();

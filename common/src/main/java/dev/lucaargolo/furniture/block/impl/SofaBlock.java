@@ -18,14 +18,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import java.util.List;
 import java.util.Map;
 
 public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock {
-
-    private static final List<? extends Interaction<?>> INTERACTIONS = List.of(
-        new SeatInteraction(Vec3.ZERO)
-    );
 
     private static final Map<Pair<Direction, Rotation>, VoxelShape> CENTER_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_CENTER, false);
     private static final Map<Pair<Direction, Rotation>, VoxelShape> RIGHT_SHAPES = computeVoxelShapes(ModBlockShapes.SOFA_RIGHT, false);
@@ -36,13 +31,10 @@ public class SofaBlock extends FurnitureConnectingBlock implements ColorBlock {
     private final DyeColor color;
 
     public SofaBlock(Block base, TagKey<Block> connecting, DyeColor color) {
-        super(base, ModBlockShapes.SOFA, connecting);
+        super(base, ModBlockShapes.SOFA, new Interaction[] {
+            new SeatInteraction(Vec3.ZERO)
+        }, connecting);
         this.color = color;
-    }
-
-    @Override
-    public List<? extends Interaction<?>> getInteractions() {
-        return INTERACTIONS;
     }
 
     @Override

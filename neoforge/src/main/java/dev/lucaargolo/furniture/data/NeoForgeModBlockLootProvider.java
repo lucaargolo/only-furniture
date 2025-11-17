@@ -27,9 +27,8 @@ public class NeoForgeModBlockLootProvider extends BlockLootSubProvider implement
 
     @Override
     protected @NotNull Iterable<Block> getKnownBlocks() {
-        return Streams.of(ModBlocks.REGISTRY).map(entry -> (Block) entry.get()).toList();
+        return Streams.of(ModBlocks.REGISTRY.getEntries()).map(entry -> (Block) entry.get()).toList();
     }
-
     @Override
     public void otherWhenSilkTouch(@NotNull Block block, @NotNull Block other) {
         super.otherWhenSilkTouch(block, other);
