@@ -6,12 +6,14 @@ import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
 import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
+import dev.lucaargolo.furniture.block.behaviour.StorageBehaviour;
 import dev.lucaargolo.furniture.block.impl.*;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.utils.ColorProvider;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.BlockFamilies;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -57,8 +59,15 @@ public class ModBlocks {
     public static final Map<WeatheringCopper.WeatherState, Pair<ModBlockRegistry.BlockEntry<KitchenSinkBlock>, ModBlockRegistry.BlockEntry<KitchenSinkBlock>>> COPPER_KITCHEN_SINK_MAP = registerWeathering("copper_kitchen_sink", KitchenSinkBlock.Weathering::new, KitchenSinkBlock.Metal::new, ModBlockShapes.KITCHEN_SINK, ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
     public static final ModBlockRegistry.BlockEntry<KitchenSinkBlock> QUARTZ_KITCHEN_SINK = REGISTRY.register("quartz_block_kitchen_sink", () -> new KitchenSinkBlock.Stone(StoneBlock.StoneType.QUARTZ_BLOCK), ModBlockTags.TOP_FOR_KITCHEN_COUNTER, BlockTags.MINEABLE_WITH_PICKAXE);
 
-    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> FRIDGE = REGISTRY.register("fridge", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.FRIDGE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
-    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> BIG_FRIDGE = REGISTRY.register("big_fridge", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.BIG_FRIDGE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> FRIDGE = REGISTRY.register("fridge", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.FRIDGE,
+            new StorageBehaviour(new Vec3(0.0, 0.2, 0.0), 27, Component.translatable("storage.onlyfurniture.fridge")),
+            new StorageBehaviour(new Vec3(0.0, 1.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"))
+    ), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
+
+    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> BIG_FRIDGE = REGISTRY.register("big_fridge", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.BIG_FRIDGE,
+            new StorageBehaviour(new Vec3(0.0, 0.8, 0.0), 27, Component.translatable("storage.onlyfurniture.fridge")),
+            new StorageBehaviour(new Vec3(0.0, -0.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"))
+    ), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 
     public static final ModBlockRegistry.BlockEntry<FurnitureBlock> STOVE = REGISTRY.register("stove", () -> new FurnitureBlock(Blocks.IRON_BLOCK, ModBlockShapes.STOVE), BlockTags.NEEDS_STONE_TOOL, BlockTags.MINEABLE_WITH_PICKAXE);
 

@@ -22,15 +22,17 @@ import org.jetbrains.annotations.Nullable;
 public class StorageBehaviour extends Behaviour<StorageBehaviour> {
 
     private final int size;
+    private final Component title;
 
-    public StorageBehaviour(Vec3 pos, int size) {
+    public StorageBehaviour(Vec3 pos, int size, Component title) {
         super(pos);
         this.size = size;
+        this.title = title;
     }
 
     @Override
     public StorageBehaviour positioned(Vec3 pos) {
-        return new StorageBehaviour(pos, this.size);
+        return new StorageBehaviour(pos, this.size, this.title);
     }
 
     @Override
@@ -44,7 +46,7 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
         SimpleContainer container = new SimpleContainer(this.size);
         ((SimpleContainerAccessor) container).setItems(storage);
         container.addListener(c -> ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, container.getItems())));
-        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, this.size, Component.literal("Storage"));
+        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, this.size, this.title);
         return true;
     }
 

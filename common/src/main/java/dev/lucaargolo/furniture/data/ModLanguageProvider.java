@@ -18,6 +18,9 @@ public class ModLanguageProvider {
                 builder.add(block, DataHelper.defaultTranslation(entry.path()));
             }
         });
+        builder.add("storage.onlyfurniture.kitchen_counter", "Kitchen Counter");
+        builder.add("storage.onlyfurniture.fridge", "Fridge");
+        builder.add("storage.onlyfurniture.freezer", "Freezer");
     }
 
 }

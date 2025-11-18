@@ -207,5 +207,8 @@
   "block.onlyfurniture.weathered_copper_kitchen_sink": "Weathered Copper Kitchen Sink",
   "block.onlyfurniture.white_sofa": "White Sofa",
   "block.onlyfurniture.yellow_sofa": "Yellow Sofa",
-  "itemGroup.onlyfurniture.creative_tab": "Only Furniture"
+  "itemGroup.onlyfurniture.creative_tab": "Only Furniture",
+  "storage.onlyfurniture.freezer": "Freezer",
+  "storage.onlyfurniture.fridge": "Fridge",
+  "storage.onlyfurniture.kitchen_counter": "Kitchen Counter"
 }

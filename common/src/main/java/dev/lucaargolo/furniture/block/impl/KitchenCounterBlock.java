@@ -12,6 +12,7 @@ import dev.lucaargolo.furniture.block.behaviour.StorageBehaviour;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -40,7 +41,7 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
 
     public KitchenCounterBlock(Block base, TagKey<Block> connecting, StoneType stone, WoodType wood) {
         super(base, ModBlockShapes.KITCHEN_COUNTER, new Behaviour[] {
-                new StorageBehaviour(Vec3.ZERO, 9)
+                new StorageBehaviour(Vec3.ZERO, 27, Component.translatable("storage.onlyfurniture.kitchen_counter")),
         }, connecting);
         this.registerDefaultState(this.defaultBlockState().setValue(HOLLOW, false));
         this.stone = stone;
