@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_hollow_open",
+  "textures": {
+    "doors": "onlyfurniture:block/warped_doors",
+    "particle": "minecraft:block/polished_diorite",
+    "planks": "minecraft:block/warped_planks",
+    "stone": "minecraft:block/polished_diorite"
+  }
+}

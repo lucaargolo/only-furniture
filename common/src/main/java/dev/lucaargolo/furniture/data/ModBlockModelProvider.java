@@ -203,28 +203,33 @@ public class ModBlockModelProvider {
 
         ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PARTICLE, PLANKS, DOORS, STONE);
         ResourceLocation hollowPath = computeModel(generators, entry, "block/", "_hollow", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation openPath = computeModel(generators, entry, "block/", "_open", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation hollowOpenPath = computeModel(generators, entry, "block/", "_hollow_open", PARTICLE, PLANKS, DOORS, STONE);
         ResourceLocation innerPath = computeModel(generators, entry, "block/", "_inner", PARTICLE, PLANKS, STONE);
         ResourceLocation outerPath = computeModel(generators, entry, "block/", "_outer", PARTICLE, PLANKS, DOORS, STONE);
 
         MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
-        PropertyDispatch.C4<Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.NORTH, KitchenCounterBlock.SOUTH, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW);
-        for (int i = 0; i < 1 << 4; i++) {
+        PropertyDispatch.C5<Boolean, Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.NORTH, KitchenCounterBlock.SOUTH, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW, KitchenCounterBlock.OPEN);
+        for (int i = 0; i < 1 << 5; i++) {
             boolean north = (i & (1)) != 0;
             boolean south = (i & (1 << 1)) != 0;
             boolean outer = (i & (1 << 2)) != 0;
             boolean hollow = (i & (1 << 3)) != 0;
+            boolean open = (i & (1 << 4)) != 0;
 
             Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
             Variant hollowVariant = Variant.variant().with(VariantProperties.MODEL, hollowPath);
+            Variant openVariant = Variant.variant().with(VariantProperties.MODEL, openPath);
+            Variant hollowOpenVariant = Variant.variant().with(VariantProperties.MODEL, hollowOpenPath);
             Variant innerVariant = Variant.variant().with(VariantProperties.MODEL, innerPath);
             Variant outerVariant = Variant.variant().with(VariantProperties.MODEL, outerPath);
 
-            Variant variant = (north && !south) || (!north && south) ? outer ? outerVariant : innerVariant : hollow ? hollowVariant : defaultVariant;
+            Variant variant = (north && !south) || (!north && south) ? outer ? outerVariant : innerVariant : hollow ? open ? hollowOpenVariant : hollowVariant : open ? openVariant : defaultVariant;
             if ((north && !south && outer) || (!north && south && !outer)) {
                 variant = variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
             }
 
-            dispatch.select(north, south, outer, hollow, variant);
+            dispatch.select(north, south, outer, hollow, open, variant);
         }
         generator.with(dispatch);
         blockStateOutput.accept(generator);

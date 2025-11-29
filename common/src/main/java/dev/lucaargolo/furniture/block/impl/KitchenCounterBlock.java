@@ -32,6 +32,7 @@ import java.util.Map;
 public class KitchenCounterBlock extends FurnitureConnectingBlock implements StoneBlock, WoodBlock {
 
     public static final BooleanProperty HOLLOW = BooleanProperty.create("hollow");
+    public static final BooleanProperty OPEN = BooleanProperty.create("open");
 
     private static final Map<Pair<Direction, Rotation>, VoxelShape> innerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_INNER, false);
     private static final Map<Pair<Direction, Rotation>, VoxelShape> outerShapes = computeVoxelShapes(ModBlockShapes.KITCHEN_COUNTER_OUTER, false);
@@ -41,9 +42,12 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
 
     public KitchenCounterBlock(Block base, TagKey<Block> connecting, StoneType stone, WoodType wood) {
         super(base, ModBlockShapes.KITCHEN_COUNTER, new Behaviour[] {
-                new StorageBehaviour(Vec3.ZERO, 27, Component.translatable("storage.onlyfurniture.kitchen_counter")),
+                new StorageBehaviour(Vec3.ZERO, 27, Component.translatable("storage.onlyfurniture.kitchen_counter"), OPEN),
         }, connecting);
-        this.registerDefaultState(this.defaultBlockState().setValue(HOLLOW, false));
+        BlockState state = this.defaultBlockState();
+        state = state.setValue(HOLLOW, false);
+        state = state.setValue(OPEN, false);
+        this.registerDefaultState(state);
         this.stone = stone;
         this.wood = wood;
     }
@@ -51,7 +55,7 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
     @Override
     public void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(HOLLOW);
+        builder.add(HOLLOW, OPEN);
     }
 
     @Override

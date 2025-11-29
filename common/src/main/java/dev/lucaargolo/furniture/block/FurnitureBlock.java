@@ -27,6 +27,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Block;
@@ -111,7 +112,13 @@ public class FurnitureBlock extends Block implements EntityBlock {
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         FurnitureData data = FurnitureData.getOriginal(level, pos);
-        if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && !player.isCrouching() && data.hasOriginal()) {
+        if (!FurnitureMod.getInstance().isFakePlayer(player) && level.mayInteract(player, pos) && data.hasOriginal()) {
+            ItemStack stack = player.getMainHandItem();
+            //This is needed for facilitating putting furnitures on top of each other.
+            if(stack.getItem() instanceof FurnitureBlockItem || stack.is(Items.DEBUG_STICK)) {
+                return InteractionResult.PASS;
+            }
+
             List<Pair<Integer, Behaviour<?>>> sortedBehaviours = IntStream.range(0, this.behaviours.length).boxed()
                     .map(i -> Pair.<Integer, Behaviour<?>>of(i, computePositionedBehaviour(pos, state, data, this.behaviours[i])))
                     .sorted(Comparator.comparingDouble(i -> i.getSecond().pos().distanceToSqr(hitResult.getLocation())))

@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_open",
+  "textures": {
+    "doors": "onlyfurniture:block/birch_doors",
+    "particle": "minecraft:block/polished_deepslate",
+    "planks": "minecraft:block/birch_planks",
+    "stone": "minecraft:block/polished_deepslate"
+  }
+}

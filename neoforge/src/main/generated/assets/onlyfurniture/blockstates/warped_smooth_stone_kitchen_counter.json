@@ -1,56 +1,108 @@
 {
   "variants": {
-    "hollow=false,north=false,outer=false,south=false": {
+    "hollow=false,north=false,open=false,outer=false,south=false": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter"
     },
-    "hollow=false,north=false,outer=false,south=true": {
+    "hollow=false,north=false,open=false,outer=false,south=true": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner",
       "y": 270
     },
-    "hollow=false,north=false,outer=true,south=false": {
+    "hollow=false,north=false,open=false,outer=true,south=false": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter"
     },
-    "hollow=false,north=false,outer=true,south=true": {
+    "hollow=false,north=false,open=false,outer=true,south=true": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer"
     },
-    "hollow=false,north=true,outer=false,south=false": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner"
+    "hollow=false,north=false,open=true,outer=false,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_open"
     },
-    "hollow=false,north=true,outer=false,south=true": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter"
-    },
-    "hollow=false,north=true,outer=true,south=false": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer",
-      "y": 270
-    },
-    "hollow=false,north=true,outer=true,south=true": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter"
-    },
-    "hollow=true,north=false,outer=false,south=false": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
-    },
-    "hollow=true,north=false,outer=false,south=true": {
+    "hollow=false,north=false,open=true,outer=false,south=true": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner",
       "y": 270
     },
-    "hollow=true,north=false,outer=true,south=false": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
+    "hollow=false,north=false,open=true,outer=true,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_open"
     },
-    "hollow=true,north=false,outer=true,south=true": {
+    "hollow=false,north=false,open=true,outer=true,south=true": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer"
     },
-    "hollow=true,north=true,outer=false,south=false": {
+    "hollow=false,north=true,open=false,outer=false,south=false": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner"
     },
-    "hollow=true,north=true,outer=false,south=true": {
-      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
+    "hollow=false,north=true,open=false,outer=false,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter"
     },
-    "hollow=true,north=true,outer=true,south=false": {
+    "hollow=false,north=true,open=false,outer=true,south=false": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer",
       "y": 270
     },
-    "hollow=true,north=true,outer=true,south=true": {
+    "hollow=false,north=true,open=false,outer=true,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter"
+    },
+    "hollow=false,north=true,open=true,outer=false,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner"
+    },
+    "hollow=false,north=true,open=true,outer=false,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_open"
+    },
+    "hollow=false,north=true,open=true,outer=true,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer",
+      "y": 270
+    },
+    "hollow=false,north=true,open=true,outer=true,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_open"
+    },
+    "hollow=true,north=false,open=false,outer=false,south=false": {
       "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
+    },
+    "hollow=true,north=false,open=false,outer=false,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner",
+      "y": 270
+    },
+    "hollow=true,north=false,open=false,outer=true,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
+    },
+    "hollow=true,north=false,open=false,outer=true,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer"
+    },
+    "hollow=true,north=false,open=true,outer=false,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow_open"
+    },
+    "hollow=true,north=false,open=true,outer=false,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner",
+      "y": 270
+    },
+    "hollow=true,north=false,open=true,outer=true,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow_open"
+    },
+    "hollow=true,north=false,open=true,outer=true,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer"
+    },
+    "hollow=true,north=true,open=false,outer=false,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner"
+    },
+    "hollow=true,north=true,open=false,outer=false,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
+    },
+    "hollow=true,north=true,open=false,outer=true,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer",
+      "y": 270
+    },
+    "hollow=true,north=true,open=false,outer=true,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow"
+    },
+    "hollow=true,north=true,open=true,outer=false,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_inner"
+    },
+    "hollow=true,north=true,open=true,outer=false,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow_open"
+    },
+    "hollow=true,north=true,open=true,outer=true,south=false": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_outer",
+      "y": 270
+    },
+    "hollow=true,north=true,open=true,outer=true,south=true": {
+      "model": "onlyfurniture:block/warped_smooth_stone_kitchen_counter_hollow_open"
     }
   }
 }

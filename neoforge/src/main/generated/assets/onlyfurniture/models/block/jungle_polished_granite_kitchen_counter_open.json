@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_open",
+  "textures": {
+    "doors": "onlyfurniture:block/jungle_doors",
+    "particle": "minecraft:block/polished_granite",
+    "planks": "minecraft:block/jungle_planks",
+    "stone": "minecraft:block/polished_granite"
+  }
+}

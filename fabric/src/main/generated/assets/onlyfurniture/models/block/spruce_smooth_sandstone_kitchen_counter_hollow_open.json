@@ -1,0 +1,9 @@
+{
+  "parent": "onlyfurniture:block/kitchen_counter_hollow_open",
+  "textures": {
+    "doors": "onlyfurniture:block/spruce_doors",
+    "particle": "minecraft:block/sandstone_top",
+    "planks": "minecraft:block/spruce_planks",
+    "stone": "minecraft:block/sandstone_top"
+  }
+}
