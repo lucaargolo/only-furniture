@@ -136,6 +136,30 @@ public class ModBlockShapes {
         Block.box(13, 21, 0, 15, 28, 2)
     };
 
+    public static final VoxelShape[] FRIDGE_OPEN = new VoxelShape[] {
+        Block.box(0, 0, 4, 16, 32, 16),
+        Block.box(0, 0, 3, 16, 1, 4),
+        Block.box(0, 19, 3, 16, 20, 4)
+    };
+
+    public static final VoxelShape[] FRIDGE_OPEN_TOP = new VoxelShape[] {
+        Block.box(0, 0, 3, 16, 1, 16),
+        Block.box(0, 19, 3, 16, 20, 16),
+        Block.box(0, 1, 2, 16, 19, 16),
+        Block.box(13, 11, 0, 15, 18, 2),
+        Block.box(0, 20, 4, 16, 32, 16)
+    };
+
+    public static final VoxelShape[] FRIDGE_OPEN_BOTTOM = new VoxelShape[] {
+        Block.box(0, 0, 3, 16, 1, 16),
+        Block.box(0, 19, 3, 16, 20, 16),
+        Block.box(0, 1, 4, 16, 19, 16),
+        Block.box(0, 20, 2, 16, 32, 16),
+        Block.box(13, 21, 0, 15, 28, 2)
+    };
+
+
+
     public static final VoxelShape[] BIG_FRIDGE = new VoxelShape[] {
         Block.box(4, 10, 0, 12, 12, 2),
         Block.box(4, 16, 0, 6, 30, 2),

@@ -1,7 +1,16 @@
 {
   "variants": {
-    "": {
+    "bottom_open=false,top_open=false": {
       "model": "onlyfurniture:block/fridge"
+    },
+    "bottom_open=false,top_open=true": {
+      "model": "onlyfurniture:block/fridge_open_top"
+    },
+    "bottom_open=true,top_open=false": {
+      "model": "onlyfurniture:block/fridge_open_bottom"
+    },
+    "bottom_open=true,top_open=true": {
+      "model": "onlyfurniture:block/fridge_open"
     }
   }
 }

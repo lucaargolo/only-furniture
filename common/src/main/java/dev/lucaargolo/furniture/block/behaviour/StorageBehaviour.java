@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,16 +24,23 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
 
     private final int size;
     private final Component title;
+    @Nullable
+    private final BooleanProperty openProperty;
 
-    public StorageBehaviour(Vec3 pos, int size, Component title) {
+    public StorageBehaviour(Vec3 pos, int size, Component title, @Nullable BooleanProperty openProperty) {
         super(pos);
         this.size = size;
         this.title = title;
+        this.openProperty = openProperty;
+    }
+
+    public StorageBehaviour(Vec3 pos, int size, Component title) {
+        this(pos, size, title, null);
     }
 
     @Override
     public StorageBehaviour positioned(Vec3 pos) {
-        return new StorageBehaviour(pos, this.size, this.title);
+        return new StorageBehaviour(pos, this.size, this.title, this.openProperty);
     }
 
     @Override
@@ -50,6 +58,9 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
         ((SimpleContainerAccessor) container).setItems(storage);
         container.addListener(c -> ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, container.getItems())));
         FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, this.size, this.title);
+        if(this.openProperty != null) {
+            level.setBlockAndUpdate(pos, state.setValue(this.openProperty, true));
+        }
         return true;
     }
 

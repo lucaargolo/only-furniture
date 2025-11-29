@@ -8,10 +8,7 @@ import dev.lucaargolo.furniture.block.base.ColorBlock;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
-import dev.lucaargolo.furniture.block.impl.KitchenCounterBlock;
-import dev.lucaargolo.furniture.block.impl.KitchenSinkBlock;
-import dev.lucaargolo.furniture.block.impl.SofaBlock;
-import dev.lucaargolo.furniture.block.impl.TableBlock;
+import dev.lucaargolo.furniture.block.impl.*;
 import dev.lucaargolo.furniture.mixin.BlockModelGeneratorsAccessor;
 import dev.lucaargolo.furniture.mixin.TextureSlotAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
@@ -55,6 +52,7 @@ public class ModBlockModelProvider {
                 case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);
                 case KitchenSinkBlock ignored -> createSinkBlockState(generators, entry);
                 case SofaBlock ignored -> createSofaBlockState(generators, entry);
+                case FridgeBlock ignored -> createFridgeBlockState(generators, entry);
                 default -> createBaseBlockState(generators, entry);
             }
         });
@@ -267,6 +265,32 @@ public class ModBlockModelProvider {
             }
 
             dispatch.select(north, east, south, west, outer, variant);
+        }
+        generator.with(dispatch);
+        blockStateOutput.accept(generator);
+    }
+
+    private static void createFridgeBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<? extends Block> entry) {
+        Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
+
+        ResourceLocation defaultPath = computeModel(generators, entry, "block/", "");
+        ResourceLocation openPath = computeModel(generators, entry, "block/", "_open");
+        ResourceLocation openTopPath = computeModel(generators, entry, "block/", "_open_top");
+        ResourceLocation openBottomPath = computeModel(generators, entry, "block/", "_open_bottom");
+
+        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
+        PropertyDispatch.C2<Boolean, Boolean> dispatch = PropertyDispatch.properties(FridgeBlock.TOP_OPEN, FridgeBlock.BOTTOM_OPEN);
+        for (int i = 0; i < 1 << 2; i++) {
+            boolean top = (i & (1)) != 0;
+            boolean bottom = (i & (1 << 1)) != 0;
+
+            Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
+            Variant openVariant = Variant.variant().with(VariantProperties.MODEL, openPath);
+            Variant openTopVariant = Variant.variant().with(VariantProperties.MODEL, openTopPath);
+            Variant openBottomVariant = Variant.variant().with(VariantProperties.MODEL, openBottomPath);
+
+            Variant variant = top && bottom ? openVariant : top ? openTopVariant : bottom ? openBottomVariant : defaultVariant;
+            dispatch.select(top, bottom, variant);
         }
         generator.with(dispatch);
         blockStateOutput.accept(generator);
