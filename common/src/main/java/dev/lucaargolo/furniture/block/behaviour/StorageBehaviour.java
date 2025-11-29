@@ -39,7 +39,10 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
     public boolean interact(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
         StorageDataAttachment storageData = ModDataAttachments.STORAGE_DATA.getOrCreate(blockEntity);
         NonNullList<ItemStack> storage = storageData.getStorage(index);
-        if(storage == null) {
+        if(storage == null || storage.size() < this.size) {
+            if(storage != null) {
+                Containers.dropContents(level, pos, storage);
+            }
             storage = NonNullList.withSize(this.size, ItemStack.EMPTY);
             ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, storage));
         }
