@@ -45,7 +45,7 @@ public class StorageMenu extends AbstractContainerMenu {
 
         for (int row = 0; row < this.rows; row++) {
             for (int col = 0; col < this.cols; col++) {
-                this.addSlot(new Slot(container, col + row * 9, 8 + col * 18, 18 + row * 18));
+                this.addSlot(new Slot(container, col + row * cols, 8 + col * 18, 18 + row * 18));
             }
         }
 

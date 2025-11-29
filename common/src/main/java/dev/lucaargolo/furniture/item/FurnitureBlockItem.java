@@ -91,13 +91,15 @@ public class FurnitureBlockItem extends BlockItem {
     protected boolean placeBlock(BlockPlaceContext context, BlockState state, int layer) {
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
+
+        FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, this.furnitureBlock.getFurnitureDataForPlacement(context));
         level.setBlock(pos, state, Block.UPDATE_ALL_IMMEDIATE);
 
         if(level.getBlockState(pos) == state) {
-            FurnitureData.set(context.getLevel(), context.getClickedPos(), layer, this.furnitureBlock.getFurnitureDataForPlacement(context));
             FurnitureMod.updateBlock(context.getLevel(), context.getClickedPos());
             return true;
         }else {
+            FurnitureData.set(level, pos, layer, FurnitureData.DEFAULT);
             return false;
         }
     }
