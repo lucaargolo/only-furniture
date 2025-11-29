@@ -288,7 +288,7 @@ public abstract class FurnitureConnectingBlock extends FurnitureBlock {
                 if(context != null && context.getPlayer() != null) {
                     Player player = context.getPlayer();
                     BlockPos lastPosition = FurnitureConnectingBlockItem.getLastPosition(player);
-                    yield Pair.of(!player.isShiftKeyDown() && pos.offset(offset).equals(lastPosition), false);
+                    yield Pair.of(pos.offset(offset).equals(lastPosition), false);
                 }else{
                     boolean isConnected = isOffsetConnected(state, offset);
                     boolean isConnectionValid = level.getBlockState(pos.offset(offset)).is(this.getConnecting());

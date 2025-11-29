@@ -42,7 +42,7 @@ public class FurnitureConnectingBlockItem extends FurnitureBlockItem{
             BlockPos clickedPos = context.getClickedPos();
             BlockState clickedState = level.getBlockState(clickedPos);
             Player player = context.getPlayer();
-            if(player != null && !player.isShiftKeyDown() && clickedState.is(this.block.getConnecting())) {
+            if(player != null && clickedState.is(this.block.getConnecting())) {
                 BlockPos lastPosition = FurnitureConnectingBlockItem.getLastPosition(player);
                 BooleanProperty propertyToConnect = lastPosition != null ? manuallyConnectNeighbors(level, lastPosition, clickedPos, clickedState) : null;
                 if(propertyToConnect != null) {
