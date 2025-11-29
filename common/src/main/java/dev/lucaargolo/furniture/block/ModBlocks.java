@@ -2,6 +2,9 @@ package dev.lucaargolo.furniture.block;
 
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.FurnitureMod.HexaFunction;
+import dev.lucaargolo.furniture.FurnitureMod.QuadFunction;
+import dev.lucaargolo.furniture.FurnitureMod.TriFunction;
 import dev.lucaargolo.furniture.block.base.MetalBlock;
 import dev.lucaargolo.furniture.block.base.StoneBlock;
 import dev.lucaargolo.furniture.block.base.WoodBlock;
@@ -166,26 +169,6 @@ public class ModBlocks {
             ModBlockRegistry.BlockEntry<?> waxedWeathered,
             ModBlockRegistry.BlockEntry<?> waxedOxidized
     ) { }
-
-    @FunctionalInterface
-    private interface HexaFunction<P1, P2, P3, P4, P5, P6, R> {
-        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
-    }
-
-    @FunctionalInterface
-    private interface PentaFunction<P1, P2, P3, P4, P5, R> {
-        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
-    }
-
-    @FunctionalInterface
-    private interface QuadFunction<P1, P2, P3, P4, R> {
-        R apply(P1 p1, P2 p2, P3 p3, P4 p4);
-    }
-
-    @FunctionalInterface
-    private interface TriFunction<P1, P2, P3, R> {
-        R apply(P1 p1, P2 p2, P3 p3);
-    }
 
     private static Stream<ResourceLocation> getAllBaseWoodBlocks() {
         return BlockFamilies.getAllFamilies()

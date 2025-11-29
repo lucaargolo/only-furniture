@@ -25,7 +25,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,8 +66,8 @@ public abstract class FurnitureMod {
 
     public abstract Block getPottedBlock(Block block);
 
-    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, TriFunction<Integer, Inventory, Container, M> constructor, Player player, Container container, D data, Component title) {
-        this.openMenu(entry, (syncId, inventory) -> constructor.apply(syncId, inventory, container), player, data, title);
+    public <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, QuadFunction<Integer, Inventory, Container, D, M> constructor, Player player, Container container, D data, Component title) {
+        this.openMenu(entry, (syncId, inventory) -> constructor.apply(syncId, inventory, container, data), player, data, title);
     }
 
     public abstract <M extends AbstractContainerMenu, D> void openMenu(ModMenuTypeRegistry.AdvancedMenuTypeEntry<M, D> entry, BiFunction<Integer, Inventory, M> constructor, Player player, D data, Component title);
@@ -147,6 +146,26 @@ public abstract class FurnitureMod {
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    }
+
+    @FunctionalInterface
+    public interface HexaFunction<P1, P2, P3, P4, P5, P6, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, P6 p6);
+    }
+
+    @FunctionalInterface
+    public interface PentaFunction<P1, P2, P3, P4, P5, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4, P5 p5);
+    }
+
+    @FunctionalInterface
+    public interface QuadFunction<P1, P2, P3, P4, R> {
+        R apply(P1 p1, P2 p2, P3 p3, P4 p4);
+    }
+
+    @FunctionalInterface
+    public interface TriFunction<P1, P2, P3, R> {
+        R apply(P1 p1, P2 p2, P3 p3);
     }
 
 }

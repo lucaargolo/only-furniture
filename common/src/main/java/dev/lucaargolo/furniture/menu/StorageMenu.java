@@ -1,5 +1,9 @@
 package dev.lucaargolo.furniture.menu;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -8,6 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class StorageMenu extends AbstractContainerMenu {
@@ -16,14 +22,17 @@ public class StorageMenu extends AbstractContainerMenu {
     private final int cols;
 
     private final Container container;
+    private final Definition definition;
 
-    public StorageMenu(int containerId, Inventory playerInventory, int slots) {
-        this(containerId, playerInventory, new SimpleContainer(slots));
+    public StorageMenu(int containerId, Inventory playerInventory, Definition definition) {
+        this(containerId, playerInventory, new SimpleContainer(definition.size), definition);
     }
 
-    public StorageMenu(int containerId, Inventory playerInventory, Container container) {
+    public StorageMenu(int containerId, Inventory playerInventory, Container container, Definition definition) {
         super(ModMenuTypes.STORAGE.get(), containerId);
         this.container = container;
+        this.definition = definition;
+
         this.container.startOpen(playerInventory.player);
 
         int cols = Math.min(container.getContainerSize(), 9);
@@ -93,10 +102,39 @@ public class StorageMenu extends AbstractContainerMenu {
         return stack;
     }
 
+
     @Override
     public boolean stillValid(@NotNull Player player) {
         return this.container.stillValid(player);
     }
 
+    @Override
+    public void removed(@NotNull Player player) {
+        super.removed(player);
+        BlockPos pos = this.definition.pos();
+        BlockState state = player.level().getBlockState(pos);
+        BlockState closedState = this.definition.closedState();
+        if(state.is(closedState.getBlock()) && state != closedState) {
+            player.level().setBlockAndUpdate(pos, closedState);
+        }
+    }
+
+    public record Definition(BlockPos pos, int size, BlockState closedState) {
+
+        public static StreamCodec<ByteBuf, Definition> STREAM_CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC,
+                Definition::pos,
+                ByteBufCodecs.VAR_INT,
+                Definition::size,
+                ByteBufCodecs.VAR_INT,
+                d -> Block.getId(d.closedState),
+                Definition::new
+        );
+
+        public Definition(BlockPos pos, int size, int closedStateId) {
+            this(pos, size, Block.stateById(closedStateId));
+        }
+
+    }
 
 }

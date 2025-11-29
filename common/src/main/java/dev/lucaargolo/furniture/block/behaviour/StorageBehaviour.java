@@ -24,14 +24,15 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
 
     private final int size;
     private final Component title;
-    @Nullable
-    private final BooleanProperty openProperty;
 
-    public StorageBehaviour(Vec3 pos, int size, Component title, @Nullable BooleanProperty openProperty) {
+    @Nullable
+    private final BooleanProperty propertyToOpen;
+
+    public StorageBehaviour(Vec3 pos, int size, Component title, @Nullable BooleanProperty propertyToOpen) {
         super(pos);
         this.size = size;
         this.title = title;
-        this.openProperty = openProperty;
+        this.propertyToOpen = propertyToOpen;
     }
 
     public StorageBehaviour(Vec3 pos, int size, Component title) {
@@ -40,7 +41,7 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
 
     @Override
     public StorageBehaviour positioned(Vec3 pos) {
-        return new StorageBehaviour(pos, this.size, this.title, this.openProperty);
+        return new StorageBehaviour(pos, this.size, this.title, this.propertyToOpen);
     }
 
     @Override
@@ -57,10 +58,16 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
         SimpleContainer container = new SimpleContainer(this.size);
         ((SimpleContainerAccessor) container).setItems(storage);
         container.addListener(c -> ModDataAttachments.STORAGE_DATA.set(blockEntity, storageData.set(index, container.getItems())));
-        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, this.size, this.title);
-        if(this.openProperty != null) {
-            level.setBlockAndUpdate(pos, state.setValue(this.openProperty, true));
+
+        StorageMenu.Definition definition;
+        if(this.propertyToOpen != null) {
+            level.setBlockAndUpdate(pos, state.setValue(this.propertyToOpen, true));
+            definition = new StorageMenu.Definition(pos, this.size, state.setValue(this.propertyToOpen, false));
+        }else{
+            definition = new StorageMenu.Definition(pos, this.size, state);
         }
+        FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, definition, this.title);
+
         return true;
     }
 
