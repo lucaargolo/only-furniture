@@ -1,108 +1,788 @@
 {
-  "variants": {
-    "hollow=false,north=false,open=false,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter"
+  "multipart": [
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=false,north=false,open=false,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=false,north=false,open=false,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=false,north=false,open=false,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=false,north=false,open=true,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=false,north=false,open=true,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=false,north=false,open=true,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=false,north=false,open=true,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=false,north=true,open=false,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=false,north=true,open=false,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=false,north=true,open=false,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=false,north=true,open=false,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=false,north=true,open=true,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=false,north=true,open=true,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=false,north=true,open=true,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=false,north=true,open=true,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=true,north=false,open=false,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=true,north=false,open=false,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=true,north=false,open=false,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=true,north=false,open=false,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "false"
+      }
     },
-    "hollow=true,north=false,open=true,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=true,north=false,open=true,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=true,north=false,open=true,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=true,north=false,open=true,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "false",
+        "south": "true"
+      }
     },
-    "hollow=true,north=true,open=false,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=true,north=true,open=false,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=true,north=true,open=false,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=true,north=true,open=false,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "false"
+      }
     },
-    "hollow=true,north=true,open=true,outer=false,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_inner"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=true,north=true,open=true,outer=false,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=true,north=true,open=true,outer=true,south=false": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_outer",
-      "y": 270
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
     },
-    "hollow=true,north=true,open=true,outer=true,south=true": {
-      "model": "onlyfurniture:block/crimson_polished_deepslate_kitchen_counter_hollow_open"
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "false",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_open"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_open"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_open"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_open"
+      },
+      "when": {
+        "hollow": "false",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_hollow_open"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_inner",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_hollow_open"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "false",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_hollow_open"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer",
+        "y": 270
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_outer"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_outer"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "false",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/polished_deepslate_top_hollow"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "onlyfurniture:block/kitchen_counter/crimson_base_hollow_open"
+      },
+      "when": {
+        "hollow": "true",
+        "north": "true",
+        "open": "true",
+        "outer": "true",
+        "south": "true"
+      }
     }
-  }
+  ]
 }

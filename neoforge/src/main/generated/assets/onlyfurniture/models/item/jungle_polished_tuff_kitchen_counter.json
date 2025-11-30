@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/jungle_polished_tuff_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/jungle_doors",
+    "particle": "minecraft:block/polished_tuff",
+    "planks": "minecraft:block/jungle_planks",
+    "stone": "minecraft:block/polished_tuff"
+  }
 }

@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/acacia_polished_granite_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/acacia_doors",
+    "particle": "minecraft:block/polished_granite",
+    "planks": "minecraft:block/acacia_planks",
+    "stone": "minecraft:block/polished_granite"
+  }
 }

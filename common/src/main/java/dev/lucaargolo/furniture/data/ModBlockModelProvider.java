@@ -24,11 +24,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.WoodType;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -45,11 +43,13 @@ public class ModBlockModelProvider {
     private static final TextureSlot LEAVES = TextureSlotAccessor.invokeCreate("leaves");
     private static final TextureSlot PILLOW = TextureSlotAccessor.invokeCreate("pillow");
 
+    private static final HashSet<ResourceLocation> generatedModels = new HashSet<>();
+
     public static void generate(BlockModelGenerators generators) {
         ModBlocks.REGISTRY.getEntries().forEach((entry) -> {
             switch (entry.get()) {
                 case TableBlock table -> createTableBlockState(generators, entry, table.isSimple());
-                case KitchenCounterBlock ignored -> createCounterBlockState(generators, entry);
+                case KitchenCounterBlock counter -> createCounterBlockState(generators, entry, counter.getWood(), counter.getStone());
                 case KitchenSinkBlock ignored -> createSinkBlockState(generators, entry);
                 case SofaBlock ignored -> createSofaBlockState(generators, entry);
                 case FridgeBlock ignored -> createFridgeBlockState(generators, entry);
@@ -59,26 +59,37 @@ public class ModBlockModelProvider {
     }
 
     private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix) {
-        return computeModel(generators, entry, prefix, "", new ArrayList<>());
+        return computeModel(generators, entry, null, null, prefix, "", new ArrayList<>());
+    }
+
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, TextureSlot... slots) {
+        return computeModel(generators, entry, null, null, prefix, "", List.of(slots));
     }
 
     private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, String suffix) {
-        return computeModel(generators, entry, prefix, suffix, new ArrayList<>());
+        return computeModel(generators, entry, null, null, prefix, suffix, new ArrayList<>());
     }
 
     private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, String suffix, TextureSlot... slots) {
-        return computeModel(generators, entry, prefix, suffix, List.of(slots));
+        return computeModel(generators, entry, null, null, prefix, suffix, List.of(slots));
     }
 
-    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, String prefix, String suffix, List<TextureSlot> slots) {
-        BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput = ((BlockModelGeneratorsAccessor) generators).getModelOutput();
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, ResourceLocation model, ResourceLocation parent, TextureSlot... slots) {
+        return computeModel(generators, entry, model, parent, "", "", List.of(slots));
+    }
 
-        Block block = entry.get();
-        String path = entry.path();
+    private static ResourceLocation computeModel(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, @Nullable ResourceLocation model, @Nullable ResourceLocation parent, String prefix, String suffix, List<TextureSlot> slots) {
+        if(generatedModels.contains(model)) {
+           return model;
+        }
+
+        BiConsumer<ResourceLocation, Supplier<JsonElement>> modelOutput = ((BlockModelGeneratorsAccessor) generators).getModelOutput();
 
         TextureMapping mapping = new TextureMapping();
         tryAddSlot(slots, PARTICLE);
 
+        String path = entry.path();
+        Block block = entry.get();
         if (block instanceof WoodBlock woodBlock) {
             WoodType wood = woodBlock.getWood();
             path = path.replace(wood.name() + "_", "");
@@ -122,17 +133,16 @@ public class ModBlockModelProvider {
                 mapping.put(PILLOW, DataHelper.getPillow(color));
         }
 
-        ResourceLocation parent = FurnitureMod.id(prefix+path+suffix);
-        ResourceLocation child = FurnitureMod.id(prefix+entry.path()+suffix);
-
+        model = model == null ? FurnitureMod.id(prefix+entry.path()+suffix) : model;
+        parent = parent == null ? FurnitureMod.id(prefix+path+suffix) : parent;
         if(slots.isEmpty() || (slots.size() == 1 && slots.contains(PARTICLE))) {
             return parent;
         }else{
             ModelTemplate template = new ModelTemplate(Optional.of(parent), Optional.empty(), slots.toArray(new TextureSlot[0]));
-            template.create(child, mapping, modelOutput);
-            return child;
+            template.create(model, mapping, modelOutput);
+            generatedModels.add(model);
+            return model;
         }
-
     }
 
     private static void createBaseBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
@@ -198,18 +208,22 @@ public class ModBlockModelProvider {
         blockStateOutput.accept(generator);
     }
 
-    private static void createCounterBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry) {
+    private static void createCounterBlockState(BlockModelGenerators generators, ModBlockRegistry.BlockEntry<?> entry, WoodType woodType, StoneBlock.StoneType stoneType) {
         Consumer<BlockStateGenerator> blockStateOutput = ((BlockModelGeneratorsAccessor) generators).getBlockStateOutput();
 
-        ResourceLocation defaultPath = computeModel(generators, entry, "block/", "", PARTICLE, PLANKS, DOORS, STONE);
-        ResourceLocation hollowPath = computeModel(generators, entry, "block/", "_hollow", PARTICLE, PLANKS, DOORS, STONE);
-        ResourceLocation openPath = computeModel(generators, entry, "block/", "_open", PARTICLE, PLANKS, DOORS, STONE);
-        ResourceLocation hollowOpenPath = computeModel(generators, entry, "block/", "_hollow_open", PARTICLE, PLANKS, DOORS, STONE);
-        ResourceLocation innerPath = computeModel(generators, entry, "block/", "_inner", PARTICLE, PLANKS, STONE);
-        ResourceLocation outerPath = computeModel(generators, entry, "block/", "_outer", PARTICLE, PLANKS, DOORS, STONE);
+        ResourceLocation basePath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+woodType.name()+"_base"), FurnitureMod.id("block/kitchen_counter/base"), PARTICLE, PLANKS, DOORS);
+        ResourceLocation baseHollowOpenPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+woodType.name()+"_base_hollow_open"), FurnitureMod.id("block/kitchen_counter/base_hollow_open"), PARTICLE, PLANKS, DOORS);
+        ResourceLocation baseOpenPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+woodType.name()+"_base_open"), FurnitureMod.id("block/kitchen_counter/base_open"), PARTICLE, PLANKS, DOORS);
+        ResourceLocation baseInnerPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+woodType.name()+"_base_inner"), FurnitureMod.id("block/kitchen_counter/base_inner"), PARTICLE, PLANKS);
+        ResourceLocation baseOuterPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+woodType.name()+"_base_outer"), FurnitureMod.id("block/kitchen_counter/base_outer"), PARTICLE, PLANKS, DOORS);
 
-        MultiVariantGenerator generator = MultiVariantGenerator.multiVariant(entry.get());
-        PropertyDispatch.C5<Boolean, Boolean, Boolean, Boolean, Boolean> dispatch = PropertyDispatch.properties(KitchenCounterBlock.NORTH, KitchenCounterBlock.SOUTH, KitchenCounterBlock.OUTER, KitchenCounterBlock.HOLLOW, KitchenCounterBlock.OPEN);
+        ResourceLocation topPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+stoneType.getPath()+"_top"), FurnitureMod.id("block/kitchen_counter/top"), PARTICLE, STONE);
+        ResourceLocation topHollowPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+stoneType.getPath()+"_top_hollow"), FurnitureMod.id("block/kitchen_counter/top_hollow"), PARTICLE, STONE);
+        ResourceLocation topInnerPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+stoneType.getPath()+"_top_inner"), FurnitureMod.id("block/kitchen_counter/top_inner"), PARTICLE, STONE);
+        ResourceLocation topOuterPath = computeModel(generators, entry, FurnitureMod.id("block/kitchen_counter/"+stoneType.getPath()+"_top_outer"), FurnitureMod.id("block/kitchen_counter/top_outer"), PARTICLE, STONE);
+
+        MultiPartGenerator generator = MultiPartGenerator.multiPart(entry.get());
+        //TODO: Optimize this so it doesnt use generate condition for every possibility.
         for (int i = 0; i < 1 << 5; i++) {
             boolean north = (i & (1)) != 0;
             boolean south = (i & (1 << 1)) != 0;
@@ -217,21 +231,39 @@ public class ModBlockModelProvider {
             boolean hollow = (i & (1 << 3)) != 0;
             boolean open = (i & (1 << 4)) != 0;
 
-            Variant defaultVariant = Variant.variant().with(VariantProperties.MODEL, defaultPath);
-            Variant hollowVariant = Variant.variant().with(VariantProperties.MODEL, hollowPath);
-            Variant openVariant = Variant.variant().with(VariantProperties.MODEL, openPath);
-            Variant hollowOpenVariant = Variant.variant().with(VariantProperties.MODEL, hollowOpenPath);
-            Variant innerVariant = Variant.variant().with(VariantProperties.MODEL, innerPath);
-            Variant outerVariant = Variant.variant().with(VariantProperties.MODEL, outerPath);
+            boolean isCorner = (north && !south) || (!north && south);
 
-            Variant variant = (north && !south) || (!north && south) ? outer ? outerVariant : innerVariant : hollow ? open ? hollowOpenVariant : hollowVariant : open ? openVariant : defaultVariant;
+            Variant baseVariant  = Variant.variant().with(VariantProperties.MODEL, basePath);
+            Variant baseHollowOpenVariant = Variant.variant().with(VariantProperties.MODEL, baseHollowOpenPath);
+            Variant baseOpenVariant = Variant.variant().with(VariantProperties.MODEL, baseOpenPath);
+            Variant baseInnerVariant = Variant.variant().with(VariantProperties.MODEL, baseInnerPath);
+            Variant baseOuterVariant = Variant.variant().with(VariantProperties.MODEL, baseOuterPath);
+
+            Variant topVariant = Variant.variant().with(VariantProperties.MODEL, topPath);
+            Variant topHollowVariant = Variant.variant().with(VariantProperties.MODEL, topHollowPath);
+            Variant topInnerVariant = Variant.variant().with(VariantProperties.MODEL, topInnerPath);
+            Variant topOuterVariant = Variant.variant().with(VariantProperties.MODEL, topOuterPath);
+
+            Variant top = isCorner ? outer ? topOuterVariant : topInnerVariant : hollow ? topHollowVariant : topVariant;
+            Variant base = isCorner ? outer ? baseOuterVariant : baseInnerVariant : hollow && open ? baseHollowOpenVariant : open ? baseOpenVariant : baseVariant;
+
             if ((north && !south && outer) || (!north && south && !outer)) {
-                variant = variant.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
+                top = top.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
+                base = base.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270);
             }
 
-            dispatch.select(north, south, outer, hollow, open, variant);
+            Condition.TerminalCondition condition = Condition.condition();
+            condition.term(KitchenCounterBlock.NORTH, north);
+            condition.term(KitchenCounterBlock.SOUTH, south);
+            condition.term(KitchenCounterBlock.OUTER, outer);
+            condition.term(KitchenCounterBlock.HOLLOW, hollow);
+            condition.term(KitchenCounterBlock.OPEN, open);
+
+            generator.with(condition, top);
+            generator.with(condition, base);
         }
-        generator.with(dispatch);
+
+        computeModel(generators, entry, "item/", PARTICLE, PLANKS, DOORS, STONE);
         blockStateOutput.accept(generator);
     }
 

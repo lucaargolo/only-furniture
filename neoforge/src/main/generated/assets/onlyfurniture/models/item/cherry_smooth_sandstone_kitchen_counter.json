@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/cherry_smooth_sandstone_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/cherry_doors",
+    "particle": "minecraft:block/sandstone_top",
+    "planks": "minecraft:block/cherry_planks",
+    "stone": "minecraft:block/sandstone_top"
+  }
 }

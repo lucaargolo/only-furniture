@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/mangrove_polished_deepslate_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/mangrove_doors",
+    "particle": "minecraft:block/polished_deepslate",
+    "planks": "minecraft:block/mangrove_planks",
+    "stone": "minecraft:block/polished_deepslate"
+  }
 }

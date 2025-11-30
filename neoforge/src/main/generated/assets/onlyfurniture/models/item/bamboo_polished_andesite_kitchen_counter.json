@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/bamboo_polished_andesite_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/bamboo_doors",
+    "particle": "minecraft:block/polished_andesite",
+    "planks": "minecraft:block/bamboo_planks",
+    "stone": "minecraft:block/polished_andesite"
+  }
 }

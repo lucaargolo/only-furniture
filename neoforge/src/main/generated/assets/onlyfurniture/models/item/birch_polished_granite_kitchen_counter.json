@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/birch_polished_granite_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/birch_doors",
+    "particle": "minecraft:block/polished_granite",
+    "planks": "minecraft:block/birch_planks",
+    "stone": "minecraft:block/polished_granite"
+  }
 }

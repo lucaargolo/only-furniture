@@ -1,9 +1,0 @@
-{
-  "parent": "onlyfurniture:block/kitchen_counter_hollow",
-  "textures": {
-    "doors": "onlyfurniture:block/oak_doors",
-    "particle": "minecraft:block/polished_tuff",
-    "planks": "minecraft:block/oak_planks",
-    "stone": "minecraft:block/polished_tuff"
-  }
-}

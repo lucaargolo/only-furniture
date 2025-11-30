@@ -1,8 +1,0 @@
-{
-  "parent": "onlyfurniture:block/kitchen_counter_inner",
-  "textures": {
-    "particle": "minecraft:block/smooth_stone",
-    "planks": "minecraft:block/dark_oak_planks",
-    "stone": "minecraft:block/smooth_stone"
-  }
-}

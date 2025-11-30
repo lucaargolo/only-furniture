@@ -1,3 +1,9 @@
 {
-  "parent": "onlyfurniture:block/dark_oak_polished_tuff_kitchen_counter"
+  "parent": "onlyfurniture:item/kitchen_counter",
+  "textures": {
+    "doors": "onlyfurniture:block/dark_oak_doors",
+    "particle": "minecraft:block/polished_tuff",
+    "planks": "minecraft:block/dark_oak_planks",
+    "stone": "minecraft:block/polished_tuff"
+  }
 }
