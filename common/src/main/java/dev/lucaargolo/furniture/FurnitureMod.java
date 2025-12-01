@@ -11,6 +11,7 @@ import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.network.BlockChangedPayload;
 import dev.lucaargolo.furniture.network.ModPacketManager;
 import dev.lucaargolo.furniture.registry.*;
+import dev.lucaargolo.furniture.sound.ModSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
@@ -57,6 +58,7 @@ public abstract class FurnitureMod {
         ModEntityTypes.REGISTRY.init();
         ModMenuTypes.REGISTRY.init();
         ModDataAttachments.REGISTRY.init();
+        ModSounds.REGISTRY.init();
         this.packetManager.init();
     }
 

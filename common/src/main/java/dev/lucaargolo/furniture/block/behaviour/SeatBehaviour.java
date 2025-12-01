@@ -23,6 +23,10 @@ public class SeatBehaviour extends Behaviour<SeatBehaviour> {
         super(pos);
     }
 
+    public SeatBehaviour(double x, double y, double z) {
+        this(new Vec3(x, y, z));
+    }
+
     @Override
     public SeatBehaviour positioned(Vec3 pos) {
         return new SeatBehaviour(pos);

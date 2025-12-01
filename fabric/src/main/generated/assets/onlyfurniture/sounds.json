@@ -1,0 +1,674 @@
+{
+  "piano_a1_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_a1_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_a1_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_a1_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_a1_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_a1_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_a1_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_a1_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/a1_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_as5_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_as5_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_as5_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_as5_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_as5_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_as5_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_as5_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_as5_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/as5_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_b2_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_b2_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_b2_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_b2_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_b2_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_b2_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_b2_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_b2_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/b2_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_c0_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_c0_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_c0_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_c0_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_c0_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_c0_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_c0_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_c0_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/c0_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_cs4_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_cs4_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_cs4_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_cs4_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_cs4_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_cs4_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_cs4_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_cs4_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/cs4_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_d1_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_d1_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_d1_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_d1_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_d1_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_d1_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_d1_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_d1_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/d1_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_ds5_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_ds5_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_ds5_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_ds5_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_ds5_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_ds5_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_ds5_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_ds5_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/ds5_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_e2_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_e2_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_e2_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_e2_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_e2_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_e2_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_e2_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_e2_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/e2_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_f6_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_f6_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_f6_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_f6_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_f6_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_f6_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_f6_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_f6_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/f6_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_fs3_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_fs3_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_fs3_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_fs3_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_fs3_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_fs3_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_fs3_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_fs3_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/fs3_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_g0_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_g0_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_g0_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_g0_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_g0_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_g0_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_g0_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_g0_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/g0_dyn4_rr2"
+      }
+    ]
+  },
+  "piano_gs4_dyn1_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn1_rr1"
+      }
+    ]
+  },
+  "piano_gs4_dyn1_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn1_rr2"
+      }
+    ]
+  },
+  "piano_gs4_dyn2_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn2_rr1"
+      }
+    ]
+  },
+  "piano_gs4_dyn2_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn2_rr2"
+      }
+    ]
+  },
+  "piano_gs4_dyn3_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn3_rr1"
+      }
+    ]
+  },
+  "piano_gs4_dyn3_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn3_rr2"
+      }
+    ]
+  },
+  "piano_gs4_dyn4_rr1": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn4_rr1"
+      }
+    ]
+  },
+  "piano_gs4_dyn4_rr2": {
+    "sounds": [
+      {
+        "name": "onlyfurniture:piano/gs4_dyn4_rr2"
+      }
+    ]
+  }
+}

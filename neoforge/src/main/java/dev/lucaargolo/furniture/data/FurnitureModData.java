@@ -29,6 +29,8 @@ public class FurnitureModData {
         generator.addProvider(event.includeServer(), NeoForgeModTagProvider.block(output, event.getLookupProvider(), exFileHelper));
         generator.addProvider(event.includeServer(), new ModLootProvider(output, event.getLookupProvider()));
         generator.addProvider(event.includeServer(), new ModDataMapProvider(output, event.getLookupProvider()));
+        generator.addProvider(event.includeClient(), new ModSoundsProvider(output));
+
     }
 
     public static RegistrySetBuilder bootstrapRegistries() {
