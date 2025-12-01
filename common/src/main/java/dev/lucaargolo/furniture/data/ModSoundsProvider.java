@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
-import dev.lucaargolo.furniture.sound.ModSounds;
+import dev.lucaargolo.furniture.sound.Instrument;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -27,16 +27,18 @@ public class ModSoundsProvider implements DataProvider {
     public @NotNull CompletableFuture<?> run(@NotNull CachedOutput output) {
         Path outputPath = this.output.getOutputFolder(PackOutput.Target.RESOURCE_PACK).resolve(FurnitureMod.MOD_ID+"/sounds.json");
         JsonObject outputJson = new JsonObject();
-        for(Map.Entry<ModSounds.Key, MinecraftEntry<SoundEvent>> entry : ModSounds.PIANO.entrySet()) {
-            ModSounds.Key key = entry.getKey();
-            String path = entry.getValue().key().getPath();
-            JsonObject soundJson = new JsonObject();
-            JsonArray soundsArray = new JsonArray();
-            JsonObject sound = new JsonObject();
-            sound.addProperty("name", FurnitureMod.id("piano/"+key.path()).toString());
-            soundsArray.add(sound);
-            soundJson.add("sounds", soundsArray);
-            outputJson.add(path, soundJson);
+        for(Instrument instrument : Instrument.INSTRUMENTS) {
+            for(Map.Entry<Instrument.Key, MinecraftEntry<SoundEvent>> entry : instrument.sounds().entrySet()) {
+                Instrument.Key key = entry.getKey();
+                String path = entry.getValue().key().getPath();
+                JsonObject soundJson = new JsonObject();
+                JsonArray soundsArray = new JsonArray();
+                JsonObject sound = new JsonObject();
+                sound.addProperty("name", FurnitureMod.id("piano/" + key.path()).toString());
+                soundsArray.add(sound);
+                soundJson.add("sounds", soundsArray);
+                outputJson.add(path, soundJson);
+            }
         }
         return DataProvider.saveStable(output, outputJson, outputPath);
     }

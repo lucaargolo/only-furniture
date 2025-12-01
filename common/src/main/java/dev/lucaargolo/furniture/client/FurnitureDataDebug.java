@@ -142,7 +142,7 @@ public class FurnitureDataDebug {
                 for(Behaviour<?> i : block.getBehaviours()) {
                     Behaviour<?> behaviour = FurnitureBlock.computePositionedBehaviour(pos, state, data, i);
                     Vec3 behaviourPosition = behaviour.pos().subtract(position);
-                    AABB bounds = AABB.ofSize(behaviourPosition, 0.1, 0.1, 0.1);
+                    AABB bounds = AABB.ofSize(behaviourPosition, 0.01, 0.01, 0.01);
                     LevelRenderer.renderLineBox(poseStack, lineConsumer, bounds.minX, bounds.minY, bounds.minZ, bounds.maxX, bounds.maxY, bounds.maxZ, 1f, 0f, 0f, 1f);
                 }
             }
