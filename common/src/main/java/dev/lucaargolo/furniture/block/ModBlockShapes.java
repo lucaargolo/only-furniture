@@ -258,4 +258,20 @@ public class ModBlockShapes {
         Block.box(5, 1, 4, 11, 7, 12),
         Block.box(4, 1, 5, 12, 7, 11)
     };
+
+    public static final VoxelShape[] UPRIGHT_PIANO = new VoxelShape[] {
+        Block.box(22, 0, 1, 24, 9, 3),
+        Block.box(-8, 0, 1, -6, 9, 3),
+        Block.box(-8, 9, 0, 24, 11, 8),
+        Block.box(23, 11, 0, 24, 14, 8),
+        Block.box(-8, 11, 0, -7, 14, 8),
+        Block.box(-8, 14, 4, 24, 16, 8),
+        Block.box(-8, 14, 2, -7, 15, 4),
+        Block.box(23, 14, 2, 24, 15, 4),
+        Block.box(-7, 14, 3, 23, 15, 4),
+        Block.box(-7, 12, 4, 23, 14, 5),
+        Block.box(-8, 0, 8, 24, 24, 16),
+        Block.box(-7, 11, 0.9, 23, 12.1, 3.9)
+    };
+
 }

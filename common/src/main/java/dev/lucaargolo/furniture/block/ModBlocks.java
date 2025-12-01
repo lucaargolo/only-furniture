@@ -79,6 +79,8 @@ public class ModBlocks {
 
     public static final ModBlockRegistry.BlockEntry<FurnitureBlock> PLANT_POT = REGISTRY.register("plant_pot", () -> new FurnitureBlock(Blocks.FLOWER_POT, ModBlockShapes.FLOWER_POT, new PlantBehaviour(0.0, 0.125, 0.0)));
 
+    public static final ModBlockRegistry.BlockEntry<FurnitureBlock> UPRIGHT_PIANO = REGISTRY.register("upright_piano", () -> new FurnitureBlock(Blocks.ACACIA_PLANKS, ModBlockShapes.UPRIGHT_PIANO));
+
     private static <T extends Block> Map<WoodType, ModBlockRegistry.BlockEntry<T>> registerForTable(String path, HexaFunction<Block, TagKey<Block>, WoodType, VoxelShape[], VoxelShape[], VoxelShape[], T> furnitureConstructor, VoxelShape[] footShapes, VoxelShape[] centerShapes, VoxelShape[] sideShapes, TagKey<?>... tags) {
         return registerForWood(path, WoodBlock::getPlanks, (block, wood, shapes) -> furnitureConstructor.apply(block, tags[0].cast(Registries.BLOCK).orElseThrow(), wood, footShapes, centerShapes, sideShapes), null, tags);
     }
