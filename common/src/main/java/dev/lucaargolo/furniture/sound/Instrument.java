@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public record Instrument(int index, Map<Key, MinecraftEntry<SoundEvent>> sounds) {
+public record Instrument(int index, Map<Note, MinecraftEntry<SoundEvent>> sounds) {
 
     public static final List<Instrument> INSTRUMENTS = new LinkedList<>();
 
@@ -29,20 +29,9 @@ public record Instrument(int index, Map<Key, MinecraftEntry<SoundEvent>> sounds)
         }
     };
 
-    public Instrument(Map<Key, MinecraftEntry<SoundEvent>> sounds) {
+    public Instrument(Map<Note, MinecraftEntry<SoundEvent>> sounds) {
         this(INSTRUMENTS.size(), ImmutableMap.copyOf(sounds));
         INSTRUMENTS.add(this);
-    }
-
-    public record Key(Note note, DynamicLayer dynamicLayer, RoundRobin roundRobin) {
-
-        public String path() {
-            String n = note.name().toLowerCase(Locale.ROOT);
-            String d = dynamicLayer.name().toLowerCase(Locale.ROOT);
-            String r = roundRobin.name().toLowerCase(Locale.ROOT);
-            return n + "_" + d + "_" + r;
-        }
-
     }
 
     public enum Note {
@@ -65,24 +54,13 @@ public record Instrument(int index, Map<Key, MinecraftEntry<SoundEvent>> sounds)
         }
     }
 
-    public enum DynamicLayer {
-        DYN1, DYN2, DYN3, DYN4
-    }
-
-    public enum RoundRobin {
-        RR1, RR2
-    }
-
-    public void play(int semitone, int duration) {
-        Key best = null;
+    public void play(int semitone, int release) {
+        Note best = null;
         SoundEvent bestSound = null;
         int bestDistance = Integer.MAX_VALUE;
 
-        for (Map.Entry<Key, MinecraftEntry<SoundEvent>> entry : sounds.entrySet()) {
-            if (entry.getKey().dynamicLayer() != DynamicLayer.DYN4) continue;
-            if (entry.getKey().roundRobin() != RoundRobin.RR1) continue;
-
-            int distance = Math.abs(entry.getKey().note().semitone() - semitone);
+        for (Map.Entry<Note, MinecraftEntry<SoundEvent>> entry : sounds.entrySet()) {
+            int distance = Math.abs(entry.getKey().semitone() - semitone);
 
             if (distance < bestDistance) {
                 best = entry.getKey();
@@ -92,29 +70,20 @@ public record Instrument(int index, Map<Key, MinecraftEntry<SoundEvent>> sounds)
         }
 
         if (bestSound != null) {
-            int semitoneShift = semitone - best.note().semitone();
+            int semitoneShift = semitone - best.semitone();
             float pitch = (float) Math.pow(2.0, semitoneShift / 12.0);
 
-            Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(bestSound, pitch, duration));
+            Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(bestSound, pitch, release));
         }
     }
 
     public static Instrument register(ModRegistry<SoundEvent> registry, String path) {
-        Map<Key, MinecraftEntry<SoundEvent>> map = new HashMap<>();
-        for (Note n : Note.values()) {
-            for (DynamicLayer d : DynamicLayer.values()) {
-                for (RoundRobin r : RoundRobin.values()) {
-                    Key key = new Key(n, d, r);
-                    ResourceLocation id = FurnitureMod.id(path + "_" + key.path());
-                    map.put(key, registry.register(id.getPath(), () -> SoundEvent.createVariableRangeEvent(id)));
-                }
-            }
+        Map<Note, MinecraftEntry<SoundEvent>> map = new HashMap<>();
+        for (Note key : Note.values()) {
+            ResourceLocation id = FurnitureMod.id(path + "_" + key.name().toLowerCase(Locale.ROOT));
+            map.put(key, registry.register(id.getPath(), () -> SoundEvent.createVariableRangeEvent(id)));
         }
         return new Instrument(map);
-    }
-
-    public interface TriConsumer<K, V, S> {
-        void accept(K k, V v, S s);
     }
 
 }

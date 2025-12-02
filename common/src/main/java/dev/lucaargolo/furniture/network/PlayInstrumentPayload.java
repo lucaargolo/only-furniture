@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Executor;
 
-public record PlayInstrumentPayload(Instrument instrument, int semitone, int duration) implements CustomPacketPayload {
+public record PlayInstrumentPayload(Instrument instrument, int semitone, int release) implements CustomPacketPayload {
 
     public static final Type<PlayInstrumentPayload> TYPE = new Type<>(FurnitureMod.id("play_instrument_payload"));
 
@@ -20,13 +20,13 @@ public record PlayInstrumentPayload(Instrument instrument, int semitone, int dur
             ByteBufCodecs.VAR_INT,
             PlayInstrumentPayload::semitone,
             ByteBufCodecs.VAR_INT,
-            PlayInstrumentPayload::duration,
+            PlayInstrumentPayload::release,
             PlayInstrumentPayload::new
     );
 
     public static void handleClient(PlayInstrumentPayload payload, Executor executor) {
         executor.execute(() -> {
-            payload.instrument.play(payload.semitone, payload.duration);
+            payload.instrument.play(payload.semitone, payload.release);
         });
     }
 
