@@ -4,17 +4,33 @@ import com.google.common.collect.ImmutableMap;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.registry.ModRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public record Instrument(Map<Key, MinecraftEntry<SoundEvent>> sounds) {
+public record Instrument(int index, Map<Key, MinecraftEntry<SoundEvent>> sounds) {
 
-    public static final List<Instrument> INSTRUMENTS = new ArrayList<>();
+    public static final List<Instrument> INSTRUMENTS = new LinkedList<>();
+
+    public static final StreamCodec<ByteBuf, Instrument> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public @NotNull Instrument decode(@NotNull ByteBuf buffer) {
+            return INSTRUMENTS.get(buffer.readInt());
+        }
+
+        @Override
+        public void encode(@NotNull ByteBuf buffer, @NotNull Instrument value) {
+            buffer.writeInt(value.index());
+        }
+    };
 
     public Instrument(Map<Key, MinecraftEntry<SoundEvent>> sounds) {
-        this.sounds = ImmutableMap.copyOf(sounds);
+        this(INSTRUMENTS.size(), ImmutableMap.copyOf(sounds));
         INSTRUMENTS.add(this);
     }
 
@@ -57,7 +73,7 @@ public record Instrument(Map<Key, MinecraftEntry<SoundEvent>> sounds) {
         RR1, RR2
     }
 
-    public void play(float volume, int semitone, TriConsumer<SoundEvent, Float, Float> consumer) {
+    public void play(int semitone, int duration) {
         Key best = null;
         SoundEvent bestSound = null;
         int bestDistance = Integer.MAX_VALUE;
@@ -79,7 +95,7 @@ public record Instrument(Map<Key, MinecraftEntry<SoundEvent>> sounds) {
             int semitoneShift = semitone - best.note().semitone();
             float pitch = (float) Math.pow(2.0, semitoneShift / 12.0);
 
-            consumer.accept(bestSound, volume, pitch);
+            Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(bestSound, pitch, duration));
         }
     }
 

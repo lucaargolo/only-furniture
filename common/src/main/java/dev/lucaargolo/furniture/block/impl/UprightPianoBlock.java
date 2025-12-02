@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.block.impl;
 
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
-import dev.lucaargolo.furniture.block.behaviour.PianoBehaviour;
+import dev.lucaargolo.furniture.block.behaviour.InstrumentBehaviour;
 import dev.lucaargolo.furniture.sound.ModSounds;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -20,9 +20,9 @@ public class UprightPianoBlock extends FurnitureBlock {
         Vec3 blackKey = new Vec3(12.5/16.0, 4.25/16.0, -5.5/16.0);
         for (int index = 0; index < 88; index++) {
             if (isWhiteKey(index)) {
-                behaviours[index] = new PianoBehaviour(whiteKey.add(-(whiteKeyOffset(index) * 0.5)/16.0, 0.0, 0.0), ModSounds.PIANO, 21+index);
+                behaviours[index] = new InstrumentBehaviour(whiteKey.add(-(whiteKeyOffset(index) * 0.5)/16.0, 0.0, 0.0), ModSounds.INSTRUMENTS.getPiano(), 21+index);
             } else {
-                behaviours[index] = new PianoBehaviour(blackKey.add(-(blackKeyOffset(index) * 0.5)/16.0 + 0.25/16.0, 0.0, 0.0), ModSounds.PIANO, 21+index);
+                behaviours[index] = new InstrumentBehaviour(blackKey.add(-(blackKeyOffset(index) * 0.5)/16.0 + 0.25/16.0, 0.0, 0.0), ModSounds.INSTRUMENTS.getPiano(), 21+index);
             }
         }
         return behaviours;

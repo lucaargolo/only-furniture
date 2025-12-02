@@ -14,6 +14,7 @@ public abstract class ModPacketManager {
         register(PacketInfo.PLAY_TO_SERVER, FurnitureRotationPayload.class);
         register(PacketInfo.PLAY_TO_CLIENT, DestroyEffectsPayload.class);
         register(PacketInfo.PLAY_TO_CLIENT, BlockChangedPayload.class);
+        register(PacketInfo.PLAY_TO_CLIENT, PlayInstrumentPayload.class);
     }
 
     protected abstract <T extends CustomPacketPayload> void register(PacketInfo info, Class<T> klass);
