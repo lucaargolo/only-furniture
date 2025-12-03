@@ -17,13 +17,12 @@
   ],
   "client": [
     "BakedQuadMixin",
-    "BlockElementMixin",
+    "BlockElementDeserializerMixin",
     "BlockModelDeserializerMixin",
     "BlockModelMixin",
     "DebugScreenOverlayMixin",
     "LevelRendererAccessor",
-    "RenderChunkRegionAccessor",
-    "SimpleBakedModelMixin"
+    "RenderChunkRegionAccessor"
   ],
   "server": [],
   "injectors": {

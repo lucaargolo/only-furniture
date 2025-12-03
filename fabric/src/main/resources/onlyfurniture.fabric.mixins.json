@@ -11,9 +11,9 @@
   "client": [
     "FabricBlockModelDeserializerMixin",
     "FabricBlockModelMixin",
-    "FabricSimpleBakedModelMixin",
     "ItemBlockRenderTypesMixin",
-    "MouseHandlerMixin"
+    "MouseHandlerMixin",
+    "SimpleBakedModelMixin"
   ],
   "server": [],
   "injectors": {

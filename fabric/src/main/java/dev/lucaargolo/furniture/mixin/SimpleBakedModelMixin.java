@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(SimpleBakedModel.class)
-public class FabricSimpleBakedModelMixin implements RenderTypeProvider {
+public class SimpleBakedModelMixin implements RenderTypeProvider {
 
     @Unique
     @Nullable

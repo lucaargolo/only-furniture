@@ -2,7 +2,7 @@ package dev.lucaargolo.furniture.mixin;
 
 import com.google.gson.*;
 import com.mojang.datafixers.util.Either;
-import dev.lucaargolo.furniture.client.utils.GroupedModel;
+import dev.lucaargolo.furniture.client.utils.GroupedBlockModel;
 import dev.lucaargolo.furniture.client.utils.ModelGroup;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.world.phys.Vec3;
@@ -25,7 +25,7 @@ public class BlockModelDeserializerMixin {
         JsonObject jsonObject = json.getAsJsonObject();
         if(jsonObject.has("groups")) {
             ModelGroup root = new ModelGroup("root", Vec3.ZERO, furniture$computeGroups(jsonObject.getAsJsonArray("groups")));
-            ((GroupedModel) model).furniture$setGroup(root);
+            ((GroupedBlockModel) model).furniture$setGroup(root);
         }
     }
 

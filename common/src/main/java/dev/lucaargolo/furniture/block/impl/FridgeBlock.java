@@ -46,7 +46,7 @@ public class FridgeBlock extends FurnitureBlock {
 
     @Override
     public boolean shouldRenderBlockEntity(BlockGetter level, BlockPos pos, BlockState state) {
-        return false;
+        return true;
     }
 
     @Override

@@ -2,10 +2,12 @@ package dev.lucaargolo.furniture.client.render.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
-import dev.lucaargolo.furniture.client.utils.GroupedBakedQuad;
+import dev.lucaargolo.furniture.client.utils.FurnitureBakedQuad;
+import net.minecraft.Util;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -21,6 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,15 +64,23 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
                     }
 
                     VertexConsumer consumer = bufferSource.getBuffer(RenderType.entitySolid(InventoryMenu.BLOCK_ATLAS));
-                    for (BakedQuad quad : quads) {
-                        String group = ((GroupedBakedQuad) quad).furniture$getGroupName();
-                        if(group != null && group.startsWith("top.door")) {
 
-                        }else{
+                    for (BakedQuad quad : quads) {
+                        String group = ((FurnitureBakedQuad) quad).furniture$getGroupName();
+                        Vector3f pivot = ((FurnitureBakedQuad) quad).furniture$getPivot();
+                        if (group != null && (group.startsWith("bottom.door") || group.startsWith("top.door"))) {
+                            poseStack.pushPose();
+                            poseStack.translate(pivot.x(), pivot.y(), pivot.z());
+                            float p = (Util.getMillis() % 3000) / 3000f;
+                            poseStack.mulPose(Axis.YP.rotationDegrees(p * 360f));
+                            poseStack.translate(-pivot.x(), -pivot.y(), -pivot.z());
+
+                            consumer.putBulkData(poseStack.last(), quad, 1f, 1f, 1f, 1f, packedLight, packedOverlay);
+                            poseStack.popPose();
+                        } else {
                             consumer.putBulkData(poseStack.last(), quad, 1f, 1f, 1f, 1f, packedLight, packedOverlay);
                         }
                     }
-
                     poseStack.popPose();
                 }
             }
