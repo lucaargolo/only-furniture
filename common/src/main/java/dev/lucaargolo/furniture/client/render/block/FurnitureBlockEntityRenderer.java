@@ -62,7 +62,7 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
 
                     VertexConsumer consumer = bufferSource.getBuffer(RenderType.entitySolid(InventoryMenu.BLOCK_ATLAS));
                     for (BakedQuad quad : quads) {
-                        String group = ((GroupedBakedQuad) quad).furniture$getGroupHint();
+                        String group = ((GroupedBakedQuad) quad).furniture$getGroupName();
                         if(group != null && group.startsWith("top.door")) {
 
                         }else{

@@ -5,8 +5,8 @@ import org.jetbrains.annotations.Nullable;
 public interface GroupedBakedQuad {
 
     @Nullable
-    String furniture$getGroupHint();
+    String furniture$getGroupName();
 
-    void furniture$setGroupHint(String groupHint);
+    void furniture$setGroupName(String groupName);
 
 }

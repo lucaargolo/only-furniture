@@ -22,7 +22,8 @@
     "BlockModelMixin",
     "DebugScreenOverlayMixin",
     "LevelRendererAccessor",
-    "RenderChunkRegionAccessor"
+    "RenderChunkRegionAccessor",
+    "SimpleBakedModelMixin"
   ],
   "server": [],
   "injectors": {

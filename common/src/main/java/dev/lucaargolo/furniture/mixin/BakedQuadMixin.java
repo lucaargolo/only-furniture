@@ -15,13 +15,13 @@ public class BakedQuadMixin implements GroupedBakedQuad {
 
     @Override
     @Nullable
-    public String furniture$getGroupHint() {
+    public String furniture$getGroupName() {
         return this.furniture$groupHint;
     }
 
     @Override
-    public void furniture$setGroupHint(String groupHint) {
-        this.furniture$groupHint = groupHint;
+    public void furniture$setGroupName(String groupName) {
+        this.furniture$groupHint = groupName;
     }
 
 }
