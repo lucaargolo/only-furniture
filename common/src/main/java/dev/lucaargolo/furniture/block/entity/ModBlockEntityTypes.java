@@ -22,6 +22,6 @@ public class ModBlockEntityTypes {
 
     public static final ModBlockEntityTypeRegistry REGISTRY = FurnitureMod.blockEntityTypeRegistry();
 
-    public static final Supplier<BlockEntityType<FurnitureBlockEntity>> FURNITURE = REGISTRY.register("plant_holder", FurnitureBlockEntity::new, FURNITURE_BLOCKS);
+    public static final MinecraftEntry<BlockEntityType<FurnitureBlockEntity>> FURNITURE = REGISTRY.register("plant_holder", FurnitureBlockEntity::new, FURNITURE_BLOCKS);
 
 }

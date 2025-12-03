@@ -13,6 +13,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -33,23 +34,26 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
 
     @Override
     public final void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
-        FurnitureData[] layers = FurnitureData.get(blockView, pos);
-        FurnitureData data = null;
-        boolean hasData = false;
-        for (FurnitureData furnitureData : layers) {
-            data = furnitureData;
-            if (data.hasOriginal()) {
-                hasData = true;
-                break;
-            }else{
-                hasData = hasData || furnitureData.getDirectionToOriginal() != null;
-                data = null;
+        Block block = state.getBlock();
+        if(block instanceof FurnitureBlock furniture && !furniture.shouldRenderBlockEntity(blockView, pos, state)) {
+            FurnitureData[] layers = FurnitureData.get(blockView, pos);
+            FurnitureData data = null;
+            boolean hasData = false;
+            for (FurnitureData furnitureData : layers) {
+                data = furnitureData;
+                if (data.hasOriginal()) {
+                    hasData = true;
+                    break;
+                }else{
+                    hasData = hasData || furnitureData.getDirectionToOriginal() != null;
+                    data = null;
+                }
             }
-        }
-        if(data != null) {
-            this.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
-        }else if(!hasData){
-            super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            if(data != null) {
+                this.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
+            }else if(!hasData){
+                super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            }
         }
     }
 

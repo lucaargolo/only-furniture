@@ -45,6 +45,11 @@ public class FridgeBlock extends FurnitureBlock {
     }
 
     @Override
+    public boolean shouldRenderBlockEntity(BlockGetter level, BlockPos pos, BlockState state) {
+        return false;
+    }
+
+    @Override
     public void createBlockStateDefinition(@NotNull StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(TOP_OPEN, BOTTOM_OPEN);

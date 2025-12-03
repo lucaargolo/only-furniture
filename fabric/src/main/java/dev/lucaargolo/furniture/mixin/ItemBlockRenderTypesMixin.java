@@ -1,6 +1,6 @@
 package dev.lucaargolo.furniture.mixin;
 
-import dev.lucaargolo.furniture.client.utils.RenderTypeHint;
+import dev.lucaargolo.furniture.client.utils.RenderTypeProvider;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -28,7 +28,7 @@ public class ItemBlockRenderTypesMixin {
         if(id != 0) {
             int ordinal = furniture$stateRenderTypeCache.computeIfAbsent(id, ItemBlockRenderTypesMixin::furniture$computeStateRenderType);
             if (ordinal != -1) {
-                cir.setReturnValue(RenderTypeHint.Type.values()[ordinal].getChunk());
+                cir.setReturnValue(RenderTypeProvider.Type.values()[ordinal].getChunk());
             }
         }
     }
@@ -39,7 +39,7 @@ public class ItemBlockRenderTypesMixin {
         if(id != 0) {
             int ordinal = furniture$stateRenderTypeCache.computeIfAbsent(id, ItemBlockRenderTypesMixin::furniture$computeStateRenderType);
             if(ordinal != -1) {
-                cir.setReturnValue(RenderTypeHint.Type.values()[ordinal].getMoving());
+                cir.setReturnValue(RenderTypeProvider.Type.values()[ordinal].getMoving());
             }
         }
     }
@@ -52,8 +52,8 @@ public class ItemBlockRenderTypesMixin {
             while (model instanceof ForwardingBakedModel forwarding) {
                 model = forwarding.getWrappedModel();
             }
-            if (model instanceof RenderTypeHint hint) {
-                RenderTypeHint.Type type = RenderTypeHint.getRenderType(hint.furniture$getRenderTypeHint());
+            if (model instanceof RenderTypeProvider hint) {
+                RenderTypeProvider.Type type = RenderTypeProvider.getRenderType(hint.furniture$getRenderType());
                 if (type != null) {
                     return type.ordinal();
                 }

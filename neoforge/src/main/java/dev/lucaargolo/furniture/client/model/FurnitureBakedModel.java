@@ -15,6 +15,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.ChunkRenderTypeSet;
 import net.neoforged.neoforge.client.model.BakedModelWrapper;
@@ -125,7 +126,8 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
         level.getBlockEntity(pos, ModBlockEntityTypes.FURNITURE.get()).ifPresent(blockEntity -> {
             builder.with(BLOCK_ENTITY_PROPERTY, blockEntity);
         });
-        if(data != null && !modelData.has(DATA_PROPERTY)) {
+        Block block = state.getBlock();
+        if(block instanceof FurnitureBlock furniture && !furniture.shouldRenderBlockEntity(level, pos, state) && data != null && !modelData.has(DATA_PROPERTY)) {
             return builder.with(DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
         }else if(hasData && !modelData.has(HAS_DATA_PROPERTY)) {
             return builder.with(HAS_DATA_PROPERTY, true).build();

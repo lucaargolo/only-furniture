@@ -109,6 +109,10 @@ public class FurnitureBlock extends Block implements EntityBlock {
         }
     }
 
+    public boolean shouldRenderBlockEntity(BlockGetter level, BlockPos pos, BlockState state) {
+        return false;
+    }
+
     @Override
     protected @NotNull InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hitResult) {
         FurnitureData data = FurnitureData.getOriginal(level, pos);

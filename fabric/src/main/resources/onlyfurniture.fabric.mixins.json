@@ -9,8 +9,8 @@
     "FlowerPotBlockAccessor"
   ],
   "client": [
-    "BlockModelDeserializerMixin",
-    "BlockModelMixin",
+    "FabricBlockModelDeserializerMixin",
+    "FabricBlockModelMixin",
     "ItemBlockRenderTypesMixin",
     "MouseHandlerMixin",
     "SimpleBakedModelMixin"

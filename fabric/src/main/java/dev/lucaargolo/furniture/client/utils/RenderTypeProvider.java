@@ -4,12 +4,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-public interface RenderTypeHint {
+public interface RenderTypeProvider {
 
     @Nullable
-    ResourceLocation furniture$getRenderTypeHint();
+    ResourceLocation furniture$getRenderType();
 
-    void furniture$setRenderTypeHint(ResourceLocation renderTypeHint);
+    void furniture$setRenderType(ResourceLocation renderTypeHint);
 
     @Nullable
     static Type getRenderType(ResourceLocation renderTypeHint) {

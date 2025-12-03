@@ -16,7 +16,10 @@
     "VoxelShapeAccessor"
   ],
   "client": [
+    "BakedQuadMixin",
     "BlockElementMixin",
+    "BlockModelDeserializerMixin",
+    "BlockModelMixin",
     "DebugScreenOverlayMixin",
     "LevelRendererAccessor",
     "RenderChunkRegionAccessor"

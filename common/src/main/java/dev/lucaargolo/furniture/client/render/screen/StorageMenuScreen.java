@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.client.screen;
+package dev.lucaargolo.furniture.client.render.screen;
 
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.menu.StorageMenu;

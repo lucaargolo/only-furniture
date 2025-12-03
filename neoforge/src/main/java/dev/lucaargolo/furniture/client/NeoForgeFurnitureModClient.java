@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
@@ -36,6 +37,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
@@ -56,6 +59,8 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     private final Map<Supplier<MenuType>, MenuScreens.ScreenConstructor> menus = new HashMap<>();
     @SuppressWarnings("rawtypes")
     private final Map<Supplier<EntityType>, EntityRendererProvider> entities = new HashMap<>();
+    @SuppressWarnings("rawtypes")
+    private final Map<Supplier<BlockEntityType>, BlockEntityRendererProvider> blockEntities = new HashMap<>();
 
     public NeoForgeFurnitureModClient() {
         this.init();
@@ -78,6 +83,11 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     @Override
     protected <E extends Entity, P extends EntityRendererProvider<E>> void registerEntityRenderer(MinecraftEntry<EntityType<E>> type, P provider) {
         entities.put(type::get, provider);
+    }
+
+    @Override
+    protected <E extends BlockEntity, P extends BlockEntityRendererProvider<E>> void registerBlockEntityRenderer(MinecraftEntry<BlockEntityType<E>> type, P provider) {
+        blockEntities.put(type::get, provider);
     }
 
     @Override
@@ -148,6 +158,9 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     public void onRenderersRegister(EntityRenderersEvent.RegisterRenderers event) {
         this.entities.forEach((type, provider) -> {
             event.registerEntityRenderer(type.get(), provider);
+        });
+        this.blockEntities.forEach((type, provider) -> {
+            event.registerBlockEntityRenderer(type.get(), provider);
         });
     }
 
