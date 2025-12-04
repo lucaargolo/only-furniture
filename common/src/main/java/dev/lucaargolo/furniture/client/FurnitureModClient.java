@@ -19,6 +19,7 @@ import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
 import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import dev.lucaargolo.furniture.utils.Animation;
 import dev.lucaargolo.furniture.utils.shape.FurnitureShape;
 import dev.lucaargolo.furniture.utils.shape.RotatedShape;
 import net.minecraft.client.Camera;
@@ -56,6 +57,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.function.TriFunction;
 
+import java.util.List;
+import java.util.Map;
+
 public abstract class FurnitureModClient {
 
     private static FurnitureModClient instance;
@@ -84,7 +88,7 @@ public abstract class FurnitureModClient {
 
     protected abstract <E extends BlockEntity, P extends BlockEntityRendererProvider<E>> void registerBlockEntityRenderer(MinecraftEntry<BlockEntityType<E>> type, P provider);
 
-    protected abstract void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor);
+    protected abstract void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, Map<String, List<Animation>> animations, int packedColor);
 
     public final boolean onMouseScroll(double deltaX, double deltaY) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -162,7 +166,7 @@ public abstract class FurnitureModClient {
                                 poseStack.translate(0.5, 0.5, 0.5);
                                 poseStack.scale(1f - 0.005f, 1f - 0.005f, 1f - 0.005f);
                                 poseStack.translate(-0.5, -0.5, -0.5);
-                                renderFurnitureModel(level, lastPosition, lastData, lastState, poseStack, consumer, FastColor.ARGB32.color(120, 0x5865f2));
+                                renderFurnitureModel(level, lastPosition, lastData, lastState, poseStack, consumer, Map.of(), FastColor.ARGB32.color(120, 0x5865f2));
                                 poseStack.popPose();
                                 return;
                             }
@@ -180,7 +184,7 @@ public abstract class FurnitureModClient {
                 poseStack.translate(0.5, 0.5, 0.5);
                 poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
                 poseStack.translate(-0.5, -0.5, -0.5);
-                renderFurnitureModel(level, placingPos, data, state, poseStack, consumer, packedColor);
+                renderFurnitureModel(level, placingPos, data, state, poseStack, consumer, Map.of(), packedColor);
                 poseStack.popPose();
             }
         }

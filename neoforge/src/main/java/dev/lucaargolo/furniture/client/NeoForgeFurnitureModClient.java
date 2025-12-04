@@ -14,6 +14,7 @@ import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import dev.lucaargolo.furniture.utils.Animation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -91,7 +92,7 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @Override
-    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor) {
+    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, Map<String, List<Animation>> animations, int packedColor) {
         Minecraft minecraft = Minecraft.getInstance();
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
 
@@ -105,14 +106,15 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
         for (Direction direction : Direction.values()) {
             random.setSeed(42L);
-            renderQuadList(poseStack, consumer, model.getQuads(state, direction, random, modelData, null), LightTexture.FULL_BRIGHT, packedColor);
+            renderQuadList(poseStack, consumer, model.getQuads(state, direction, random, modelData, null), animations, LightTexture.FULL_BRIGHT, packedColor);
         }
         random.setSeed(42L);
-        renderQuadList(poseStack, consumer, model.getQuads(state, null, random, modelData, null), LightTexture.FULL_BRIGHT, packedColor);
+        renderQuadList(poseStack, consumer, model.getQuads(state, null, random, modelData, null), animations, LightTexture.FULL_BRIGHT, packedColor);
     }
 
-    private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, int packedLight, int packedColor) {
+    private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, Map<String, List<Animation>> animations, int packedLight, int packedColor) {
         for (BakedQuad bakedquad : quads) {
+            //TODO: Handle animations
             consumer.putBulkData(poseStack.last(), bakedquad, FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
         }
     }

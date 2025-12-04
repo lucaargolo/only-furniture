@@ -15,6 +15,7 @@ import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import dev.lucaargolo.furniture.utils.Animation;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -48,6 +49,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.function.TriFunction;
+
+import java.util.List;
+import java.util.Map;
 
 public class FabricFurnitureModClient extends FurnitureModClient implements ClientModInitializer {
 
@@ -91,14 +95,14 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     }
 
     @Override
-    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor) {
+    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, Map<String, List<Animation>> animations, int packedColor) {
         Minecraft minecraft = Minecraft.getInstance();
 
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
         BakedModel model = dispatcher.getBlockModel(state);
 
         if(model instanceof FurnitureBakedModel furnitureModel) {
-            RenderContext render = VanillaRenderContext.of(poseStack, consumer, LightTexture.FULL_BRIGHT, packedColor);
+            RenderContext render = VanillaRenderContext.of(poseStack, consumer, LightTexture.FULL_BRIGHT, packedColor, animations);
             furnitureModel.emitBlockQuads(level, state, pos, () -> random, render, data);
         }
     }

@@ -3,6 +3,7 @@ package dev.lucaargolo.furniture.client.utils;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import dev.lucaargolo.furniture.utils.Animation;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
@@ -20,6 +21,8 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class VanillaRenderContext implements RenderContext {
@@ -132,7 +135,7 @@ public class VanillaRenderContext implements RenderContext {
                     float v = byteBuffer.getFloat(20);
 
                     this.position[l] = new Vector3f(x, y, z);
-                    this.normal[l] = new Vector3f(nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ());
+                    this.normal[l] = nominalFace != null ? new Vector3f(nominalFace.getStepX(), nominalFace.getStepY(), nominalFace.getStepZ()) : new Vector3f();
                     this.uv[l] = new Vector2f(u, v);
                 }
             }
@@ -141,6 +144,7 @@ public class VanillaRenderContext implements RenderContext {
 
         @Override
         public QuadEmitter fromVanilla(BakedQuad quad, RenderMaterial material, @Nullable Direction cullFace) {
+            //TODO: Handle animations
             int[] quadData = quad.getVertices();
             this.nominalFace = quad.getDirection();
             return fromVanilla(quadData, 0);
@@ -291,6 +295,7 @@ public class VanillaRenderContext implements RenderContext {
     private VertexConsumer consumer = null;
     private int packedLight = LightTexture.FULL_BRIGHT;
     private int packedColor = 0x0;
+    private Map<String, List<Animation>> animations = Map.of();
 
     @Override
     public QuadEmitter getEmitter() {
@@ -313,11 +318,12 @@ public class VanillaRenderContext implements RenderContext {
         throw new IllegalStateException("Baked model consumer is not supported");
     }
 
-    public static VanillaRenderContext of(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedColor) {
+    public static VanillaRenderContext of(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedColor, Map<String, List<Animation>> animations) {
         INSTANCE.poseStack = poseStack;
         INSTANCE.consumer = consumer;
         INSTANCE.packedLight = packedLight;
         INSTANCE.packedColor = packedColor;
+        INSTANCE.animations = animations;
         return INSTANCE;
     }
 
