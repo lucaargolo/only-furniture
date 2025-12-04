@@ -44,7 +44,7 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
             BlockState state = blockEntity.getBlockState();
             BlockPos pos = blockEntity.getBlockPos();
             Block block = state.getBlock();
-            if(block instanceof FurnitureBlock furniture && furniture.shouldRenderBlockEntity(level, pos, state)) {
+            if(block instanceof FurnitureBlock furniture && furniture.shouldRenderBlockEntity(blockEntity)) {
                 FurnitureData data = FurnitureData.getOriginal(level, pos);
                 if(data.hasOriginal()) {
                     float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;

@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.attachment;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.attachment.impl.PlantDataAttachment;
 import dev.lucaargolo.furniture.attachment.impl.StorageDataAttachment;
@@ -30,6 +31,12 @@ public class ModDataAttachments {
             StorageDataAttachment.class,
             () -> new StorageDataAttachment(Map.of()),
             StorageDataAttachment.CODEC
+    ));
+
+    public static final DataAttachmentType<AnimationDataAttachment> ANIMATION_DATA = REGISTRY.register("animation_data", DataAttachmentType.of(
+            AnimationDataAttachment.class,
+            () -> new AnimationDataAttachment(Map.of()),
+            AnimationDataAttachment.STREAM_CODEC
     ));
 
 

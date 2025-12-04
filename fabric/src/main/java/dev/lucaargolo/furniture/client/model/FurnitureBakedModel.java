@@ -35,7 +35,7 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
     @Override
     public final void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context) {
         Block block = state.getBlock();
-        if(block instanceof FurnitureBlock furniture && !furniture.shouldRenderBlockEntity(blockView, pos, state)) {
+        if(block instanceof FurnitureBlock furniture && furniture.shouldRenderModel(blockView, pos)) {
             FurnitureData[] layers = FurnitureData.get(blockView, pos);
             FurnitureData data = null;
             boolean hasData = false;

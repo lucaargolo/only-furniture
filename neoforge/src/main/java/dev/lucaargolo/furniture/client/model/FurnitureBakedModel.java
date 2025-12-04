@@ -127,7 +127,7 @@ public class FurnitureBakedModel extends BakedModelWrapper<BakedModel> {
             builder.with(BLOCK_ENTITY_PROPERTY, blockEntity);
         });
         Block block = state.getBlock();
-        if(block instanceof FurnitureBlock furniture && !furniture.shouldRenderBlockEntity(level, pos, state) && data != null && !modelData.has(DATA_PROPERTY)) {
+        if(block instanceof FurnitureBlock furniture && furniture.shouldRenderModel(level, pos) && data != null && !modelData.has(DATA_PROPERTY)) {
             return builder.with(DATA_PROPERTY, data).with(HAS_DATA_PROPERTY, true).build();
         }else if(hasData && !modelData.has(HAS_DATA_PROPERTY)) {
             return builder.with(HAS_DATA_PROPERTY, true).build();

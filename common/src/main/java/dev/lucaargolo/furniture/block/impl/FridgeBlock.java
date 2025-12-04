@@ -6,6 +6,10 @@ import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.behaviour.StorageBehaviour;
 import dev.lucaargolo.furniture.utils.Rotation;
+import net.minecraft.client.animation.AnimationChannel;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.animation.Keyframe;
+import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -30,6 +34,21 @@ public class FridgeBlock extends FurnitureBlock {
     protected final Map<Pair<Direction, Rotation>, VoxelShape> openTopShapes;
     protected final Map<Pair<Direction, Rotation>, VoxelShape> openBottomShapes;
 
+    public static final AnimationDefinition open_top = AnimationDefinition.Builder.withLength(0.25F)
+            .addAnimation("door2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                    new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 135.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.25F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+            ))
+            .build();
+
+    public static final AnimationDefinition close_top = AnimationDefinition.Builder.withLength(0.25F)
+            .addAnimation("door2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+                    new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+                    new Keyframe(0.25F, KeyframeAnimations.degreeVec(0.0F, 135.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
+            ))
+            .build();
+
+
     public FridgeBlock() {
         super(Blocks.IRON_BLOCK, ModBlockShapes.FRIDGE,
                 new StorageBehaviour(new Vec3(0.0, 1.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"), TOP_OPEN),
@@ -42,11 +61,6 @@ public class FridgeBlock extends FurnitureBlock {
         state = state.setValue(TOP_OPEN, false);
         state = state.setValue(BOTTOM_OPEN, false);
         this.registerDefaultState(state);
-    }
-
-    @Override
-    public boolean shouldRenderBlockEntity(BlockGetter level, BlockPos pos, BlockState state) {
-        return true;
     }
 
     @Override

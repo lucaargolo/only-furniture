@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.block.base.LightBlock;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
@@ -109,8 +110,12 @@ public class FurnitureBlock extends Block implements EntityBlock {
         }
     }
 
-    public boolean shouldRenderBlockEntity(BlockGetter level, BlockPos pos, BlockState state) {
-        return false;
+    public final boolean shouldRenderBlockEntity(FurnitureBlockEntity entity) {
+        return ModDataAttachments.ANIMATION_DATA.get(entity) != null;
+    }
+
+    public final boolean shouldRenderModel(BlockGetter level, BlockPos pos) {
+        return !level.getBlockEntity(pos, ModBlockEntityTypes.FURNITURE.get()).map(this::shouldRenderBlockEntity).orElse(false);
     }
 
     @Override
