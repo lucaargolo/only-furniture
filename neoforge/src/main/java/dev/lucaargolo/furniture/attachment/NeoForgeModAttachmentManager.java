@@ -13,11 +13,11 @@ public class NeoForgeModAttachmentManager extends ModAttachmentManager{
     @Override
     public <A extends DataAttachment<A>> @Nullable A get(Object target, DataAttachmentType<A> type) {
         NeoForgeModAttachmentRegistry registry = (NeoForgeModAttachmentRegistry) ModDataAttachments.REGISTRY;
-        return ((IAttachmentHolder) target).getData(registry.get(type));
+        return ((IAttachmentHolder) target).getExistingDataOrNull(registry.get(type));
     }
 
     @Override
-    public <A extends DataAttachment<A>> A set(Object target, DataAttachmentType<A> type, A value) {
+    public <A extends DataAttachment<A>> A set(Object target, DataAttachmentType<A> type, @Nullable A value) {
         NeoForgeModAttachmentRegistry registry = (NeoForgeModAttachmentRegistry) ModDataAttachments.REGISTRY;
         A result;
         if(value != null) {

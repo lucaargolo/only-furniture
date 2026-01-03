@@ -42,7 +42,7 @@ public class KitchenCounterBlock extends FurnitureConnectingBlock implements Sto
 
     public KitchenCounterBlock(Block base, TagKey<Block> connecting, StoneType stone, WoodType wood) {
         super(base, ModBlockShapes.KITCHEN_COUNTER, new Behaviour[] {
-                new StorageBehaviour(Vec3.ZERO, 27, Component.translatable("storage.onlyfurniture.kitchen_counter"), OPEN),
+                new StorageBehaviour(Vec3.ZERO, 27, Component.translatable("storage.onlyfurniture.kitchen_counter"), null, null),
         }, connecting);
         BlockState state = this.defaultBlockState();
         state = state.setValue(HOLLOW, false);

@@ -18,7 +18,7 @@ public class FabricModAttachmentManager extends ModAttachmentManager{
     }
 
     @Override
-    public <A extends DataAttachment<A>> A set(Object target, DataAttachmentType<A> type, A value) {
+    public <A extends DataAttachment<A>> A set(Object target, DataAttachmentType<A> type, @Nullable A value) {
         FabricModAttachmentRegistry registry = (FabricModAttachmentRegistry) ModDataAttachments.REGISTRY;
         A result = ((AttachmentTarget) target).setAttached(registry.get(type), value);
         if(target instanceof BlockEntity entity) {

@@ -11,6 +11,7 @@ import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.network.DestroyEffectsPayload;
+import dev.lucaargolo.furniture.utils.Animation;
 import dev.lucaargolo.furniture.utils.Rotation;
 import dev.lucaargolo.furniture.utils.shape.FurnitureShape;
 import dev.lucaargolo.furniture.utils.shape.ShapeUtils;
@@ -35,6 +36,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -108,6 +111,11 @@ public class FurnitureBlock extends Block implements EntityBlock {
         }else {
             return null;
         }
+    }
+
+    @Override
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> blockEntityType) {
+        return Animation.ticker();
     }
 
     public final boolean shouldRenderBlockEntity(FurnitureBlockEntity entity) {

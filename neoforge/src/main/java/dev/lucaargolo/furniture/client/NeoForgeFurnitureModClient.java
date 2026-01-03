@@ -2,24 +2,25 @@ package dev.lucaargolo.furniture.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
+import dev.lucaargolo.furniture.client.utils.FurnitureBakedQuad;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
-import dev.lucaargolo.furniture.utils.Animation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -43,9 +44,13 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
+import net.neoforged.neoforge.client.model.IQuadTransformer;
+import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.function.TriFunction;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +97,7 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @Override
-    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, Map<String, List<Animation>> animations, int packedColor) {
+    public void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, float partialTick, AnimationDataAttachment animations, int packedLight, int packedColor) {
         Minecraft minecraft = Minecraft.getInstance();
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
 
@@ -106,16 +111,25 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
 
         for (Direction direction : Direction.values()) {
             random.setSeed(42L);
-            renderQuadList(poseStack, consumer, model.getQuads(state, direction, random, modelData, null), animations, LightTexture.FULL_BRIGHT, packedColor);
+            renderQuadList(poseStack, consumer, partialTick, model.getQuads(state, direction, random, modelData, null), animations, packedLight, packedColor);
         }
         random.setSeed(42L);
-        renderQuadList(poseStack, consumer, model.getQuads(state, null, random, modelData, null), animations, LightTexture.FULL_BRIGHT, packedColor);
+        renderQuadList(poseStack, consumer, partialTick, model.getQuads(state, null, random, modelData, null), animations, packedLight, packedColor);
     }
 
-    private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, List<BakedQuad> quads, Map<String, List<Animation>> animations, int packedLight, int packedColor) {
-        for (BakedQuad bakedquad : quads) {
-            //TODO: Handle animations
-            consumer.putBulkData(poseStack.last(), bakedquad, FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
+    private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, float partialTick, List<BakedQuad> quads, AnimationDataAttachment animations, int packedLight, int packedColor) {
+        for (BakedQuad quad : quads) {
+            Matrix4f matrix = new Matrix4f();
+            IQuadTransformer transformer;
+            if(animations != null && quad instanceof FurnitureBakedQuad furnitureQuad) {
+                matrix = matrix.translate(furnitureQuad.furniture$getPivot());
+                matrix = animations.animate(furnitureQuad.furniture$getGroupName(), matrix, partialTick);
+                matrix = matrix.translate(new Vector3f(furnitureQuad.furniture$getPivot()).mul(-1f));
+                transformer = QuadTransformers.applying(new Transformation(matrix));
+            }else{
+                transformer = QuadTransformers.empty();
+            }
+            consumer.putBulkData(poseStack.last(), transformer.process(quad), FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
         }
     }
 
@@ -191,7 +205,7 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     public void onRenderLevelStage(RenderLevelStageEvent event) {
         if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             LevelRendererAccessor levelRenderer = (LevelRendererAccessor) event.getLevelRenderer();
-            this.onFinishTranslucentLayer(levelRenderer, event.getCamera(), event.getPoseStack());
+            this.onFinishTranslucentLayer(levelRenderer, event.getCamera(), event.getPoseStack(), event.getPartialTick().getGameTimeDeltaTicks());
         }
     }
 

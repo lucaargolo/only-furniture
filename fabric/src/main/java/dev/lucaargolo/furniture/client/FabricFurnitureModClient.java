@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
@@ -15,7 +16,6 @@ import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
-import dev.lucaargolo.furniture.utils.Animation;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -28,7 +28,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -49,9 +48,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.function.TriFunction;
-
-import java.util.List;
-import java.util.Map;
+import org.jetbrains.annotations.Nullable;
 
 public class FabricFurnitureModClient extends FurnitureModClient implements ClientModInitializer {
 
@@ -95,14 +92,14 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     }
 
     @Override
-    protected void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, Map<String, List<Animation>> animations, int packedColor) {
+    public void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, float partialTick, @Nullable AnimationDataAttachment animations, int packedLight, int packedColor) {
         Minecraft minecraft = Minecraft.getInstance();
 
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
         BakedModel model = dispatcher.getBlockModel(state);
 
         if(model instanceof FurnitureBakedModel furnitureModel) {
-            RenderContext render = VanillaRenderContext.of(poseStack, consumer, LightTexture.FULL_BRIGHT, packedColor, animations);
+            RenderContext render = VanillaRenderContext.of(poseStack, consumer, partialTick, packedLight, packedColor, animations);
             furnitureModel.emitBlockQuads(level, state, pos, () -> random, render, data);
         }
     }
@@ -135,7 +132,7 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     }
 
     private void onAfterTranslucent(WorldRenderContext context) {
-        this.onFinishTranslucentLayer((LevelRendererAccessor) context.worldRenderer(), context.camera(), context.matrixStack());
+        this.onFinishTranslucentLayer((LevelRendererAccessor) context.worldRenderer(), context.camera(), context.matrixStack(), context.tickCounter().getGameTimeDeltaTicks());
     }
 
 }

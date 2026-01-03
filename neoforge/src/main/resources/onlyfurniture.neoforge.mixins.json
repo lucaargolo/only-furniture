@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BlockGetterMixin",
-    "ModelProviderMixin"
+    "IQuadTransformerMixin",
+    "ModelProviderMixin",
+    "UnbakedGeometryHelperMixin"
   ],
   "client": [],
   "server": [],

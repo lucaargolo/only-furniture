@@ -1,5 +1,8 @@
 package dev.lucaargolo.furniture.menu;
 
+import dev.lucaargolo.furniture.attachment.ModDataAttachments;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
+import dev.lucaargolo.furniture.utils.Animation;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -12,9 +15,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 public class StorageMenu extends AbstractContainerMenu {
 
@@ -112,28 +116,28 @@ public class StorageMenu extends AbstractContainerMenu {
     public void removed(@NotNull Player player) {
         super.removed(player);
         BlockPos pos = this.definition.pos();
-        BlockState state = player.level().getBlockState(pos);
-        BlockState closedState = this.definition.closedState();
-        if(state.is(closedState.getBlock()) && state != closedState) {
-            player.level().setBlockAndUpdate(pos, closedState);
+        Optional<Animation> animation = this.definition.closeAnimation();
+        if(animation.isPresent()) {
+            BlockEntity entity = player.level().getBlockEntity(pos);
+            if(entity != null) {
+                AnimationDataAttachment animations = ModDataAttachments.ANIMATION_DATA.getOrCreate(entity);
+                ModDataAttachments.ANIMATION_DATA.set(entity, animations.replace(entity.getLevel(), entity.getBlockPos(), entity.getBlockState(), animation.get()));
+            }
         }
+
     }
 
-    public record Definition(BlockPos pos, int size, BlockState closedState) {
+    public record Definition(BlockPos pos, int size, Optional<Animation> closeAnimation) {
 
         public static StreamCodec<ByteBuf, Definition> STREAM_CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC,
                 Definition::pos,
                 ByteBufCodecs.VAR_INT,
                 Definition::size,
-                ByteBufCodecs.VAR_INT,
-                d -> Block.getId(d.closedState),
+                ByteBufCodecs.optional(Animation.STREAM_CODEC),
+                Definition::closeAnimation,
                 Definition::new
         );
-
-        public Definition(BlockPos pos, int size, int closedStateId) {
-            this(pos, size, Block.stateById(closedStateId));
-        }
 
     }
 

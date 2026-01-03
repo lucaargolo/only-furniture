@@ -7,6 +7,7 @@ import dev.lucaargolo.furniture.attachment.impl.PlantDataAttachment;
 import dev.lucaargolo.furniture.attachment.impl.StorageDataAttachment;
 import dev.lucaargolo.furniture.registry.ModAttachmentRegistry;
 
+import java.util.List;
 import java.util.Map;
 
 public class ModDataAttachments {
@@ -35,7 +36,7 @@ public class ModDataAttachments {
 
     public static final DataAttachmentType<AnimationDataAttachment> ANIMATION_DATA = REGISTRY.register("animation_data", DataAttachmentType.of(
             AnimationDataAttachment.class,
-            () -> new AnimationDataAttachment(Map.of()),
+            () -> new AnimationDataAttachment(List.of()),
             AnimationDataAttachment.STREAM_CODEC
     ));
 

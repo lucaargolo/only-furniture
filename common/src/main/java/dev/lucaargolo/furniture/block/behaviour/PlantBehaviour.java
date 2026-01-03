@@ -34,6 +34,8 @@ public class PlantBehaviour extends Behaviour<PlantBehaviour> {
 
     @Override
     public boolean interact(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, Player player, int index) {
+        assert blockEntity != null;
+
         PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.getOrCreate(blockEntity);
         if(plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
             Block pottedBlock = potBlock.getPotted();
@@ -61,6 +63,8 @@ public class PlantBehaviour extends Behaviour<PlantBehaviour> {
 
     @Override
     public void remove(Level level, BlockPos pos, BlockState state, @Nullable FurnitureBlockEntity blockEntity, int index) {
+        assert blockEntity != null;
+
         PlantDataAttachment plantData = ModDataAttachments.PLANT_DATA.get(blockEntity);
         if (plantData != null && plantData.getBlock(index) instanceof FlowerPotBlock potBlock && potBlock != Blocks.FLOWER_POT) {
             Block pottedBlock = potBlock.getPotted();

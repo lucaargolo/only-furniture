@@ -3,7 +3,7 @@ package dev.lucaargolo.furniture.client.utils;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import dev.lucaargolo.furniture.utils.Animation;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
@@ -15,21 +15,36 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class VanillaRenderContext implements RenderContext {
 
     private static final VanillaRenderContext INSTANCE = new VanillaRenderContext();
+    private static final Matrix4f IDENTITY = new Matrix4f();
+
+    @Nullable
+    private PoseStack poseStack = null;
+
+    @Nullable
+    private VertexConsumer consumer = null;
+
+    private float partialTick = 1.0f;
+    private int packedLight = LightTexture.FULL_BRIGHT;
+    private int packedColor = 0x0;
+
+    @Nullable
+    private AnimationDataAttachment animations = null;
 
     private final LinkedBlockingDeque<QuadTransform> stack = new LinkedBlockingDeque<>();
+
     private final QuadEmitter emitter = new QuadEmitter() {
         final Vector3f[] position = new Vector3f[4];
         final Vector3f[] normal = new Vector3f[4];
@@ -120,6 +135,10 @@ public class VanillaRenderContext implements RenderContext {
 
         @Override
         public QuadEmitter fromVanilla(int[] quadData, int startIndex) {
+            return fromVanilla(quadData, IDENTITY);
+        }
+
+        private QuadEmitter fromVanilla(int[] quadData, Matrix4f transform) {
             try (MemoryStack memoryStack = MemoryStack.stackPush()) {
                 ByteBuffer byteBuffer = memoryStack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
                 IntBuffer intBuffer = byteBuffer.asIntBuffer();
@@ -130,6 +149,14 @@ public class VanillaRenderContext implements RenderContext {
                     float x = byteBuffer.getFloat(0);
                     float y = byteBuffer.getFloat(4);
                     float z = byteBuffer.getFloat(8);
+
+                    if(transform != IDENTITY) {
+                        Vector4f vector = new Vector4f(x, y, z, 1.0f);
+                        vector.mul(transform);
+                        x = vector.x;
+                        y = vector.y;
+                        z = vector.z;
+                    }
 
                     float u = byteBuffer.getFloat(16);
                     float v = byteBuffer.getFloat(20);
@@ -144,18 +171,27 @@ public class VanillaRenderContext implements RenderContext {
 
         @Override
         public QuadEmitter fromVanilla(BakedQuad quad, RenderMaterial material, @Nullable Direction cullFace) {
-            //TODO: Handle animations
             int[] quadData = quad.getVertices();
             this.nominalFace = quad.getDirection();
-            return fromVanilla(quadData, 0);
+            if(animations != null && quad instanceof FurnitureBakedQuad furnitureQuad) {
+                Matrix4f matrix = new Matrix4f();
+                matrix = matrix.translate(furnitureQuad.furniture$getPivot());
+                matrix = animations.animate(furnitureQuad.furniture$getGroupName(), matrix, partialTick);
+                matrix = matrix.translate(new Vector3f(furnitureQuad.furniture$getPivot()).mul(-1f));
+                return fromVanilla(quadData, matrix);
+            }else{
+                return fromVanilla(quadData, 0);
+            }
         }
 
         @Override
         public QuadEmitter emit() {
-            PoseStack.Pose pose = poseStack.last();
-            stack.forEach(transform -> transform.transform(this));
-            for (int i = 0; i < 4; i++) {
-                consumer.addVertex(pose, position[i]).setColor(packedColor).setUv(uv[i].x, uv[i].y).setLight(packedLight).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, normal[i].x, normal[i].y, normal[i].z);
+            if(consumer != null && poseStack != null) {
+                PoseStack.Pose pose = poseStack.last();
+                stack.forEach(transform -> transform.transform(this));
+                for (int i = 0; i < 4; i++) {
+                    consumer.addVertex(pose, position[i]).setColor(packedColor).setUv(uv[i].x, uv[i].y).setLight(packedLight).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(pose, normal[i].x, normal[i].y, normal[i].z);
+                }
             }
             return this;
         }
@@ -291,12 +327,6 @@ public class VanillaRenderContext implements RenderContext {
         }
     };
 
-    private PoseStack poseStack = null;
-    private VertexConsumer consumer = null;
-    private int packedLight = LightTexture.FULL_BRIGHT;
-    private int packedColor = 0x0;
-    private Map<String, List<Animation>> animations = Map.of();
-
     @Override
     public QuadEmitter getEmitter() {
         return emitter;
@@ -318,9 +348,10 @@ public class VanillaRenderContext implements RenderContext {
         throw new IllegalStateException("Baked model consumer is not supported");
     }
 
-    public static VanillaRenderContext of(PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedColor, Map<String, List<Animation>> animations) {
+    public static VanillaRenderContext of(PoseStack poseStack, VertexConsumer consumer, float partialTick, int packedLight, int packedColor, @Nullable AnimationDataAttachment animations) {
         INSTANCE.poseStack = poseStack;
         INSTANCE.consumer = consumer;
+        INSTANCE.partialTick = partialTick;
         INSTANCE.packedLight = packedLight;
         INSTANCE.packedColor = packedColor;
         INSTANCE.animations = animations;

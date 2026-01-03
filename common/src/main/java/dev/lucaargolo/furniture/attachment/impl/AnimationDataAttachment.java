@@ -1,49 +1,91 @@
 package dev.lucaargolo.furniture.attachment.impl;
 
-import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.attachment.DataAttachment;
 import dev.lucaargolo.furniture.attachment.DataAttachmentType;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.utils.Animation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Matrix4f;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 public class AnimationDataAttachment implements DataAttachment<AnimationDataAttachment> {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AnimationDataAttachment> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.map(HashMap::new, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.collection(ArrayList::new, Animation.STREAM_CODEC)),
+            ByteBufCodecs.collection(ArrayList::new, Animation.STREAM_CODEC),
             AnimationDataAttachment::get,
             AnimationDataAttachment::new
     );
 
-    private final Map<String, List<Animation>> data;
+    private final List<Animation> data;
 
-    public AnimationDataAttachment(Map<String, List<Animation>> data) {
-        this.data = new HashMap<>(data);
+    public AnimationDataAttachment(List<Animation> data) {
+        this.data = new ArrayList<>(data);
     }
 
-    private Map<String, List<Animation>> get() {
+    public List<Animation> get() {
         return this.data;
     }
 
-    public AnimationDataAttachment add(String group, Animation animation) {
-        List<Animation> list = data.computeIfAbsent(group, g -> new ArrayList<>());
-        list.add(animation);
-        this.data.put(group, list);
+    private AnimationDataAttachment innerSet(Level level, BlockPos pos, BlockState state, Animation animation, boolean replace) {
+        this.data.sort(Comparator.comparingInt(a -> a.duration() - a.progress()));
+        int progressSum = 0;
+        int durationSum = 0;
+        for (Animation a : this.data) {
+            progressSum += a.progress();
+            durationSum += a.duration();
+        }
+        if(replace) {
+            this.data.removeIf(a -> a.overlaps(animation));
+        }else{
+            this.data.clear();
+        }
+
+        float p = (float) progressSum / (float) durationSum;
+        float i = 1.0f - p;
+        int progress = replace ? Mth.floor(i * animation.duration()) : 0;
+
+        level.setBlockAndUpdate(pos, animation.applyStart(state));
+        this.data.add(animation.copy(progress));
         return this;
     }
 
-    public void tick(Object target) {
-        Iterator<Map.Entry<String, List<Animation>>> iterator = this.data.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, List<Animation>> entry = iterator.next();
-            entry.getValue().removeIf(Animation::tick);
-            if (entry.getValue().isEmpty()) {
-                iterator.remove();
+    public AnimationDataAttachment add(Level level, BlockPos pos, BlockState state, Animation animation) {
+        level.setBlockAndUpdate(pos, animation.applyStart(state));
+        this.data.add(animation.copy());
+        return this;
+    }
+
+    public AnimationDataAttachment set(Level level, BlockPos pos, BlockState state, Animation animation) {
+        return innerSet(level, pos, state, animation, false);
+    }
+
+    public AnimationDataAttachment replace(Level level, BlockPos pos, BlockState state, Animation animation) {
+        return innerSet(level, pos, state, animation, true);
+    }
+
+    public void tick(BlockEntity target) {
+        Iterator<Animation> it = this.data.iterator();
+        while (it.hasNext()) {
+            Animation animation = it.next();
+            if(animation.process()) {
+                Level level = target.getLevel();
+                if(level != null) {
+                    BlockPos pos = target.getBlockPos();
+                    BlockState state = target.getBlockState();
+                    level.setBlockAndUpdate(pos, animation.applyEnd(state));
+                }
+                it.remove();
             }
         }
         if(this.data.isEmpty()) {
@@ -51,21 +93,9 @@ public class AnimationDataAttachment implements DataAttachment<AnimationDataAtta
         }
     }
 
-    public Matrix4f animate(String group, Matrix4f matrix) {
-        List<Animation> list = this.data.getOrDefault(group, List.of());
-        for(Animation animation : list) {
-            Animation.Type type = animation.type();
-            matrix = switch (type) {
-                case ROTATE_X -> matrix.rotate(Axis.XP.rotationDegrees(animation.value()));
-                case ROTATE_Y -> matrix.rotate(Axis.YP.rotationDegrees(animation.value()));
-                case ROTATE_Z -> matrix.rotate(Axis.ZP.rotationDegrees(animation.value()));
-                case SCALE_X -> matrix.scale(animation.value(), 1f, 1f);
-                case SCALE_Y -> matrix.scale(1f, animation.value(), 1f);
-                case SCALE_Z -> matrix.scale(1f, 1f, animation.value());
-                case POSITION_X -> matrix.translate(animation.value(), 0f, 0f);
-                case POSITION_Y -> matrix.translate(0f, animation.value(), 0f);
-                case POSITION_Z -> matrix.translate(0f, 0f, animation.value());
-            };
+    public Matrix4f animate(String group, Matrix4f matrix, float partialTick) {
+        for(Animation animation : this.data) {
+            matrix = animation.animate(group, matrix, partialTick);
         }
         return matrix;
     }
@@ -73,5 +103,6 @@ public class AnimationDataAttachment implements DataAttachment<AnimationDataAtta
     public DataAttachmentType<AnimationDataAttachment> getType() {
         return ModDataAttachments.ANIMATION_DATA;
     }
+
 
 }

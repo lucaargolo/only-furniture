@@ -5,11 +5,8 @@ import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.behaviour.StorageBehaviour;
+import dev.lucaargolo.furniture.utils.Animation;
 import dev.lucaargolo.furniture.utils.Rotation;
-import net.minecraft.client.animation.AnimationChannel;
-import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.animation.Keyframe;
-import net.minecraft.client.animation.KeyframeAnimations;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -34,25 +31,16 @@ public class FridgeBlock extends FurnitureBlock {
     protected final Map<Pair<Direction, Rotation>, VoxelShape> openTopShapes;
     protected final Map<Pair<Direction, Rotation>, VoxelShape> openBottomShapes;
 
-    public static final AnimationDefinition open_top = AnimationDefinition.Builder.withLength(0.25F)
-            .addAnimation("door2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
-                    new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 135.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                    new Keyframe(0.25F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-            ))
-            .build();
+    private static final Animation OPEN_TOP_DOOR = new Animation("top.door", 20, -135f, 0f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(TOP_OPEN, true), state -> state.setValue(TOP_OPEN, true));
+    private static final Animation CLOSE_TOP_DOOR = new Animation("top.door", 20, 0f, -135f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(TOP_OPEN, true), state -> state.setValue(TOP_OPEN, false));
 
-    public static final AnimationDefinition close_top = AnimationDefinition.Builder.withLength(0.25F)
-            .addAnimation("door2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
-                    new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
-                    new Keyframe(0.25F, KeyframeAnimations.degreeVec(0.0F, 135.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
-            ))
-            .build();
-
+    private static final Animation OPEN_BOTTOM_DOOR = new Animation("bottom.door", 20, -135f, 0f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(BOTTOM_OPEN, true), state -> state.setValue(BOTTOM_OPEN, true));
+    private static final Animation CLOSE_BOTTOM_DOOR = new Animation("bottom.door", 20, 0f, -135f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(BOTTOM_OPEN, true), state -> state.setValue(BOTTOM_OPEN, false));
 
     public FridgeBlock() {
         super(Blocks.IRON_BLOCK, ModBlockShapes.FRIDGE,
-                new StorageBehaviour(new Vec3(0.0, 1.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"), TOP_OPEN),
-                new StorageBehaviour(new Vec3(0.0, 0.2, 0.0), 27, Component.translatable("storage.onlyfurniture.fridge"), BOTTOM_OPEN)
+                new StorageBehaviour(new Vec3(0.0, 1.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"), OPEN_TOP_DOOR, CLOSE_TOP_DOOR),
+                new StorageBehaviour(new Vec3(0.0, 0.2, 0.0), 27, Component.translatable("storage.onlyfurniture.fridge"), OPEN_BOTTOM_DOOR, CLOSE_BOTTOM_DOOR)
         );
         this.openShapes = computeVoxelShapes(ModBlockShapes.FRIDGE_OPEN, false);
         this.openTopShapes = computeVoxelShapes(ModBlockShapes.FRIDGE_OPEN_TOP, false);
