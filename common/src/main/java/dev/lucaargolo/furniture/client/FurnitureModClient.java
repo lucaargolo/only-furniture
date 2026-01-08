@@ -14,6 +14,7 @@ import dev.lucaargolo.furniture.client.render.ModRenderTypeManager;
 import dev.lucaargolo.furniture.client.render.ModShaderManager;
 import dev.lucaargolo.furniture.client.render.block.FurnitureBlockEntityRenderer;
 import dev.lucaargolo.furniture.client.render.screen.StorageMenuScreen;
+import dev.lucaargolo.furniture.client.sound.InstrumentSoundInstance;
 import dev.lucaargolo.furniture.entity.ModEntityTypes;
 import dev.lucaargolo.furniture.item.FurnitureBlockItem;
 import dev.lucaargolo.furniture.item.FurnitureConnectingBlockItem;
@@ -27,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -36,6 +38,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -218,6 +221,18 @@ public abstract class FurnitureModClient {
 
     public static FurnitureModClient getInstance() {
         return instance;
+    }
+
+    public static void addTerrainParticle(ClientLevel level, BlockPos pos, BlockState state, double xPos, double yPos, double zPos, double xOffset, double yOffset, double zOffset) {
+        TerrainParticle particle = new TerrainParticle(
+                level, (double) pos.getX() + xPos, (double) pos.getY() + yPos, (double) pos.getZ() + zPos,
+                xOffset - 0.5, yOffset - 0.5, zOffset - 0.5, state, pos
+        );
+        Minecraft.getInstance().particleEngine.add(particle);
+    }
+
+    public static void playInstrument(SoundEvent event, float pitch, int release) {
+        Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(event, pitch, release));
     }
 
 }

@@ -1,5 +1,6 @@
 package dev.lucaargolo.furniture;
 
+import dev.lucaargolo.furniture.animation.ModAnimations;
 import dev.lucaargolo.furniture.attachment.ModAttachmentManager;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.block.ModBlocks;
@@ -59,6 +60,7 @@ public abstract class FurnitureMod {
         ModMenuTypes.REGISTRY.init();
         ModDataAttachments.REGISTRY.init();
         ModSounds.REGISTRY.init();
+        ModAnimations.REGISTRY.init();
         this.packetManager.init();
     }
 

@@ -2,10 +2,10 @@ package dev.lucaargolo.furniture.block.impl;
 
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.animation.ModAnimations;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.ModBlockShapes;
 import dev.lucaargolo.furniture.block.behaviour.StorageBehaviour;
-import dev.lucaargolo.furniture.utils.Animation;
 import dev.lucaargolo.furniture.utils.Rotation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,16 +31,10 @@ public class FridgeBlock extends FurnitureBlock {
     protected final Map<Pair<Direction, Rotation>, VoxelShape> openTopShapes;
     protected final Map<Pair<Direction, Rotation>, VoxelShape> openBottomShapes;
 
-    private static final Animation OPEN_TOP_DOOR = new Animation("top.door", 20, -135f, 0f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(TOP_OPEN, true), state -> state.setValue(TOP_OPEN, true));
-    private static final Animation CLOSE_TOP_DOOR = new Animation("top.door", 20, 0f, -135f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(TOP_OPEN, true), state -> state.setValue(TOP_OPEN, false));
-
-    private static final Animation OPEN_BOTTOM_DOOR = new Animation("bottom.door", 20, -135f, 0f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(BOTTOM_OPEN, true), state -> state.setValue(BOTTOM_OPEN, true));
-    private static final Animation CLOSE_BOTTOM_DOOR = new Animation("bottom.door", 20, 0f, -135f, Animation.Easing.EASE_IN_OUT_SINE, Animation.Type.ROTATE_Y, state -> state.setValue(BOTTOM_OPEN, true), state -> state.setValue(BOTTOM_OPEN, false));
-
     public FridgeBlock() {
         super(Blocks.IRON_BLOCK, ModBlockShapes.FRIDGE,
-                new StorageBehaviour(new Vec3(0.0, 1.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"), OPEN_TOP_DOOR, CLOSE_TOP_DOOR),
-                new StorageBehaviour(new Vec3(0.0, 0.2, 0.0), 27, Component.translatable("storage.onlyfurniture.fridge"), OPEN_BOTTOM_DOOR, CLOSE_BOTTOM_DOOR)
+                new StorageBehaviour(new Vec3(0.0, 1.2, 0.0), 9, Component.translatable("storage.onlyfurniture.freezer"), ModAnimations.FRIDGE_OPEN_TOP_DOOR, ModAnimations.FRIDGE_CLOSE_TOP_DOOR),
+                new StorageBehaviour(new Vec3(0.0, 0.2, 0.0), 27, Component.translatable("storage.onlyfurniture.fridge"), ModAnimations.FRIDGE_OPEN_BOTTOM_DOOR, ModAnimations.FRIDGE_CLOSE_BOTTOM_DOOR)
         );
         this.openShapes = computeVoxelShapes(ModBlockShapes.FRIDGE_OPEN, false);
         this.openTopShapes = computeVoxelShapes(ModBlockShapes.FRIDGE_OPEN_TOP, false);

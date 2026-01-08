@@ -1,10 +1,10 @@
 package dev.lucaargolo.furniture.menu;
 
+import dev.lucaargolo.furniture.animation.Animation;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
-import dev.lucaargolo.furniture.utils.Animation;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
@@ -129,7 +129,7 @@ public class StorageMenu extends AbstractContainerMenu {
 
     public record Definition(BlockPos pos, int size, Optional<Animation> closeAnimation) {
 
-        public static StreamCodec<ByteBuf, Definition> STREAM_CODEC = StreamCodec.composite(
+        public static StreamCodec<RegistryFriendlyByteBuf, Definition> STREAM_CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC,
                 Definition::pos,
                 ByteBufCodecs.VAR_INT,

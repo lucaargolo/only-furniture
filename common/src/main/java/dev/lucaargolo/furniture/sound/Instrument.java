@@ -2,10 +2,10 @@ package dev.lucaargolo.furniture.sound;
 
 import com.google.common.collect.ImmutableMap;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.client.FurnitureModClient;
 import dev.lucaargolo.furniture.registry.ModRegistry;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -73,7 +73,7 @@ public record Instrument(int index, Map<Note, MinecraftEntry<SoundEvent>> sounds
             int semitoneShift = semitone - best.semitone();
             float pitch = (float) Math.pow(2.0, semitoneShift / 12.0);
 
-            Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(bestSound, pitch, release));
+            FurnitureModClient.playInstrument(bestSound, pitch, release);
         }
     }
 

@@ -1,9 +1,9 @@
 package dev.lucaargolo.furniture.attachment.impl;
 
+import dev.lucaargolo.furniture.animation.Animation;
 import dev.lucaargolo.furniture.attachment.DataAttachment;
 import dev.lucaargolo.furniture.attachment.DataAttachmentType;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
-import dev.lucaargolo.furniture.utils.Animation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -38,12 +38,12 @@ public class AnimationDataAttachment implements DataAttachment<AnimationDataAtta
     }
 
     private AnimationDataAttachment innerSet(Level level, BlockPos pos, BlockState state, Animation animation, boolean replace) {
-        this.data.sort(Comparator.comparingInt(a -> a.duration() - a.progress()));
-        int progressSum = 0;
-        int durationSum = 0;
+        this.data.sort(Comparator.comparingInt(a -> a.life() - a.age()));
+        int ageSum = 0;
+        int lifeSum = 0;
         for (Animation a : this.data) {
-            progressSum += a.progress();
-            durationSum += a.duration();
+            ageSum += a.age();
+            lifeSum += a.life();
         }
         if(replace) {
             this.data.removeIf(a -> a.overlaps(animation));
@@ -51,18 +51,18 @@ public class AnimationDataAttachment implements DataAttachment<AnimationDataAtta
             this.data.clear();
         }
 
-        float p = (float) progressSum / (float) durationSum;
+        float p = (float) ageSum / (float) lifeSum;
         float i = 1.0f - p;
-        int progress = replace ? Mth.floor(i * animation.duration()) : 0;
+        int age = replace ? Mth.floor(i * animation.life()) : 0;
 
         level.setBlockAndUpdate(pos, animation.applyStart(state));
-        this.data.add(animation.copy(progress));
+        this.data.add(animation.definition().animation(age));
         return this;
     }
 
     public AnimationDataAttachment add(Level level, BlockPos pos, BlockState state, Animation animation) {
         level.setBlockAndUpdate(pos, animation.applyStart(state));
-        this.data.add(animation.copy());
+        this.data.add(animation);
         return this;
     }
 
@@ -78,7 +78,7 @@ public class AnimationDataAttachment implements DataAttachment<AnimationDataAtta
         Iterator<Animation> it = this.data.iterator();
         while (it.hasNext()) {
             Animation animation = it.next();
-            if(animation.process()) {
+            if(animation.tick()) {
                 Level level = target.getLevel();
                 if(level != null) {
                     BlockPos pos = target.getBlockPos();

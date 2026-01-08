@@ -3,9 +3,9 @@ package dev.lucaargolo.furniture.network;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.client.FurnitureModClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -73,17 +73,12 @@ public record DestroyEffectsPayload(BlockPos blockPos, int state, int packedData
                             double xPos = xOffset * xSize + minX;
                             double yPos = yOffset * ySize + minY;
                             double zPos = zOffset * zSize + minZ;
-                            TerrainParticle particle = new TerrainParticle(
-                                    level, (double) pos.getX() + xPos, (double) pos.getY() + yPos, (double) pos.getZ() + zPos,
-                                    xOffset - 0.5, yOffset - 0.5, zOffset - 0.5, state, pos
-                            );
-                            Minecraft.getInstance().particleEngine.add(particle);
+                            FurnitureModClient.addTerrainParticle(level, pos, state, xPos, yPos, zPos, xOffset, yOffset, zOffset);
                         }
                     }
                 }
             });
         }
     }
-
 
 }

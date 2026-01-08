@@ -1,6 +1,8 @@
 package dev.lucaargolo.furniture.registry;
 
+import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.registry.minecraft.MinecraftEntry;
+import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -15,7 +17,11 @@ public class FabricModRegistry<T> extends ModRegistry<T> {
     @SuppressWarnings("unchecked")
     public FabricModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
-        this.registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(registryKey.location());
+        if(registryKey.location().getNamespace().equals(FurnitureMod.MOD_ID)) {
+            this.registry = FabricRegistryBuilder.createSimple(registryKey).buildAndRegister();
+        }else{
+            this.registry = (Registry<T>) BuiltInRegistries.REGISTRY.get(registryKey.location());
+        }
     }
 
     @Override

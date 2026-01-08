@@ -1,4 +1,4 @@
-package dev.lucaargolo.furniture.sound;
+package dev.lucaargolo.furniture.client.sound;
 
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -11,7 +11,7 @@ public class InstrumentSoundInstance extends AbstractTickableSoundInstance {
     private final int release;
     private int age = 0;
 
-    protected InstrumentSoundInstance(SoundEvent event, float pitch, int release) {
+    public InstrumentSoundInstance(SoundEvent event, float pitch, int release) {
         super(event, SoundSource.BLOCKS, SoundInstance.createUnseededRandom());
         this.pitch = pitch;
         this.release = release;

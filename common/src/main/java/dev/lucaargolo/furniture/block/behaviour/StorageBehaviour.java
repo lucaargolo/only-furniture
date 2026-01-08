@@ -1,6 +1,7 @@
 package dev.lucaargolo.furniture.block.behaviour;
 
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.animation.AnimationDefinition;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.attachment.impl.StorageDataAttachment;
@@ -8,7 +9,6 @@ import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.menu.ModMenuTypes;
 import dev.lucaargolo.furniture.menu.StorageMenu;
 import dev.lucaargolo.furniture.mixin.SimpleContainerAccessor;
-import dev.lucaargolo.furniture.utils.Animation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -22,6 +22,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class StorageBehaviour extends Behaviour<StorageBehaviour> {
 
@@ -29,11 +30,11 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
     private final Component title;
 
     @Nullable
-    private final Animation openAnimation;
+    private final Supplier<AnimationDefinition> openAnimation;
     @Nullable
-    private final Animation closeAnimation;
+    private final Supplier<AnimationDefinition> closeAnimation;
 
-    public StorageBehaviour(Vec3 pos, int size, Component title, @Nullable Animation openAnimation, @Nullable Animation closeAnimation) {
+    public StorageBehaviour(Vec3 pos, int size, Component title, @Nullable Supplier<AnimationDefinition> openAnimation, @Nullable Supplier<AnimationDefinition> closeAnimation) {
         super(pos);
         this.size = size;
         this.title = title;
@@ -69,10 +70,16 @@ public class StorageBehaviour extends Behaviour<StorageBehaviour> {
 
         if(this.openAnimation != null) {
             AnimationDataAttachment animationData = ModDataAttachments.ANIMATION_DATA.getOrCreate(blockEntity);
-            ModDataAttachments.ANIMATION_DATA.set(blockEntity, animationData.replace(level, pos, state, this.openAnimation));
+            ModDataAttachments.ANIMATION_DATA.set(blockEntity, animationData.replace(level, pos, state, this.openAnimation.get().animation()));
         }
 
-        StorageMenu.Definition definition = new StorageMenu.Definition(pos, this.size, Optional.ofNullable(this.closeAnimation));
+        StorageMenu.Definition definition;
+        if(this.closeAnimation != null) {
+            definition = new StorageMenu.Definition(pos, this.size, Optional.of(this.closeAnimation.get().animation()));
+        }else{
+            definition = new StorageMenu.Definition(pos, this.size, Optional.empty());
+        }
+
         FurnitureMod.getInstance().openMenu(ModMenuTypes.STORAGE, StorageMenu::new, player, container, definition, this.title);
 
         return true;

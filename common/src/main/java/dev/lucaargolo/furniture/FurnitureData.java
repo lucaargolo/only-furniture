@@ -12,10 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -203,7 +200,9 @@ public class FurnitureData {
     }
 
     public static FurnitureData[] get(BlockGetter getter, BlockPos pos) {
-        if(getter instanceof LevelReader level) {
+        if(getter instanceof EmptyBlockGetter) {
+            return FurnitureData.DEFAULT_LAYERS.clone();
+        }else if(getter instanceof LevelReader level) {
             return getChunkData(level, new ChunkPos(pos)).get(pos);
         }else if(getter instanceof RenderChunkRegionAccessor region) {
             return getChunkData(region.getLevel(), new ChunkPos(pos)).get(pos);

@@ -8,36 +8,57 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public interface DataAttachmentType<A extends DataAttachment<A>> {
+public class DataAttachmentType<A extends DataAttachment<A>> {
 
-    A create();
-
-    Class<A> getType();
-
-    @Nullable
-    Codec<A> getCodec();
+    private final Class<A> type;
+    private final Supplier<A> supplier;
 
     @Nullable
-    StreamCodec<RegistryFriendlyByteBuf, A> getStreamCodec();
+    private final Codec<A> codec;
+    @Nullable
+    private final StreamCodec<RegistryFriendlyByteBuf, A> streamCodec;
 
-    default boolean isSerializable() {
+    private DataAttachmentType(Class<A> type, Supplier<A> supplier, @Nullable Codec<A> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> streamCodec) {
+        this.type = type;
+        this.supplier = supplier;
+        this.codec = codec;
+        this.streamCodec = streamCodec;
+    }
+
+    public A create() {
+        return supplier.get();
+    }
+
+    public Class<A> getType() {
+        return type;
+    }
+
+    public @Nullable Codec<A> getCodec() {
+        return codec;
+    }
+
+    public @Nullable StreamCodec<RegistryFriendlyByteBuf, A> getStreamCodec() {
+        return streamCodec;
+    }
+
+    public boolean isSerializable() {
         return this.getCodec() != null;
     }
 
-    default boolean isNetworkSynced() {
+    public boolean isNetworkSynced() {
         return this.getStreamCodec() != null;
     }
 
     @Nullable
-    default A get(Object target) {
+    public A get(Object target) {
         return FurnitureMod.getAttachmentManager().get(target, this);
     }
 
-    default void set(Object target, A value) {
+    public void set(Object target, A value) {
         FurnitureMod.getAttachmentManager().set(target, this, value);
     }
 
-    default A getOrCreate(Object target) {
+    public A getOrCreate(Object target) {
         return FurnitureMod.getAttachmentManager().getOrCreate(target, this);
     }
 
@@ -54,27 +75,7 @@ public interface DataAttachmentType<A extends DataAttachment<A>> {
     }
 
     static <A extends DataAttachment<A>> DataAttachmentType<A> of(Class<A> type, Supplier<A> supplier, @Nullable Codec<A> codec, @Nullable StreamCodec<RegistryFriendlyByteBuf, A> streamCodec) {
-        return new DataAttachmentType<>() {
-            @Override
-            public A create() {
-                return supplier.get();
-            }
-
-            @Override
-            public Class<A> getType() {
-                return type;
-            }
-
-            @Override
-            public @Nullable Codec<A> getCodec() {
-                return codec;
-            }
-
-            @Override
-            public @Nullable StreamCodec<RegistryFriendlyByteBuf, A> getStreamCodec() {
-                return streamCodec;
-            }
-        };
+        return new DataAttachmentType<>(type, supplier, codec, streamCodec);
     }
 
 }

@@ -17,6 +17,11 @@ public class NeoForgeModRegistry<T> extends ModRegistry<T> {
     public NeoForgeModRegistry(ResourceKey<Registry<T>> registryKey) {
         super(registryKey);
         this.registry = DeferredRegister.create(registryKey, FurnitureMod.MOD_ID);
+        if (registryKey.location().getNamespace().equals(FurnitureMod.MOD_ID)) {
+            this.registry.makeRegistry(builder -> {
+                builder.sync(true);
+            });
+        }
     }
 
     @Override
