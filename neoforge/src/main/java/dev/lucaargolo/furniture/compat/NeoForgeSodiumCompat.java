@@ -1,5 +1,6 @@
-package dev.lucaargolo.furniture;
+package dev.lucaargolo.furniture.compat;
 
+import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.mixin.sodium.LevelSliceAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
