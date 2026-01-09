@@ -38,7 +38,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
@@ -64,12 +63,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-
 public abstract class FurnitureModClient {
 
-    private static final Long CLEANUP_TIME = 200L;
-    private static final HashMap<BlockPos, Long> dirtyBlocks = new HashMap<>();
     private static FurnitureModClient instance;
 
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(128));
@@ -246,30 +241,6 @@ public abstract class FurnitureModClient {
 
     public static void playInstrument(SoundEvent event, float pitch, int release) {
         Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(event, pitch, release));
-    }
-
-    public static void setBlockDirty(BlockPos pos) {
-        dirtyBlocks.put(pos, System.currentTimeMillis());
-        ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).invokeSetSectionDirty(
-                SectionPos.blockToSectionCoord(pos.getX()),
-                SectionPos.blockToSectionCoord(pos.getY()),
-                SectionPos.blockToSectionCoord(pos.getZ()),
-                true
-        );
-    }
-
-
-    public static boolean isBlockDirty(BlockPos pos) {
-        long current = System.currentTimeMillis();
-        Long time = dirtyBlocks.get(pos);
-        if(time == null) {
-            return false;
-        }else if(current - time >= CLEANUP_TIME) {
-            dirtyBlocks.remove(pos);
-            return false;
-        }else{
-            return true;
-        }
     }
 
 }

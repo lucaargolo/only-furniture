@@ -1,9 +1,11 @@
 package dev.lucaargolo.furniture.network;
 
 import dev.lucaargolo.furniture.FurnitureMod;
-import dev.lucaargolo.furniture.client.FurnitureModClient;
+import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +25,12 @@ public record BlockChangedPayload(BlockPos pos) implements CustomPacketPayload {
     public static void handleClient(BlockChangedPayload payload, Executor executor) {
         executor.execute(() -> {
             BlockPos pos = payload.pos();
-            FurnitureModClient.setBlockDirty(pos);
+            ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).invokeSetSectionDirty(
+                    SectionPos.blockToSectionCoord(pos.getX()),
+                    SectionPos.blockToSectionCoord(pos.getY()),
+                    SectionPos.blockToSectionCoord(pos.getZ()),
+                    true
+            );
         });
     }
 
