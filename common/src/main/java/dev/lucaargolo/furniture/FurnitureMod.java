@@ -66,6 +66,8 @@ public abstract class FurnitureMod {
 
     public abstract String getPlatform();
 
+    public abstract boolean isModLoaded(String modId);
+
     public abstract boolean isFakePlayer(Player player);
 
     public abstract Block getPottedBlock(Block block);
@@ -135,14 +137,19 @@ public abstract class FurnitureMod {
     }
 
     public static <T> T loadPlatformClass(Class<T> clazz, Object... parameters) {
-        String name = clazz.getName();
-        String platformName = name.substring(0, name.lastIndexOf('.')) + "." + instance.getPlatform() + name.substring(name.lastIndexOf('.') + 1);
+        return loadPlatformClass(null, clazz, parameters);
+    }
+
+    public static <T> T loadPlatformClass(String mod, Class<T> clazz, Object... parameters) {
+        String originalName = clazz.getName();
+        String clazzPrefix = mod == null ? instance.getPlatform() : instance.isModLoaded(mod) ? instance.getPlatform() : "Empty";
+        String clazzName = originalName.substring(0, originalName.lastIndexOf('.')) + "." + clazzPrefix + originalName.substring(originalName.lastIndexOf('.') + 1);
         Class<?>[] parameterTypes = new Class<?>[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             parameterTypes[i] = parameters[i].getClass();
         }
         try {
-            return (T) clazz.getClassLoader().loadClass(platformName).getConstructor(parameterTypes).newInstance(parameters);
+            return (T) clazz.getClassLoader().loadClass(clazzName).getConstructor(parameterTypes).newInstance(parameters);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

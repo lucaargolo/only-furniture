@@ -7,10 +7,12 @@ import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
+import dev.lucaargolo.furniture.client.FabricFurnitureModClient;
 import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
 import dev.lucaargolo.furniture.client.utils.FurnitureQuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
+import net.fabricmc.fabric.impl.renderer.VanillaModelEncoder;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
@@ -107,7 +109,14 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
             }
         }
 
-        this.wrapped.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+        if(FabricFurnitureModClient.getSodiumCompat().isPresent()) {
+            if(this.wrapped.isVanillaAdapter()) {
+                //noinspection UnstableApiUsage
+                VanillaModelEncoder.emitBlockQuads(this, state, randomSupplier, context);
+            }
+        }else{
+            this.wrapped.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+        }
 
         context.popTransform();
     }

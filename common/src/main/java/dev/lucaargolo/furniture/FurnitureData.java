@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.attachment.ModDataAttachments;
 import dev.lucaargolo.furniture.attachment.impl.ChunkFurnitureDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
+import dev.lucaargolo.furniture.client.FurnitureModClient;
 import dev.lucaargolo.furniture.mixin.RenderChunkRegionAccessor;
 import dev.lucaargolo.furniture.utils.PackingUtils;
 import dev.lucaargolo.furniture.utils.Rotation;
@@ -207,7 +208,11 @@ public class FurnitureData {
         }else if(getter instanceof RenderChunkRegionAccessor region) {
             return getChunkData(region.getLevel(), new ChunkPos(pos)).get(pos);
         }
-        return FurnitureData.DEFAULT_LAYERS.clone();
+        FurnitureData[] layers = FurnitureModClient.getSodiumCompat().get(getter, pos);
+        if(layers != null) {
+            return layers;
+        }
+        throw new IllegalStateException("FurnitureData not available in "+getter);
     }
 
     public static void set(Level level, BlockPos pos, FurnitureData[] layers) {

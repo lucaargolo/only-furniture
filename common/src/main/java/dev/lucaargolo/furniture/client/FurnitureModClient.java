@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
+import dev.lucaargolo.furniture.SodiumCompat;
 import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.FurnitureConnectingBlock;
@@ -76,11 +77,13 @@ public abstract class FurnitureModClient {
     private final ModShaderManager shaderManager;
     private final ModRenderTypeManager renderTypeManager;
 
+    private final SodiumCompat sodiumCompat;
 
     public FurnitureModClient() {
         instance = this;
         this.shaderManager = FurnitureMod.loadPlatformClass(ModShaderManager.class);
         this.renderTypeManager = FurnitureMod.loadPlatformClass(ModRenderTypeManager.class);
+        this.sodiumCompat = FurnitureMod.loadPlatformClass("sodium", SodiumCompat.class);
     }
 
     protected final void init() {
@@ -227,6 +230,10 @@ public abstract class FurnitureModClient {
 
     public static FurnitureModClient getInstance() {
         return instance;
+    }
+
+    public static SodiumCompat getSodiumCompat() {
+        return instance.sodiumCompat;
     }
 
     public static void addTerrainParticle(ClientLevel level, BlockPos pos, BlockState state, double xPos, double yPos, double zPos, double xOffset, double yOffset, double zOffset) {

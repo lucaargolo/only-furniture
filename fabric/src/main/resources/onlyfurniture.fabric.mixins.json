@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "BlockGetterMixin",
-    "FlowerPotBlockAccessor"
+    "FlowerPotBlockAccessor",
+    "sodium.LevelSliceAccessor"
   ],
   "client": [
     "FabricBlockModelDeserializerMixin",
