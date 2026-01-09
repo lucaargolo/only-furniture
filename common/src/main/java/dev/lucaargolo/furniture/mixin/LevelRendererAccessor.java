@@ -20,4 +20,7 @@ public interface LevelRendererAccessor {
         throw new AssertionError();
     }
 
+    @Invoker
+    void invokeSetSectionDirty(int sectionX, int sectionY, int sectionZ, boolean reRenderOnMainThread);
+
 }

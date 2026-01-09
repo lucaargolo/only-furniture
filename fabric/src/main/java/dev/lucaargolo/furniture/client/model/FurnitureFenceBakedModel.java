@@ -2,7 +2,9 @@ package dev.lucaargolo.furniture.client.model;
 
 import com.mojang.math.Axis;
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
+import dev.lucaargolo.furniture.client.utils.FurnitureQuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -16,6 +18,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -30,8 +33,8 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
     }
 
     @Override
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data) {
-        super.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data, @Nullable AnimationDataAttachment animations, float partialTick) {
+        super.emitBlockQuads(blockView, state, pos, randomSupplier, context, data, animations, partialTick);
         if(state.getBlock() instanceof FurnitureFenceBlock furniture) {
             List<Vec3i> offsets = furniture.getType().getOffsets();
             for (int index = 0; index < offsets.size(); index++) {
@@ -53,7 +56,7 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                             float size = ((FurnitureFenceBlock) state.getBlock()).getSize() / 16f;
 
                             float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
-                            Matrix4f transform = new Matrix4f()
+                            Matrix4f globalTransform = new Matrix4f()
                                     .translate(data.getX(state), data.getY(state), data.getZ(state))
                                     .translate(0.5f, 0.5f, 0.5f)
                                     .rotate(Axis.YN.rotation(angle))
@@ -61,9 +64,16 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                                     .translate(-0.5f, -0.5f, -0.5f);
 
                             context.pushTransform((quad) -> {
+                                Matrix4f localTransform = new Matrix4f();
+                                if(animations != null && quad instanceof FurnitureQuadEmitter furnitureQuad) {
+                                    localTransform = localTransform.translate(furnitureQuad.pivot());
+                                    localTransform = animations.animate(furnitureQuad.groupName(), localTransform, partialTick);
+                                    localTransform = localTransform.translate(new Vector3f(furnitureQuad.pivot()).mul(-1f));
+                                }
                                 for (int i = 0; i < 4; i++) {
                                     Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-                                    vector.mul(transform);
+                                    vector.mul(localTransform);
+                                    vector.mul(globalTransform);
                                     quad.pos(i, vector.x, vector.y, vector.z);
                                 }
                                 return true;
@@ -72,14 +82,14 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                             QuadEmitter emitter = context.getEmitter();
 
                             int color = Minecraft.getInstance().getBlockColors().getColor(state, blockView, pos, 0);
-                            int packedColor = FastColor.ARGB32.color(255, color);
+                            int blockColor = FastColor.ARGB32.color(255, color);
 
-                            emitSide(emitter, this.getParticleIcon(), Direction.NORTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 1f - distance - 0.5f, packedColor);
-                            emitSide(emitter, this.getParticleIcon(), Direction.SOUTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 0.5f, packedColor);
-                            emitSide(emitter, this.getParticleIcon(), Direction.EAST, 0.5f, 0, 0.5f + distance, 1, (0.5f - size / 2f), packedColor);
-                            emitSide(emitter, this.getParticleIcon(), Direction.WEST, 1f - distance - 0.5f, 0, 1f - 0.5f, 1, (0.5f - size / 2f), packedColor);
-                            emitSide(emitter, this.getParticleIcon(), Direction.UP, (0.5f - size / 2f), 0.5f, (0.5f + size / 2f), distance + 0.5f, 0, packedColor);
-                            emitSide(emitter, this.getParticleIcon(), Direction.DOWN, (0.5f - size / 2f), 1f - distance - 0.5f, (0.5f + size / 2f), 1f - 0.5f, 0, packedColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.NORTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 1f - distance - 0.5f, blockColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.SOUTH, (0.5f - size / 2f), 0, (0.5f + size / 2f), 1, 0.5f, blockColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.EAST, 0.5f, 0, 0.5f + distance, 1, (0.5f - size / 2f), blockColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.WEST, 1f - distance - 0.5f, 0, 1f - 0.5f, 1, (0.5f - size / 2f), blockColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.UP, (0.5f - size / 2f), 0.5f, (0.5f + size / 2f), distance + 0.5f, 0, blockColor);
+                            emitSide(emitter, this.getParticleIcon(), Direction.DOWN, (0.5f - size / 2f), 1f - distance - 0.5f, (0.5f + size / 2f), 1f - 0.5f, 0, blockColor);
 
                             context.popTransform();
                         }

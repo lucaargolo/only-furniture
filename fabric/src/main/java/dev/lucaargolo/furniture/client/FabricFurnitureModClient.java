@@ -11,7 +11,7 @@ import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
-import dev.lucaargolo.furniture.client.utils.VanillaRenderContext;
+import dev.lucaargolo.furniture.client.utils.FurnitureRenderContext;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
@@ -23,7 +23,6 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
@@ -92,15 +91,25 @@ public class FabricFurnitureModClient extends FurnitureModClient implements Clie
     }
 
     @Override
-    public void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, float partialTick, @Nullable AnimationDataAttachment animations, int packedLight, int packedColor) {
+    public void renderFurnitureModel(Level level, BlockPos pos, BlockState state, FurnitureData data, @Nullable AnimationDataAttachment animations, PoseStack poseStack, VertexConsumer consumer, float partialTick, int packedLight, int packedColor, boolean lightPipelineAware) {
         Minecraft minecraft = Minecraft.getInstance();
 
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
         BakedModel model = dispatcher.getBlockModel(state);
 
+
         if(model instanceof FurnitureBakedModel furnitureModel) {
-            RenderContext render = VanillaRenderContext.of(poseStack, consumer, partialTick, packedLight, packedColor, animations);
-            furnitureModel.emitBlockQuads(level, state, pos, () -> random, render, data);
+            FurnitureRenderContext.INSTANCE.prepare(level, state, pos, model, poseStack, consumer, lightPipelineAware);
+            FurnitureRenderContext.INSTANCE.pushTransform(quad -> {
+                for(int i = 0; i < 4; i++) {
+                    quad.lightmap(i, packedLight);
+                    quad.color(i, packedColor);
+                }
+                return true;
+            });
+            furnitureModel.emitBlockQuads(level, state, pos, () -> random, FurnitureRenderContext.INSTANCE, data, animations, partialTick);
+            FurnitureRenderContext.INSTANCE.popTransform();
+            FurnitureRenderContext.INSTANCE.release();
         }
     }
 

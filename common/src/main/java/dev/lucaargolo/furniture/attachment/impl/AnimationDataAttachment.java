@@ -75,21 +75,22 @@ public class AnimationDataAttachment implements DataAttachment<AnimationDataAtta
     }
 
     public void tick(BlockEntity target) {
-        Iterator<Animation> it = this.data.iterator();
-        while (it.hasNext()) {
-            Animation animation = it.next();
-            if(animation.tick()) {
-                Level level = target.getLevel();
-                if(level != null) {
-                    BlockPos pos = target.getBlockPos();
-                    BlockState state = target.getBlockState();
-                    level.setBlockAndUpdate(pos, animation.applyEnd(state));
-                }
-                it.remove();
-            }
-        }
         if(this.data.isEmpty()) {
             ModDataAttachments.ANIMATION_DATA.set(target, null);
+        }else {
+            Iterator<Animation> it = this.data.iterator();
+            while (it.hasNext()) {
+                Animation animation = it.next();
+                if (animation.tick()) {
+                    Level level = target.getLevel();
+                    if (level != null) {
+                        BlockPos pos = target.getBlockPos();
+                        BlockState state = target.getBlockState();
+                        level.setBlockAndUpdate(pos, animation.applyEnd(state));
+                    }
+                    it.remove();
+                }
+            }
         }
     }
 

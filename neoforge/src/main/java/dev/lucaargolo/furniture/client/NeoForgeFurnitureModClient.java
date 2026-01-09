@@ -2,7 +2,6 @@ package dev.lucaargolo.furniture.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Transformation;
 import dev.lucaargolo.furniture.FurnitureData;
 import dev.lucaargolo.furniture.FurnitureMod;
 import dev.lucaargolo.furniture.NeoForgeFurnitureMod;
@@ -12,7 +11,6 @@ import dev.lucaargolo.furniture.block.FurnitureFenceBlock;
 import dev.lucaargolo.furniture.block.ModBlocks;
 import dev.lucaargolo.furniture.client.model.FurnitureBakedModel;
 import dev.lucaargolo.furniture.client.model.FurnitureFenceBakedModel;
-import dev.lucaargolo.furniture.client.utils.FurnitureBakedQuad;
 import dev.lucaargolo.furniture.item.ModItems;
 import dev.lucaargolo.furniture.mixin.LevelRendererAccessor;
 import dev.lucaargolo.furniture.registry.ModBlockRegistry;
@@ -44,17 +42,17 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.client.model.IQuadTransformer;
-import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.lighting.LightPipelineAwareModelBlockRenderer;
+import net.neoforged.neoforge.client.model.lighting.QuadLighter;
 import net.neoforged.neoforge.common.NeoForge;
 import org.apache.commons.lang3.function.TriFunction;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class NeoForgeFurnitureModClient extends FurnitureModClient {
@@ -97,40 +95,88 @@ public class NeoForgeFurnitureModClient extends FurnitureModClient {
     }
 
     @Override
-    public void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, float partialTick, AnimationDataAttachment animations, int packedLight, int packedColor) {
+    public void renderFurnitureModel(Level level, BlockPos pos, BlockState state, FurnitureData data, AnimationDataAttachment animations, PoseStack poseStack, VertexConsumer consumer, float partialTick, int packedLight, int packedColor, boolean lightPipelineAware) {
         Minecraft minecraft = Minecraft.getInstance();
         BlockRenderDispatcher dispatcher = minecraft.getBlockRenderer();
-
         BakedModel model = dispatcher.getBlockModel(state);
+
         ModelData modelData = ModelData.EMPTY.derive()
-                .with(FurnitureBakedModel.COLOR, minecraft.getBlockColors().getColor(state, level, pos, 0))
+                .with(FurnitureBakedModel.COLOR_PROPERTY, minecraft.getBlockColors().getColor(state, level, pos, 0))
                 .with(FurnitureBakedModel.DATA_PROPERTY, data)
                 .with(FurnitureBakedModel.HAS_DATA_PROPERTY, true)
+                .with(FurnitureBakedModel.ANIMATION_PROPERTY, animations)
+                .with(FurnitureBakedModel.PARTIAL_TICK_PROPERTY, partialTick)
                 .build();
         modelData = model.getModelData(level, pos, state, modelData);
 
-        for (Direction direction : Direction.values()) {
-            random.setSeed(42L);
-            renderQuadList(poseStack, consumer, partialTick, model.getQuads(state, direction, random, modelData, null), animations, packedLight, packedColor);
+        if(lightPipelineAware) {
+            renderLightPipelineAwareFurnitureModel(model, modelData, level, pos, state, poseStack, consumer, packedColor);
+        }else{
+            renderStaticLightFurnitureModel(model, modelData, state, poseStack, consumer, packedLight, packedColor);
         }
-        random.setSeed(42L);
-        renderQuadList(poseStack, consumer, partialTick, model.getQuads(state, null, random, modelData, null), animations, packedLight, packedColor);
     }
 
-    private static void renderQuadList(PoseStack poseStack, VertexConsumer consumer, float partialTick, List<BakedQuad> quads, AnimationDataAttachment animations, int packedLight, int packedColor) {
-        for (BakedQuad quad : quads) {
-            Matrix4f matrix = new Matrix4f();
-            IQuadTransformer transformer;
-            if(animations != null && quad instanceof FurnitureBakedQuad furnitureQuad) {
-                matrix = matrix.translate(furnitureQuad.furniture$getPivot());
-                matrix = animations.animate(furnitureQuad.furniture$getGroupName(), matrix, partialTick);
-                matrix = matrix.translate(new Vector3f(furnitureQuad.furniture$getPivot()).mul(-1f));
-                transformer = QuadTransformers.applying(new Transformation(matrix));
-            }else{
-                transformer = QuadTransformers.empty();
-            }
-            consumer.putBulkData(poseStack.last(), transformer.process(quad), FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
+    private void renderStaticLightFurnitureModel(BakedModel model, ModelData modelData, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedColor) {
+        for (Direction direction : Direction.values()) {
+            random.setSeed(42L);
+            renderQuadList(model.getQuads(state, direction, random, modelData, null), poseStack, consumer, packedLight, packedColor);
         }
+        random.setSeed(42L);
+        renderQuadList(model.getQuads(state, null, random, modelData, null), poseStack, consumer, packedLight, packedColor);
+    }
+
+    private static void renderQuadList(List<BakedQuad> quads, PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedColor) {
+        for (BakedQuad quad : quads) {
+            consumer.putBulkData(poseStack.last(), quad, FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, packedLight, OverlayTexture.NO_OVERLAY);
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private void renderLightPipelineAwareFurnitureModel(BakedModel model, ModelData modelData, Level level, BlockPos pos, BlockState state, PoseStack poseStack, VertexConsumer consumer, int packedColor) {
+        LightPipelineAwareModelBlockRenderer renderer = (LightPipelineAwareModelBlockRenderer) Minecraft.getInstance().getBlockRenderer().getModelRenderer();
+        PoseStack.Pose pose = poseStack.last();
+        AtomicBoolean empty = new AtomicBoolean(true);
+        boolean smoothLighter = Minecraft.useAmbientOcclusion();
+        QuadLighter lighter = renderer.getQuadLighter(smoothLighter);
+        AtomicReference<QuadLighter> flatLighter = new AtomicReference<>();
+
+        random.setSeed(42L);
+        renderLightPipelineAwareQuadList(renderer, model.getQuads(state, null, random, modelData, null), level, pos, state, pose, consumer, packedColor, empty, smoothLighter, lighter, flatLighter);
+
+        for (Direction direction : Direction.values()) {
+            random.setSeed(42L);
+            renderLightPipelineAwareQuadList(renderer, model.getQuads(state, direction, random, modelData, null), level, pos, state, pose, consumer, packedColor, empty, smoothLighter, lighter, flatLighter);
+        }
+
+        lighter.reset();
+        if (flatLighter.get() != null)
+            flatLighter.get().reset();
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static void renderLightPipelineAwareQuadList(LightPipelineAwareModelBlockRenderer renderer, List<BakedQuad> quads, Level level, BlockPos pos, BlockState state, PoseStack.Pose pose, VertexConsumer consumer, int packedColor, AtomicBoolean empty, boolean smoothLighter, QuadLighter lighter, AtomicReference<QuadLighter> flatLighter) {
+        if (!quads.isEmpty()) {
+            if (empty.get()) {
+                empty.set(false);
+                lighter.setup(level, pos, state);
+            }
+            for (BakedQuad quad : quads) {
+                if (smoothLighter && !quad.hasAmbientOcclusion()) {
+                    if (flatLighter.get() == null) {
+                        flatLighter.set(renderer.getQuadLighter(false));
+                        flatLighter.get().setup(level, pos, state);
+                    }
+                    processLightPipelineAwareQuad(flatLighter.get(), consumer, pose, quad, packedColor);
+                } else {
+                    processLightPipelineAwareQuad(lighter, consumer, pose, quad, packedColor);
+                }
+            }
+        }
+    }
+
+    private static void processLightPipelineAwareQuad(QuadLighter lighter, VertexConsumer consumer, PoseStack.Pose pose, BakedQuad quad, int packedColor) {
+        lighter.computeLightingForQuad(quad);
+        consumer.putBulkData(pose, quad, lighter.getComputedBrightness(), FastColor.ARGB32.red(packedColor)/255f, FastColor.ARGB32.green(packedColor)/255f, FastColor.ARGB32.blue(packedColor)/255f, FastColor.ARGB32.alpha(packedColor)/255f, lighter.getComputedLightmap(), OverlayTexture.NO_OVERLAY, true);
     }
 
     @SubscribeEvent

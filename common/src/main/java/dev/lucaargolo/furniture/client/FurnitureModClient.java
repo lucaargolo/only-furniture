@@ -37,6 +37,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
@@ -62,14 +63,19 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+
 public abstract class FurnitureModClient {
 
+    private static final Long CLEANUP_TIME = 200L;
+    private static final HashMap<BlockPos, Long> dirtyBlocks = new HashMap<>();
     private static FurnitureModClient instance;
 
     private final MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(128));
 
     private final ModShaderManager shaderManager;
     private final ModRenderTypeManager renderTypeManager;
+
 
     public FurnitureModClient() {
         instance = this;
@@ -90,7 +96,7 @@ public abstract class FurnitureModClient {
 
     protected abstract <E extends BlockEntity, P extends BlockEntityRendererProvider<E>> void registerBlockEntityRenderer(MinecraftEntry<BlockEntityType<E>> type, P provider);
 
-    public abstract void renderFurnitureModel(Level level, BlockPos pos, FurnitureData data, BlockState state, PoseStack poseStack, VertexConsumer consumer, float partialTick, @Nullable AnimationDataAttachment animations, int packedLight, int packedColor);
+    public abstract void renderFurnitureModel(Level level, BlockPos pos, BlockState state, FurnitureData data, @Nullable AnimationDataAttachment animations, PoseStack poseStack, VertexConsumer consumer, float partialTick, int packedLight, int packedColor, boolean lightPipelineAware);
 
     public final boolean onMouseScroll(double deltaX, double deltaY) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -168,7 +174,7 @@ public abstract class FurnitureModClient {
                                 poseStack.translate(0.5, 0.5, 0.5);
                                 poseStack.scale(1f - 0.005f, 1f - 0.005f, 1f - 0.005f);
                                 poseStack.translate(-0.5, -0.5, -0.5);
-                                renderFurnitureModel(level, lastPosition, lastData, lastState, poseStack, consumer, partialTick, null, LightTexture.FULL_BRIGHT, FastColor.ARGB32.color(120, 0x5865f2));
+                                renderFurnitureModel(level, lastPosition, lastState, lastData, null, poseStack, consumer, partialTick, LightTexture.FULL_BRIGHT, FastColor.ARGB32.color(120, 0x5865f2), false);
                                 poseStack.popPose();
                                 return;
                             }
@@ -186,7 +192,7 @@ public abstract class FurnitureModClient {
                 poseStack.translate(0.5, 0.5, 0.5);
                 poseStack.scale(1f + 0.005f, 1f + 0.005f, 1f + 0.005f);
                 poseStack.translate(-0.5, -0.5, -0.5);
-                renderFurnitureModel(level, placingPos, data, state, poseStack, consumer, partialTick, null, LightTexture.FULL_BRIGHT, packedColor);
+                renderFurnitureModel(level, placingPos, state, data, null, poseStack, consumer, partialTick, LightTexture.FULL_BRIGHT, packedColor, false);
                 poseStack.popPose();
             }
         }
@@ -233,6 +239,30 @@ public abstract class FurnitureModClient {
 
     public static void playInstrument(SoundEvent event, float pitch, int release) {
         Minecraft.getInstance().getSoundManager().queueTickingSound(new InstrumentSoundInstance(event, pitch, release));
+    }
+
+    public static void setBlockDirty(BlockPos pos) {
+        dirtyBlocks.put(pos, System.currentTimeMillis());
+        ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).invokeSetSectionDirty(
+                SectionPos.blockToSectionCoord(pos.getX()),
+                SectionPos.blockToSectionCoord(pos.getY()),
+                SectionPos.blockToSectionCoord(pos.getZ()),
+                true
+        );
+    }
+
+
+    public static boolean isBlockDirty(BlockPos pos) {
+        long current = System.currentTimeMillis();
+        Long time = dirtyBlocks.get(pos);
+        if(time == null) {
+            return false;
+        }else if(current - time >= CLEANUP_TIME) {
+            dirtyBlocks.remove(pos);
+            return false;
+        }else{
+            return true;
+        }
     }
 
 }

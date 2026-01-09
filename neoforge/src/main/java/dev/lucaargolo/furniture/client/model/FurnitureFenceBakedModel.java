@@ -81,7 +81,7 @@ public class FurnitureFenceBakedModel extends FurnitureBakedModel {
                 Transformation transformation = new Transformation(transform);
                 IQuadTransformer transformer = QuadTransformers.applying(transformation);
 
-                Integer color = modelData.get(COLOR);
+                Integer color = modelData.get(COLOR_PROPERTY);
                 int packedColor = FastColor.ARGB32.color(255, color != null ? color : 0xFFFFFF);
 
                 List<BakedQuad> fenceQuads = new ArrayList<>();

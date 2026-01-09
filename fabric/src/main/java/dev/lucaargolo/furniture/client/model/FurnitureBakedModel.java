@@ -1,12 +1,14 @@
 package dev.lucaargolo.furniture.client.model;
 
 import dev.lucaargolo.furniture.FurnitureData;
+import dev.lucaargolo.furniture.attachment.impl.AnimationDataAttachment;
 import dev.lucaargolo.furniture.block.FurnitureBlock;
 import dev.lucaargolo.furniture.block.behaviour.Behaviour;
 import dev.lucaargolo.furniture.block.behaviour.PlantBehaviour;
 import dev.lucaargolo.furniture.block.entity.FurnitureBlockEntity;
 import dev.lucaargolo.furniture.block.entity.ModBlockEntityTypes;
 import dev.lucaargolo.furniture.client.model.behaviour.PlantBehaviourBakedModel;
+import dev.lucaargolo.furniture.client.utils.FurnitureQuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.resources.model.BakedModel;
@@ -15,7 +17,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.util.Optional;
@@ -50,16 +54,16 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
                 }
             }
             if(data != null) {
-                this.emitBlockQuads(blockView, state, pos, randomSupplier, context, data);
+                this.emitBlockQuads(blockView, state, pos, randomSupplier, context, data, null, 1f);
             }else if(!hasData){
                 super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
             }
         }
     }
 
-    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data) {
+    public void emitBlockQuads(BlockAndTintGetter blockView, BlockState state, BlockPos pos, Supplier<RandomSource> randomSupplier, RenderContext context, FurnitureData data, @Nullable AnimationDataAttachment animations, float partialTick) {
         float offset = ((((pos.getX() & 1) << 2) | ((pos.getY() & 1) << 1) | (pos.getZ() & 1)) - 3.5f) * 0.001f;
-        Matrix4f transform =  new Matrix4f()
+        Matrix4f globalTransform =  new Matrix4f()
                 .translate(data.getX(state), data.getY(state), data.getZ(state))
                 .translate(0.5f, 0.5f, 0.5f)
                 .rotate(data.getRotation(state))
@@ -67,10 +71,17 @@ public class FurnitureBakedModel extends ForwardingBakedModel {
                 .translate(-0.5f, -0.5f, -0.5f);
 
         context.pushTransform((quad) -> {
+            Matrix4f localTransform = new Matrix4f();
+            if(animations != null && quad instanceof FurnitureQuadEmitter furnitureQuad) {
+                localTransform = localTransform.translate(furnitureQuad.pivot());
+                localTransform = animations.animate(furnitureQuad.groupName(), localTransform, partialTick);
+                localTransform = localTransform.translate(new Vector3f(furnitureQuad.pivot()).mul(-1f));
+            }
             for (int i = 0; i < 4; i++) {
-                Vector4f vector = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
-                vector.mul(transform);
-                quad.pos(i, vector.x, vector.y, vector.z);
+                Vector4f position = new Vector4f(quad.x(i), quad.y(i), quad.z(i), 1.0f);
+                position.mul(localTransform);
+                position.mul(globalTransform);
+                quad.pos(i, position.x, position.y, position.z);
             }
             return true;
         });

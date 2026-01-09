@@ -31,12 +31,12 @@ public class FurnitureBlockEntityRenderer implements BlockEntityRenderer<Furnitu
             BlockState state = blockEntity.getBlockState();
             BlockPos pos = blockEntity.getBlockPos();
             Block block = state.getBlock();
-            if(block instanceof FurnitureBlock furniture && furniture.shouldRenderBlockEntity(blockEntity)) {
+            if(block instanceof FurnitureBlock furniture && (FurnitureModClient.isBlockDirty(pos) || furniture.shouldRenderBlockEntity(blockEntity))) {
                 FurnitureData data = FurnitureData.getOriginal(level, pos);
                 if(data.hasOriginal()) {
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.translucent());
                     AnimationDataAttachment animations = ModDataAttachments.ANIMATION_DATA.get(blockEntity);
-                    FurnitureModClient.getInstance().renderFurnitureModel(blockEntity.getLevel(), blockEntity.getBlockPos(), data, state, poseStack, vertexConsumer, partialTick, animations, packedLight, 0xFFFFFFFF);
+                    FurnitureModClient.getInstance().renderFurnitureModel(blockEntity.getLevel(), blockEntity.getBlockPos(), state, data, animations, poseStack, vertexConsumer, partialTick, packedLight, 0xFFFFFFFF, true);
                 }
             }
         }
